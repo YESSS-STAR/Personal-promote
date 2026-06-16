@@ -1,1 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fire__167 | Server & Promotions Manager</title>
+    <style>
+        /* --- CSS Styling --- */
+        :root {
+            --bg-color: #0d0d12;
+            --surface-color: #1a1a24;
+            --text-main: #f0f0f0;
+            --text-muted: #a0a0b0;
+            --accent-color: #ff5722; /* Fiery orange */
+            --accent-glow: rgba(255, 87, 34, 0.4);
+            --discord-color: #5865F2;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Header / Hero Section */
+        header {
+            background: linear-gradient(135deg, var(--bg-color) 0%, #2a110a 100%);
+            padding: 120px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hero-title span {
+            color: var(--accent-color);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--text-main);
+        }
+        
+        .section-title span {
+            color: var(--accent-color);
+        }
+
+        /* Grid Layout for Skills */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            padding: 40px;
+            border-radius: 12px;
+            border-top: 5px solid var(--accent-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .card h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .card p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .card ul {
+            list-style-type: none;
+        }
+
+        .card ul li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        .card ul li::before {
+            content: '🔥';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1rem;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: linear-gradient(180deg, var(--surface-color) 0%, #111118 100%);
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 15px;
+            border: 1px solid #333;
+        }
+
+        .contact-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .contact-section p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+
+        .btn-email {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-email:hover {
+            background-color: #e64a19;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-3px);
+        }
+
+        .btn-discord {
+            background-color: var(--discord-color);
+            color: #fff;
+        }
+
+        .btn-discord:hover {
+            background-color: #4752c4;
+            box-shadow: 0 0 20px rgba(88, 101, 242, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .icon {
+            margin-right: 10px;
+            font-weight: normal;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            background-color: #0a0a0e;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .hero-subtitle { font-size: 1.2rem; }
+            .contact-info { flex-direction: column; align-items: center; }
+            .contact-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Hero Section -->
+    <header>
+        <h1 class="hero-title"><span>fire</span>__167</h1>
+        <p class="hero-subtitle">Igniting community growth. I specialize in turning chaotic servers into thriving hubs and driving explosive engagement through top-tier promotion strategies.</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2 class="section-title">What Makes Me <span>Amazing?</span></h2>
+
+        <div class="grid">
+            <!-- Server Manager Card -->
+            <div class="card">
+                <h3>🛠️ Server Manager</h3>
+                <p>Running a successful community requires organization, strict moderation, and a welcoming environment. I take the stress off your hands by ensuring everything runs like clockwork.</p>
+                <ul>
+                    <li><strong>Community Building:</strong> Fostering active, healthy, and engaged member bases.</li>
+                    <li><strong>Bot Configuration:</strong> Setting up complex bots, auto-moderation, and economy systems.</li>
+                    <li><strong>Staff Management:</strong> Hiring, training, and coordinating moderation teams.</li>
+                    <li><strong>Channel Optimization:</strong> Creating clean, easy-to-navigate server layouts.</li>
+                </ul>
+            </div>
+
+            <!-- Promotions Manager Card -->
+            <div class="card">
+                <h3>📈 Promotions Manager</h3>
+                <p>A server without members is just a quiet room. I bring targeted, effective promotion strategies that bring the right audience directly to your digital doorstep.</p>
+                <ul>
+                    <li><strong>Growth Strategy:</strong> Designing custom roadmaps for hitting member milestones.</li>
+                    <li><strong>Partnerships:</strong> Networking with other servers and creators to do mutually beneficial collaborations.</li>
+                    <li><strong>Event Hosting:</strong> Organizing giveaways, AMAs, and tournaments to boost activity.</li>
+                    <li><strong>Analytics Tracking:</strong> Monitoring invite links and retention rates to optimize growth.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section" id="contact">
+            <h2>Ready to Level Up Your Server?</h2>
+            <p>Whether you need a full server overhaul or an aggressive promotional campaign, I'm ready to help. Reach out to me below.</p>
+            
+            <div class="contact-info">
+                <a href="mailto:haniqwafi@proton.me" class="contact-btn btn-email">
+                    <span class="icon">✉️</span> haniqwafi@proton.me
+                </a>
+                <!-- Using a discord:// link to try and open the app, or standard text to copy -->
+                <a href="https://discordapp.com/users/fire__167" class="contact-btn btn-discord" target="_blank">
+                    <span class="icon">💬</span> Discord: fire__167
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 fire__167 | Server & Promotions Management. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
