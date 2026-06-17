@@ -3,146 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haniq | Personal Blog</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --ocean-light: #e0f7fa;
-            --ocean-mid: #80deea;
-            --ocean-dark: #006064;
-            --ocean-deep: #00363a;
-            --card-bg: rgba(255, 255, 255, 0.6);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--ocean-light) 0%, var(--ocean-mid) 100%);
-            color: var(--ocean-deep);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Header Section */
-        .hero {
-            text-align: center;
-            margin-top: 10vh;
-            margin-bottom: 5vh;
-            animation: fadeIn 1.5s ease-in-out;
-        }
-
-        .hero h1 {
-            font-size: 4rem;
-            margin: 0;
-            color: var(--ocean-deep);
-            letter-spacing: -2px;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            font-weight: 300;
-            color: var(--ocean-dark);
-        }
-
-        /* Hobbies Section */
-        .hobbies {
-            display: flex;
-            gap: 2rem;
-            max-width: 900px;
-            width: 90%;
-            margin-bottom: 5vh;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 15px;
-            flex: 1;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 96, 100, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: var(--ocean-dark);
-        }
-
-        /* Spotify Widget Area */
-        .spotify-section {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 10vh;
-        }
-
-        .spotify-container {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Responsive design for phones */
-        @media (max-width: 768px) {
-            .hobbies {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <title>Haniq | Personal Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header class="hero">
-        <h1>Haniq</h1>
-        <p class="subtitle">Student at Princess Elizabeth Primary School</p>
-    </header>
+    <div class="container">
+        <header class="hero">
+            <div class="hero-badge">Welcome to my corner of the web</div>
+            <h1>Haniq</h1>
+            <p>Balancing studies with the pitch, the track, and the board.</p>
+        </header>
 
-    <section class="hobbies">
-        <div class="card">
-            <h2>⚽ Football</h2>
-            <p>Strategy on the pitch, teamwork, and pushing limits.</p>
-        </div>
-        <div class="card">
-            <h2>🏃‍♂️ Running</h2>
-            <p>Chasing new personal bests and clearing the mind.</p>
-        </div>
-        <div class="card">
-            <h2>♟️ Chess</h2>
-            <p>Calculating the next move, anticipating the opponent.</p>
-        </div>
-    </section>
+        <main class="hobbies">
+            <div class="card">
+                <div class="icon-wrapper">⚽</div>
+                <h2>Football</h2>
+                <p>Strategy on the pitch, teamwork, and constantly pushing my limits to play a better game.</p>
+            </div>
+            
+            <div class="card">
+                <div class="icon-wrapper">🏃‍♂️</div>
+                <h2>Running</h2>
+                <p>Chasing new personal bests, building endurance, and using the track to clear my mind.</p>
+            </div>
+            
+            <div class="card">
+                <div class="icon-wrapper">♟️</div>
+                <h2>Chess</h2>
+                <p>Analyzing the board, calculating the next move, and always anticipating the opponent's strategy.</p>
+            </div>
+        </main>
 
-    <section class="spotify-section">
-        <h3 style="color: var(--ocean-dark); font-weight: 400; margin-bottom: 15px;">On Rotation</h3>
-        <div class="spotify-container">
-            <!-- Replace the ID below with your preferred playlist, album, or track ID -->
-            <iframe 
-                src="https://open.spotify.com/embed/playlist/37i9dQZF1FA1IArC73vN6g?utm_source=generator&theme=0" 
-                width="100%" 
-                height="152" 
-                frameBorder="0" 
-                allowfullscreen="" 
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                loading="lazy">
-            </iframe >
-        </div>
-    </section>
+        <section class="spotify-wrapper">
+            <div class="spotify-title">Currently Playing</div>
+            <div class="spotify-container" id="music-widget">
+                <img id="album-art" src="https://via.placeholder.com/150" alt="Album Art">
+                <div class="track-info">
+                    <p id="listening-status" class="status">Loading data...</p>
+                    <p id="track-name" class="track">...</p>
+                    <p id="artist-name" class="artist">...</p>
+                </div>
+            </div>
+        </section>
+    </div>
 
+    <footer>
+        <p>Designed for Haniq • Hosted on GitHub Pages</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
-
