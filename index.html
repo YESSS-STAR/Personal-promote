@@ -10,53 +10,54 @@
 <body>
 
     <div class="container">
-        <header class="hero">
+        
+        <header class="hero hidden">
             <div class="hero-badge">Welcome to my corner of the web</div>
             <h1>Haniq</h1>
             <p>Balancing studies with the pitch, the track, and the board.</p>
         </header>
 
         <main class="hobbies">
-            <div class="card">
+            <div class="card hidden delay-1">
                 <div class="icon-wrapper">⚽</div>
                 <h2>Football</h2>
-                <p>Strategy on the pitch, teamwork, and constantly finding ways to improve.</p>
+                <p>Strategy on the pitch, teamwork, and constantly pushing my limits to play a better game.</p>
             </div>
             
-            <div class="card">
+            <div class="card hidden delay-2">
                 <div class="icon-wrapper">🏃‍♂️</div>
                 <h2>Running</h2>
-                <p>Chasing new personal bests, building endurance.</p>
+                <p>Chasing new personal bests, building endurance, and using the track to clear my mind.</p>
             </div>
             
-            <div class="card">
+            <div class="card hidden delay-3">
                 <div class="icon-wrapper">♟️</div>
                 <h2>Chess</h2>
-                <p>Analyzing the board, calculating the next move, and always anticipating the opponent next move.</p>
+                <p>Analyzing the board, calculating the next move, and always anticipating the opponent's strategy.</p>
             </div>
         </main>
 
-        <section class="spotify-wrapper">
-            <div class="spotify-title">Currently Playing</div>
-            <div class="spotify-container" id="music-widget">
-                <img id="album-art" src="https://via.placeholder.com/150" alt="Album Art">
-                <div class="track-info">
-                    <p id="listening-status" class="status">Loading data...</p>
-                    <p id="track-name" class="track">...</p>
-                    <p id="artist-name" class="artist">...</p>
-                </div>
+        <section class="spotify-wrapper hidden delay-1">
+            <div class="spotify-title">Currently on Rotation</div>
+            <div class="spotify-container">
+                <iframe 
+                    src="https://open.spotify.com/embed/playlist/37i9dQZF1FA1IArC73vN6g?utm_source=generator&theme=0" 
+                    width="100%" 
+                    height="152" 
+                    frameBorder="0" 
+                    allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy">
+                </iframe>
             </div>
         </section>
+
     </div>
 
-    <footer>
-        <p>Designed for Haniq blogs</p>
+    <footer class="hidden delay-2">
+        <p>Designed for Haniq • Hosted on GitHub Pages</p>
     </footer>
-    
-    <footer>
-        <p>contact me on haniqwafi@proton.me</p>
-    </footer>
-    
+
     <script src="script.js"></script>
 </body>
 </html>
