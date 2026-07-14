@@ -13,14 +13,14 @@
     <!-- Navbar -->
     <nav class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-2">
-            <i class="fa-solid class= fa-bolt text-indigo-500 text-2xl"></i>
+            <i class="fa-solid fa-bolt text-indigo-500 text-2xl"></i>
             <span class="text-xl font-bold tracking-wider bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">ELITE SUBS</span>
         </div>
         <div>
-            <button id="navAdminBtn" onclick="toggleView('login')" class="bg-gray-800 hover:bg-gray-700 text-sm font-medium px-4 py-2 rounded-lg border border-gray-700 transition">
+            <button type="button" id="navAdminBtn" onclick="toggleView('login')" class="bg-gray-800 hover:bg-gray-700 text-sm font-medium px-4 py-2 rounded-lg border border-gray-700 transition cursor-pointer">
                 <i class="fa-solid fa-user-shield mr-2"></i>Admin Panel
             </button>
-            <button id="navStoreBtn" onclick="toggleView('store')" class="hidden bg-indigo-600 hover:bg-indigo-700 text-sm font-medium px-4 py-2 rounded-lg transition">
+            <button type="button" id="navStoreBtn" onclick="toggleView('store')" class="hidden bg-indigo-600 hover:bg-indigo-700 text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer">
                 <i class="fa-solid fa-store mr-2"></i>Back to Store
             </button>
         </div>
@@ -119,7 +119,7 @@
                             <input type="text" id="prodFeatures" required placeholder="e.g., 4K Stream, 4 Devices, Anti-ban" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 transition text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Icon Style (FontAwesome Class)</label>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Icon Style</label>
                             <select id="prodIcon" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 transition text-sm">
                                 <option value="fa-video text-red-500">Netflix Red (Video Icon)</option>
                                 <option value="fa-clapperboard text-blue-400">Disney Blue (Clapper Icon)</option>
@@ -159,53 +159,79 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-950 border-t border-gray-900 text-center py-6 text-xs text-gray-500">
-        &copy; 2026 Elite Subs. All rights reserved. Simulating admin dashboards securely.
-    </footer>
-
-    <!-- Application Script Logic -->
     <script>
-        // Default seed data if no data exists in user storage
+        // Default seed data
         const initialProducts = [
             { title: "CapCut Pro Premium", price: "$3.50/mo", features: ["No Watermarks", "All Premium Transitions", "4K Export Support"], icon: "fa-wand-magic-sparkles text-cyan-400" },
             { title: "Netflix Ultra HD", price: "$5.00/mo", features: ["4K Resolution", "Shared Private Profile", "Instant Activation"], icon: "fa-video text-red-500" },
             { title: "Disney+ Premium", price: "$4.00/mo", features: ["IMAX Enhanced Content", "4 Screens Simultaneously", "Subtitles Enabled"], icon: "fa-clapperboard text-blue-400" }
         ];
 
-        let products = JSON.parse(localStorage.getItem('store_products')) || initialProducts;
+        let products = initialProducts;
         let isLogged = false;
 
-        // Visitor Counter logic
-        // Track unique page accesses within a session context
+        // Failsafe Loading: Ignores corrupted local browser storage to prevent blank screens
+        try {
+            const savedData = localStorage.getItem('store_products');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                if (Array.isArray(parsedData) && parsedData.length > 0) {
+                    products = parsedData;
+                }
+            }
+        } catch (error) {
+            console.warn("Cleared corrupted local data, loading default store template.");
+            localStorage.removeItem('store_products');
+        }
+
+        // Visitor Counter & Setup logic
         window.addEventListener('DOMContentLoaded', () => {
-            let visits = parseInt(localStorage.getItem('visitorCount')) || 0;
-            visits += 1;
-            localStorage.setItem('visitorCount', visits);
-            document.getElementById('visitorCountDisplay').innerText = visits;
+            try {
+                let visits = parseInt(localStorage.getItem('visitorCount')) || 0;
+                visits += 1;
+                localStorage.setItem('visitorCount', visits);
+                document.getElementById('visitorCountDisplay').innerText = visits;
+            } catch (e) {
+                console.warn("Could not track visitor count.");
+            }
             
             saveToStorage();
             renderStore();
         });
 
         function saveToStorage() {
-            localStorage.setItem('store_products', JSON.stringify(products));
-            document.getElementById('productCountDisplay').innerText = products.length;
+            try {
+                localStorage.setItem('store_products', JSON.stringify(products));
+                document.getElementById('productCountDisplay').innerText = products.length;
+            } catch (e) {
+                console.warn("Storage limits reached or unavailable.");
+            }
         }
 
         // Navigation state machine
         function toggleView(view) {
+            // Hide everything first
             document.getElementById('storeView').classList.add('hidden');
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('adminView').classList.add('hidden');
+            
+            // Reset buttons
             document.getElementById('navAdminBtn').classList.add('hidden');
             document.getElementById('navStoreBtn').classList.remove('hidden');
 
             if (view === 'store') {
                 document.getElementById('storeView').classList.remove('hidden');
                 document.getElementById('navStoreBtn').classList.add('hidden');
-                if (!isLogged) document.getElementById('navAdminBtn').classList.remove('hidden');
-                else document.getElementById('navAdminBtn').innerText = "Dashboard", document.getElementById('navAdminBtn').classList.remove('hidden'), document.getElementById('navAdminBtn').onclick = () => toggleView('admin');
+                
+                if (!isLogged) {
+                    document.getElementById('navAdminBtn').classList.remove('hidden');
+                    document.getElementById('navAdminBtn').innerHTML = '<i class="fa-solid fa-user-shield mr-2"></i>Admin Panel';
+                    document.getElementById('navAdminBtn').onclick = () => toggleView('login');
+                } else {
+                    document.getElementById('navAdminBtn').classList.remove('hidden');
+                    document.getElementById('navAdminBtn').innerHTML = '<i class="fa-solid fa-gauge mr-2"></i>Dashboard';
+                    document.getElementById('navAdminBtn').onclick = () => toggleView('admin');
+                }
             } else if (view === 'login') {
                 if (isLogged) {
                     toggleView('admin');
@@ -311,10 +337,8 @@
             const targetProduct = { title, price, features, icon };
 
             if (editIndex !== "") {
-                // Modifying existing index
                 products[parseInt(editIndex)] = targetProduct;
             } else {
-                // Pushing fresh item
                 products.push(targetProduct);
             }
 
@@ -351,4 +375,11 @@
         function resetForm() {
             document.getElementById('productForm').reset();
             document.getElementById('editIndex').value = "";
-            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-plus-circle mr-2 text-indigo-400"><
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-plus-circle mr-2 text-indigo-400"></i>Add New Product`;
+            document.getElementById('formSubmitBtn').className = "flex-1 bg-indigo-600 hover:bg-indigo-700 font-medium py-2 rounded-lg text-sm transition text-white";
+            document.getElementById('formSubmitBtn').innerText = "Add Product";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
