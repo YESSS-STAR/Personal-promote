@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airheads Storefront</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: linear-gradient(180deg, #ff8fa3 0%, #fff0f3 100%);
+      margin: 0;
+      padding: 15px;
+      color: #333;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      color: #d63384;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .nav-btn.active {
+      background: #ff477e;
+      color: white;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 15px;
+      border: 1.5px solid #ffccd5;
+      box-shadow: 0 4px 12px rgba(255, 71, 126, 0.08);
+    }
+    .notice-card {
+      background: #fff0f3;
+      border: 1px solid #ffb3c1;
+      color: #c71f37;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    h2 {
+      margin-top: 0;
+      color: #d63384;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #f8d7da;
+      padding-bottom: 10px;
+    }
+    .flavor-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    .flavor-item:last-child {
+      border-bottom: none;
+    }
+    .add-btn {
+      background: #ff477e;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .qty-controls button {
+      background: #ffccd5;
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .total-row {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 2px dashed #ddd;
+      display: flex;
+      justify-content: space-between;
+      color: #d63384;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .submit-btn {
+      width: 100%;
+      background: #ff477e;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- Navigation Tabs -->
+  <div class="nav-buttons">
+    <button class="nav-btn active" onclick="switchView(event, 'storefront')">🛍️ Storefront</button>
+    <button class="nav-btn" onclick="switchView(event, 'track')">🔍 Track Order</button>
+    <button class="nav-btn" onclick="switchView(event, 'admin')">🔑 Admin</button>
+  </div>
+
+  <!-- STOREFRONT VIEW -->
+  <div id="view-storefront" class="view-section active">
+    
+    <!-- Notice Card -->
+    <div class="card notice-card">
+      📢 <strong>NOTICE:</strong> Pre-orders close this Friday!<br>
+      Pick up your candy at booth B during lunch break. 🎉
+    </div>
+
+    <!-- Flavor Menu Card -->
+    <div class="card">
+      <h2>🍬 Flavor Menu</h2>
+      <div id="flavorList">
+        <p style="color: #888; font-size: 14px;">Loading flavors...</p>
+      </div>
+    </div>
+
+    <!-- Cart Card -->
+    <div class="card">
+      <h2>🛒 Your Order</h2>
+      <div id="cartItems">
+        <p style="color: #888; text-align: center;">No candy added yet!</p>
+      </div>
+      
+      <div class="total-row">
+        <span>Total</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+
+      <div style="margin-top: 15px;">
+        <label><strong>Your Name:</strong></label>
+        <input type="text" id="custName" placeholder="Enter your full name">
+        
+        <label><strong>Class / Grade:</strong></label>
+        <input type="text" id="custClass" placeholder="e.g. 4B / Sec 3">
+
+        <button class="submit-btn" onclick="submitOrder()">Place Pre-Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACK ORDER VIEW -->
+  <div id="view-track" class="view-section">
+    <div class="card">
+      <h2>🔍 Track Your Order</h2>
+      <input type="text" id="trackInput" placeholder="Enter your name or Order ID">
+      <button class="submit-btn" onclick="searchOrder()">Check Status</button>
+      <div id="trackResult" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="view-admin" class="view-section">
+    <div class="card">
+      <h2>🔑 Admin Dashboard</h2>
+      
+      <!-- Max Order Limit Controller -->
+      <div style="background: #fff0f3; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ffccd5;">
+        <label style="font-weight: bold; color: #d63384; display: block; margin-bottom: 6px;">🛑 Max Candies Per Order:</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="number" id="adminMaxLimit" value="4" min="1" style="margin: 0;">
+          <button class="add-btn" onclick="saveMaxLimit()">Save Limit</button>
+        </div>
+      </div>
+
+      <h3>Orders Received</h3>
+      <div id="adminOrdersList">Loading orders...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // --- 1. FIREBASE CONFIGURATION ---
+  const firebaseConfig = {
+    // Make sure your real config keys are pasted here:
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "YOUR_APP_ID"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const database = firebase.database();
+
+  // --- 2. GLOBAL APP STATE ---
+  let cart = {};
+  let flavors = {};
+  let maxOrderLimit = 4; // Default limit
+
+  // Default Airheads items loaded if Firebase DB is empty
+  const defaultFlavors = {
+    f1: { name: "Blue Raspberry", price: 1.00 },
+    f2: { name: "Cherry", price: 1.00 },
+    f3: { name: "Watermelon", price: 1.00 },
+    f4: { name: "White Mystery", price: 1.00 }
+  };
+
+  // --- 3. REALTIME FIREBASE LISTENERS ---
+
+  // Sync Order Cap from Admin
+  database.ref('settings/maxOrderLimit').on('value', (snapshot) => {
+    if (snapshot.exists()) {
+      maxOrderLimit = parseInt(snapshot.val()) || 4;
+    } else {
+      maxOrderLimit = 4;
+    }
+    const limitInput = document.getElementById('adminMaxLimit');
+    if (limitInput) limitInput.value = maxOrderLimit;
+  });
+
+  // Sync Flavors & Auto-seed if empty
+  database.ref('flavors').on('value', (snapshot) => {
+    if (snapshot.exists() && snapshot.val()) {
+      flavors = snapshot.val();
+    } else {
+      // Auto-populate Firebase with default Airheads menu
+      database.ref('flavors').set(defaultFlavors);
+      flavors = defaultFlavors;
+    }
+    renderFlavors();
+  });
+
+  // --- 4. RENDER FUNCTIONS ---
+
+  function renderFlavors() {
+    const listEl = document.getElementById('flavorList');
+    listEl.innerHTML = '';
+
+    Object.keys(flavors).forEach(id => {
+      const item = flavors[id];
+      const div = document.createElement('div');
+      div.className = 'flavor-item';
+      div.innerHTML = `
+        <div>
+          <strong>${item.name}</strong><br>
+          <span style="color: #666; font-size: 13px;">$${parseFloat(item.price).toFixed(2)}</span>
+        </div>
+        <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ Add</button>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  function renderCart() {
+    const cartEl = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    const keys = Object.keys(cart);
+
+    if (keys.length === 0) {
+      cartEl.innerHTML = '<p style="color: #888; text-align: center;">No candy added yet!</p>';
+      totalEl.innerText = '$0.00';
+      return;
+    }
+
+    cartEl.innerHTML = '';
+    let grandTotal = 0;
+
+    keys.forEach(name => {
+      const item = cart[name];
+      const itemTotal = item.price * item.qty;
+      grandTotal += itemTotal;
+
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div>
+          <strong>${name}</strong> ($${item.price.toFixed(2)})
+        </div>
+        <div class="qty-controls">
+          <button onclick="updateQty('${name}', -1)">-</button>
+          <span style="margin: 0 8px; font-weight: bold;">${item.qty}</span>
+          <button onclick="updateQty('${name}', 1)">+</button>
+        </div>
+      `;
+      cartEl.appendChild(div);
+    });
+
+    totalEl.innerText = `$${grandTotal.toFixed(2)}`;
+  }
+
+  // --- 5. CART & LIMIT ACTIONS ---
+
+  function getTotalCartCount() {
+    return Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+  }
+
+  function addToCart(name, price) {
+    if (getTotalCartCount() >= maxOrderLimit) {
+      alert(`⚠️ You can only order a maximum of ${maxOrderLimit} candies per order!`);
+      return;
+    }
+
+    if (!cart[name]) {
+      cart[name] = { price: price, qty: 0 };
+    }
+    cart[name].qty += 1;
+    renderCart();
+  }
+
+  function updateQty(name, change) {
+    if (!cart[name]) return;
+
+    if (change > 0 && getTotalCartCount() >= maxOrderLimit) {
+      alert(`⚠️ Maximum limit is ${maxOrderLimit} candies per order!`);
+      return;
+    }
+
+    cart[name].qty += change;
+    if (cart[name].qty <= 0) {
+      delete cart[name];
+    }
+    renderCart();
+  }
+
+  // --- 6. ADMIN ACTIONS ---
+
+  function saveMaxLimit() {
+    const val = parseInt(document.getElementById('adminMaxLimit').value) || 4;
+    database.ref('settings/maxOrderLimit').set(val)
+      .then(() => alert(`✅ Saved! Max order limit set to ${val}`))
+      .catch((err) => alert('Error: ' + err.message));
+  }
+
+  // --- 7. ORDER SUBMISSION ---
+
+  function submitOrder() {
+    const name = document.getElementById('custName').value.trim();
+    const studentClass = document.getElementById('custClass').value.trim();
+
+    if (getTotalCartCount() === 0) {
+      alert('Please add at least one candy to your order!');
+      return;
+    }
+    if (!name || !studentClass) {
+      alert('Please fill in your name and class!');
+      return;
+    }
+
+    const orderData = {
+      customerName: name,
+      class: studentClass,
+      items: cart,
+      totalAmount: Object.values(cart).reduce((s, i) => s + (i.price * i.qty), 0),
+      timestamp: Date.now(),
+      status: 'Pending'
+    };
+
+    database.ref('orders').push(orderData)
+      .then(() => {
+        alert('🎉 Order placed successfully!');
+        cart = {};
+        document.getElementById('custName').value = '';
+        document.getElementById('custClass').value = '';
+        renderCart();
+      })
+      .catch((err) => alert('Order failed: ' + err.message));
+  }
+
+  // --- 8. NAVIGATION ---
+
+  function switchView(event, view) {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(`view-${view}`).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
