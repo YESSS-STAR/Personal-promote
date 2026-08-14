@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airheads Storefront</title>
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: linear-gradient(180deg, #ff8fa3 0%, #fff0f3 100%);
+      margin: 0;
+      padding: 15px;
+      color: #333;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      color: #d63384;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .nav-btn.active {
+      background: #ff477e;
+      color: white;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 15px;
+      border: 1.5px solid #ffccd5;
+      box-shadow: 0 4px 12px rgba(255, 71, 126, 0.08);
+    }
+    .notice-card {
+      background: #fff0f3;
+      border: 1px solid #ffb3c1;
+      color: #c71f37;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    h2 {
+      margin-top: 0;
+      color: #d63384;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #f8d7da;
+      padding-bottom: 10px;
+    }
+    h3 {
+      color: #d63384;
+      font-size: 16px;
+      margin-top: 15px;
+    }
+    .flavor-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    .flavor-item:last-child {
+      border-bottom: none;
+    }
+    .add-btn {
+      background: #ff477e;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .add-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .stock-label {
+      font-size: 12px;
+      color: #888;
+    }
+    .stock-label.low {
+      color: #e0a800;
+      font-weight: bold;
+    }
+    .stock-label.out {
+      color: #c71f37;
+      font-weight: bold;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .qty-controls button {
+      background: #ffccd5;
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .total-row {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 2px dashed #ddd;
+      display: flex;
+      justify-content: space-between;
+      color: #d63384;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .submit-btn {
+      width: 100%;
+      background: #ff477e;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #eee;
+      color: #333;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- Navigation Tabs -->
+  <div class="nav-buttons">
+    <button class="nav-btn active" onclick="switchView(event, 'storefront')">🛍️ Storefront</button>
+    <button class="nav-btn" onclick="switchView(event, 'track')">🔍 Track Order</button>
+    <button class="nav-btn" onclick="switchView(event, 'admin')">🔑 Admin</button>
+  </div>
+
+  <!-- STOREFRONT VIEW -->
+  <div id="view-storefront" class="view-section active">
+    
+    <!-- Notice Card -->
+    <div class="card notice-card">
+      📢 <strong>NOTICE:</strong> Pre-orders close this Friday!<br>
+      Pick up your candy at booth B during lunch break. 🎉
+    </div>
+
+    <!-- Flavor Menu Card -->
+    <div class="card">
+      <h2>
+        🍬 Flavor Menu
+        <span id="backendBadge" class="badge">Connecting...</span>
+      </h2>
+      <div id="flavorList">Loading flavors...</div>
+    </div>
+
+    <!-- Cart Card -->
+    <div class="card">
+      <h2>🛒 Your Order</h2>
+      <div id="cartItems">
+        <p style="color: #888; text-align: center;">No candy added yet!</p>
+      </div>
+      
+      <div class="total-row">
+        <span>Total</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+
+      <div style="margin-top: 15px;">
+        <label><strong>Your Name:</strong></label>
+        <input type="text" id="custName" placeholder="Enter your full name">
+        
+        <label><strong>Class / Grade:</strong></label>
+        <input type="text" id="custClass" placeholder="e.g. 4B / Sec 3">
+
+        <button class="submit-btn" onclick="submitOrder()">Place Pre-Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACK ORDER VIEW -->
+  <div id="view-track" class="view-section">
+    <div class="card">
+      <h2>🔍 Track Your Order</h2>
+      <input type="text" id="trackInput" placeholder="Enter your full name">
+      <button class="submit-btn" onclick="searchOrder()">Check Status</button>
+      <div id="trackResult" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="view-admin" class="view-section">
+    <div class="card">
+      <h2>🔑 Admin Dashboard</h2>
+      
+      <!-- Max Order Limit Controller -->
+      <div style="background: #fff0f3; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ffccd5;">
+        <label style="font-weight: bold; color: #d63384; display: block; margin-bottom: 6px;">🛑 Max Candies Per Order:</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="number" id="adminMaxLimit" value="4" min="1" style="margin: 0;">
+          <button class="add-btn" onclick="saveMaxLimit()">Save Limit</button>
+        </div>
+      </div>
+
+      <!-- Price & Flavor Manager -->
+      <div style="background: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ddd;">
+        <label style="font-weight: bold; color: #d63384; display: block; margin-bottom: 6px;">🍬 Manage Flavor Prices & Stock:</label>
+        <div style="display:flex; gap:8px; font-size:11px; color:#888; padding: 0 2px 4px;">
+          <span style="flex:2;">Name</span>
+          <span style="flex:1;">Price</span>
+          <span style="flex:1;">Stock</span>
+        </div>
+        <div id="adminFlavorEditor">Loading flavor editor...</div>
+      </div>
+
+      <h3>Orders Received</h3>
+      <div id="adminOrdersList">Loading orders...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FIREBASE & APPLICATION MODULE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, push, get, child } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-database.js";
+
+  // --- 1. CONFIGURATIONS ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEFbes4s9GV362uXdvsreyRNEVoFa5zEk",
+    authDomain: "airheadss.firebaseapp.com",
+    projectId: "airheadss",
+    storageBucket: "airheadss.firebasestorage.app",
+    messagingSenderId: "933227965044",
+    appId: "1:933227965044:web:bf57e5361bb636ad7eff21",
+    measurementId: "G-HHTCHCC19P",
+    databaseURL: "https://airheadss-default-rtdb.asia-southeast1.firebasedatabase.app"
+  };
+
+  const SUPABASE_URL = 'https://fkvrgcjosxvmjbigdgci.supabase.co'; 
+  const SUPABASE_KEY = 'Sb_publishable_v9_WElaCZsdhwvTAXu3BxA_trAHaO1B';
+
+  const defaultFlavors = [
+    { id: '1', name: 'Blue Raspberry', price: 1.20, stock: 50 },
+    { id: '2', name: 'Cherry',         price: 1.00, stock: 50 },
+    { id: '3', name: 'Watermelon',     price: 1.20, stock: 50 },
+    { id: '4', name: 'White Mystery',  price: 1.20, stock: 50 },
+    { id: '5', name: 'Grape',          price: 1.20, stock: 50 },
+    { id: '6', name: 'Orange',         price: 1.20, stock: 50 }
+  ];
+
+  // Global State
+  window.cart = {};
+  window.flavorsList = [...defaultFlavors];
+  window.maxOrderLimit = 4;
+  window.activeBackend = 'hardcoded';
+  
+  let db = null;
+  let supabaseClient = null;
+  let firebaseTimer = null;
+
+  // --- 2. INITIALIZATION & FALLBACK ---
+  window.addEventListener('DOMContentLoaded', () => {
+    renderFlavors();
+    renderCart();
+    renderAdminFlavorEditor();
+    initFirebaseWithFallback();
+  });
+
+  function updateBadge(text, color) {
+    const badge = document.getElementById('backendBadge');
+    if (badge) {
+      badge.innerText = text;
+      badge.style.background = color || '#eee';
+      badge.style.color = '#fff';
+    }
+  }
+
+  function initFirebaseWithFallback() {
+    updateBadge('Connecting Firebase...', '#ffc107');
+
+    firebaseTimer = setTimeout(() => {
+      console.warn('⚠️ Firebase timeout (>10s). Switching to Supabase...');
+      switchToSupabase();
+    }, 10000);
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+
+      const connectedRef = ref(db, ".info/connected");
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === true) {
+          clearTimeout(firebaseTimer);
+          window.activeBackend = 'firebase';
+          updateBadge('Firebase Connected', '#28a745');
+          attachFirebaseListeners();
+          seedFirebaseFlavorsIfEmpty();
+        }
+      }, (err) => {
+        console.error('Firebase connection listener error:', err);
+        clearTimeout(firebaseTimer);
+        switchToSupabase();
+      });
+    } catch (err) {
+      console.error('Firebase init error:', err);
+      clearTimeout(firebaseTimer);
+      switchToSupabase();
+    }
+  }
+
+  async function seedFirebaseFlavorsIfEmpty() {
+    try {
+      const snap = await get(child(ref(db), 'flavors'));
+      if (!snap.exists()) {
+        const seed = {};
+        defaultFlavors.forEach(f => {
+          seed[f.id] = { name: f.name, price: f.price, stock: f.stock };
+        });
+        await set(ref(db, 'flavors'), seed);
+      }
+    } catch (err) {
+      console.error('Could not seed flavors:', err);
+    }
+  }
+
+  function attachFirebaseListeners() {
+    onValue(ref(db, 'settings/maxOrderLimit'), (snap) => {
+      if (snap.exists()) {
+        window.maxOrderLimit = parseInt(snap.val()) || 4;
+        document.getElementById('adminMaxLimit').value = window.maxOrderLimit;
+      }
+    });
+
+    onValue(ref(db, 'flavors'), (snap) => {
+      if (snap.exists() && snap.val()) {
+        const data = snap.val();
+        window.flavorsList = Object.keys(data).map(k => ({
+          id: k,
+          name: data[k].name,
+          price: parseFloat(data[k].price) || 0,
+          stock: data[k].stock !== undefined ? parseInt(data[k].stock) : 0
+        }));
+        renderFlavors();
+        renderAdminFlavorEditor();
+      }
+    });
+
+    onValue(ref(db, 'orders'), (snap) => {
+      const list = document.getElementById('adminOrdersList');
+      if (!snap.exists()) {
+        list.innerHTML = '<p style="color: #888;">No orders received yet.</p>';
+        return;
+      }
+      const data = snap.val();
+      list.innerHTML = Object.keys(data).reverse().map(k => {
+        const o = data[k];
+        return `
+          <div style="padding: 10px; border-bottom: 1px solid #eee;">
+            <strong>${o.customerName} (${o.class})</strong> - $${parseFloat(o.totalAmount).toFixed(2)}<br>
+            <small style="color: #666;">Status: ${o.status || 'Pending'}</small>
+          </div>
+        `;
+      }).join('');
+    });
+  }
+
+  async function switchToSupabase() {
+    window.activeBackend = 'supabase';
+    updateBadge('Supabase Active', '#17a2b8');
+
+    try {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      
+      const { data: settingsData } = await supabaseClient.from('settings').select('*').eq('key', 'max_limit').single();
+      if (settingsData && settingsData.value) {
+        window.maxOrderLimit = parseInt(settingsData.value) || 4;
+        document.getElementById('adminMaxLimit').value = window.maxOrderLimit;
+      }
+
+      const { data: flavorsData } = await supabaseClient.from('flavors').select('*');
+      if (flavorsData && flavorsData.length > 0) {
+        window.flavorsList = flavorsData.map(f => ({
+          id: f.id,
+          name: f.name,
+          price: parseFloat(f.price) || 0,
+          stock: f.stock !== undefined ? parseInt(f.stock) : 0
+        }));
+        renderFlavors();
+        renderAdminFlavorEditor();
+      }
+      
+      loadSupabaseOrders();
+    } catch (e) {
+      console.error('Supabase fallback error:', e);
+      updateBadge('Offline (Hardcoded)', '#dc3545');
+    }
+  }
+
+  // --- 3. UI RENDERING ---
+  window.renderFlavors = function() {
+    const listEl = document.getElementById('flavorList');
+    listEl.innerHTML = '';
+
+    window.flavorsList.forEach(item => {
+      const stock = item.stock !== undefined ? item.stock : 0;
+      const inCartQty = window.cart[item.name] ? window.cart[item.name].qty : 0;
+      const remaining = stock - inCartQty;
+      const isOut = remaining <= 0;
+
+      let stockClass = '';
+      let stockText = `${stock} in stock`;
+      if (stock <= 0) {
+        stockClass = 'out';
+        stockText = 'Out of stock';
+      } else if (stock <= 5) {
+        stockClass = 'low';
+        stockText = `Only ${stock} left`;
+      }
+
+      const div = document.createElement('div');
+      div.className = 'flavor-item';
+      div.innerHTML = `
+        <div>
+          <strong>${item.name}</strong><br>
+          <span style="color: #666; font-size: 13px;">$${parseFloat(item.price).toFixed(2)}</span>
+          &nbsp;·&nbsp;<span class="stock-label ${stockClass}">${stockText}</span>
+        </div>
+        <button class="add-btn" ${isOut ? 'disabled' : ''} onclick="addToCart('${item.name}', ${item.price})">+ Add</button>
+      `;
+      listEl.appendChild(div);
+    });
+  };
+
+  window.renderAdminFlavorEditor = function() {
+    const editorEl = document.getElementById('adminFlavorEditor');
+    if (!editorEl) return;
+
+    editorEl.innerHTML = window.flavorsList.map((item) => `
+      <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+        <input type="text" id="editName_${item.id}" value="${item.name}" style="margin:0; flex: 2;">
+        <input type="number" step="0.10" id="editPrice_${item.id}" value="${item.price}" style="margin:0; flex: 1;">
+        <input type="number" step="1" min="0" id="editStock_${item.id}" value="${item.stock !== undefined ? item.stock : 0}" style="margin:0; flex: 1;">
+        <button class="add-btn" onclick="updateFlavor('${item.id}')" style="padding: 10px;">Save</button>
+      </div>
+    `).join('');
+  };
+
+  window.renderCart = function() {
+    const cartEl = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    const keys = Object.keys(window.cart);
+
+    if (keys.length === 0) {
+      cartEl.innerHTML = '<p style="color: #888; text-align: center;">No candy added yet!</p>';
+      totalEl.innerText = '$0.00';
+      return;
+    }
+
+    cartEl.innerHTML = '';
+    let grandTotal = 0;
+
+    keys.forEach(name => {
+      const item = window.cart[name];
+      const itemTotal = item.price * item.qty;
+      grandTotal += itemTotal;
+
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div>
+          <strong>${name}</strong> ($${item.price.toFixed(2)})
+        </div>
+        <div class="qty-controls">
+          <button onclick="updateQty('${name}', -1)">-</button>
+          <span style="margin: 0 8px; font-weight: bold;">${item.qty}</span>
+          <button onclick="updateQty('${name}', 1)">+</button>
+        </div>
+      `;
+      cartEl.appendChild(div);
+    });
+
+    totalEl.innerText = `$${grandTotal.toFixed(2)}`;
+  };
+
+  // --- 4. CART LOGIC ---
+  function getTotalCartCount() {
+    return Object.values(window.cart).reduce((sum, item) => sum + item.qty, 0);
+  }
+
+  function getFlavorStock(name) {
+    const f = window.flavorsList.find(f => f.name === name);
+    return f && f.stock !== undefined ? f.stock : 0;
+  }
+
+  window.addToCart = function(name, price) {
+    if (getTotalCartCount() >= window.maxOrderLimit) {
+      alert(`⚠️ You can only order a maximum of ${window.maxOrderLimit} candies per order!`);
+      return;
+    }
+
+    const stock = getFlavorStock(name);
+    const currentQty = window.cart[name] ? window.cart[name].qty : 0;
+    if (currentQty >= stock) {
+      alert(`⚠️ Sorry, only ${stock} of "${name}" left in stock!`);
+      renderFlavors();
+      return;
+    }
+
+    if (!window.cart[name]) {
+      window.cart[name] = { price: price, qty: 0 };
+    }
+    window.cart[name].qty += 1;
+    renderCart();
+    renderFlavors();
+  };
+
+  window.updateQty = function(name, change) {
+    if (!window.cart[name]) return;
+
+    if (change > 0) {
+      if (getTotalCartCount() >= window.maxOrderLimit) {
+        alert(`⚠️ Maximum limit is ${window.maxOrderLimit} candies per order!`);
+        return;
+      }
+      const stock = getFlavorStock(name);
+      if (window.cart[name].qty >= stock) {
+        alert(`⚠️ Sorry, only ${stock} of "${name}" left in stock!`);
+        return;
+      }
+    }
+
+    window.cart[name].qty += change;
+    if (window.cart[name].qty <= 0) {
+      delete window.cart[name];
+    }
+    renderCart();
+    renderFlavors();
+  };
+
+  // --- 5. ADMIN ACTIONS ---
+  window.saveMaxLimit = async function() {
+    const val = parseInt(document.getElementById('adminMaxLimit').value) || 4;
+    window.maxOrderLimit = val;
+
+    if (window.activeBackend === 'firebase') {
+      await set(ref(db, 'settings/maxOrderLimit'), val);
+      alert(`✅ Max limit saved to Firebase: ${val}`);
+    } else if (window.activeBackend === 'supabase') {
+      await supabaseClient.from('settings').upsert({ key: 'max_limit', value: val.toString() });
+      alert(`✅ Max limit saved to Supabase: ${val}`);
+    } else {
+      alert(`✅ Max limit set locally to ${val}`);
+    }
+  };
+
+  window.updateFlavor = async function(id) {
+    const newName = document.getElementById(`editName_${id}`).value.trim();
+    const newPrice = parseFloat(document.getElementById(`editPrice_${id}`).value) || 1.00;
+    const newStock = parseInt(document.getElementById(`editStock_${id}`).value);
+    const safeStock = isNaN(newStock) ? 0 : Math.max(0, newStock);
+
+    const idx = window.flavorsList.findIndex(f => f.id === id);
+    if (idx === -1) return;
+    window.flavorsList[idx].name = newName;
+    window.flavorsList[idx].price = newPrice;
+    window.flavorsList[idx].stock = safeStock;
+
+    if (window.activeBackend === 'firebase') {
+      await set(ref(db, `flavors/${id}`), { name: newName, price: newPrice, stock: safeStock });
+      alert(`✅ Updated "${newName}" in Firebase! (${safeStock} in stock)`);
+    } else if (window.activeBackend === 'supabase') {
+      await supabaseClient.from('flavors').upsert({ id: id, name: newName, price: newPrice, stock: safeStock });
+      alert(`✅ Updated "${newName}" in Supabase! (${safeStock} in stock)`);
+    } else {
+      alert(`✅ Updated "${newName}" locally! (${safeStock} in stock)`);
+    }
+
+    renderFlavors();
+  };
+
+  window.submitOrder = async function() {
+    const name = document.getElementById('custName').value.trim();
+    const studentClass = document.getElementById('custClass').value.trim();
+
+    if (getTotalCartCount() === 0) {
+      alert('Please add at least one candy to your order!');
+      return;
+    }
+    if (!name || !studentClass) {
+      alert('Please
