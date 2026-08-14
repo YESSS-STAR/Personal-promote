@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIRHEADS - Pre-Order Storefront</title>
+  <style>
+    /* Global Reset & Design Tokens */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    :root {
+      --bg-primary: #f8f9fa;
+      --surface: #ffffff;
+      --text-main: #1a1d20;
+      --text-muted: #6c757d;
+      --border-color: #e9ecef;
+      --accent-primary: #2b3a4a;
+      --accent-hover: #1e293b;
+      --badge-pending-bg: #e2e8f0;
+      --badge-pending-text: #334155;
+      --badge-paid-bg: #d1e7dd;
+      --badge-paid-text: #0f5132;
+      --danger-bg: #f8d7da;
+      --danger-text: #842029;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    /* Layout Containers */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Navigation Bar */
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 18px 0;
+      margin-bottom: 30px;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: underline;
+    }
+
+    .btn-link:hover {
+      color: var(--text-main);
+    }
+
+    /* Storefront Grid Layout */
+    .storefront-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .storefront-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card Component */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Catalog Items */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .product-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .product-price {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .qty-btn {
+      background: var(--bg-primary);
+      border: none;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .qty-btn:hover {
+      background: var(--border-color);
+    }
+
+    .qty-count {
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0 10px;
+    }
+
+    /* Cart & Checkout Panel */
+    .cart-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .form-group {
+      margin-top: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.95rem;
+      background: var(--bg-primary);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--surface);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-action {
+      background: none;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 6px;
+    }
+
+    .btn-action-paid {
+      background-color: var(--badge-paid-bg);
+      color: var(--badge-paid-text);
+      border: none;
+    }
+
+    .btn-action-cancel {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: none;
+    }
+
+    /* Post-Order Screen */
+    .confirmation-box {
+      max-width: 550px;
+      margin: 40px auto 0;
+      text-align: left;
+    }
+
+    .whatsapp-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background-color: #25d366;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-top: 20px;
+    }
+
+    .whatsapp-btn:hover {
+      background-color: #1ebd56;
+    }
+
+    /* Admin View Elements */
+    .auth-box {
+      max-width: 360px;
+      margin: 60px auto 0;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+
+    /* Data Tables */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--bg-primary);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-pending {
+      background-color: var(--badge-pending-bg);
+      color: var(--badge-pending-text);
+    }
+
+    .badge-paid {
+      background-color: var(--badge-paid-bg);
+      color: var(--badge-paid-text);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .empty-state {
+      padding: 30px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="container header-content">
+      <div class="brand-title">AIRHEADS</div>
+      <div class="nav-actions">
+        <button class="btn-link" id="nav-storefront-btn" onclick="showView('storefront-view')">Storefront</button>
+        <button class="btn-link" id="nav-admin-btn" onclick="navigateAdmin()">Admin</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- VIEW 1: PUBLIC STOREFRONT -->
+    <div id="storefront-view">
+      <div class="storefront-layout">
+        
+        <!-- Product Catalog -->
+        <div>
+          <div class="card">
+            <div class="card-title">Product Catalog</div>
+            <div class="product-grid" id="product-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart & Checkout Sidebar -->
+        <div>
+          <div class="card">
+            <div class="card-title">Your Pre-Order</div>
+            <div id="cart-items-container">
+              <div class="empty-state">No items added yet.</div>
+            </div>
+            
+            <div class="cart-total-row">
+              <span>Total Amount</span>
+              <span id="cart-total-display">$0.00</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cust-name">Customer Name *</label>
+              <input type="text" id="cust-name" class="form-input" placeholder="e.g. John Doe">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cust-class">Class / Grade *</label>
+              <input type="text" id="cust-class" class="form-input" placeholder="e.g. Class 3A">
+            </div>
+
+            <button class="btn-primary" onclick="submitPreOrder()">Place Pre-Order</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 2: POST-ORDER CONFIRMATION SCREEN -->
+    <div id="confirmation-view" class="hidden">
+      <div class="card confirmation-box">
+        <div class="card-title">Order Submitted Successfully</div>
+        
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
+          Your order reference is <strong id="conf-order-id" style="color: var(--text-main);">#0000</strong>.
+        </p>
+
+        <div style="background: var(--bg-primary); padding: 16px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem;">
+          <div style="margin-bottom: 6px;"><strong>Name:</strong> <span id="conf-name"></span></div>
+          <div style="margin-bottom: 6px;"><strong>Class:</strong> <span id="conf-class"></span></div>
+          <div style="margin-bottom: 6px;"><strong>Items:</strong> <span id="conf-items"></span></div>
+          <div><strong>Total Price:</strong> <span id="conf-total"></span></div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Please click below to send your order confirmation message via WhatsApp to arrange payment.
+        </p>
+
+        <a id="whatsapp-link" href="#" target="_blank" class="whatsapp-btn">
+          Click here to pay via WhatsApp (+65 88351447)
+        </a>
+
+        <button class="btn-primary" style="background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 12px;" onclick="resetStorefront()">
+          Back to Storefront
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 3: ADMIN LOGIN -->
+    <div id="admin-login-view" class="hidden">
+      <div class="card auth-box">
+        <div class="card-title">Admin Dashboard Access</div>
+        
+        <div class="form-group">
+          <label class="form-label" for="admin-pass">Password</label>
+          <input type="password" id="admin-pass" class="form-input" placeholder="Enter password">
+        </div>
+
+        <div id="auth-error" style="color: var(--danger-text); font-size: 0.85rem; margin-top: 8px;" class="hidden">
+          Invalid password. Access denied.
+        </div>
+
+        <button class="btn-primary" onclick="loginAdmin()">Login</button>
+      </div>
+    </div>
+
+    <!-- VIEW 4: ADMIN DASHBOARD -->
+    <div id="admin-dashboard-view" class="hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.2rem; font-weight: 700;">Order Management Dashboard</h2>
+        <button class="btn-action" onclick="logoutAdmin()">Logout</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-pending-btn" onclick="switchAdminTab('pending')">
+          Pending Orders (<span id="pending-count">0</span>)
+        </button>
+        <button class="tab-btn" id="tab-fulfilled-btn" onclick="switchAdminTab('fulfilled')">
+          Fulfilled & Paid Orders (<span id="fulfilled-count">0</span>)
+        </button>
+      </div>
+
+      <!-- Tab Content: Pending Orders -->
+      <div id="admin-tab-pending" class="card" style="padding: 0;">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Class</th>
+                <th>Items Ordered</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-pending-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Content: Fulfilled Orders -->
+      <div id="admin-tab-fulfilled" class="card hidden" style="padding: 0;">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Class</th>
+                <th>Items Ordered</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-fulfilled-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    /* Data Definitions */
+    const PRODUCTS = [
+      { id: 'cherry', name: 'Cherry', price: 1.00 },
+      { id: 'orange', name: 'Orange', price: 1.20 },
+      { id: 'white_mystery', name: 'White Mystery', price: 1.20 },
+      { id: 'grape', name: 'Grape', price: 1.20 },
+      { id: 'watermelon', name: 'Watermelon', price: 1.20 }
+    ];
+
+    /* Application State */
+    let cart = {};
+    let orders = JSON.parse(localStorage.getItem('airheads_orders')) || [];
+    let isAdminAuthenticated = false;
+
+    /* Initialize Application */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+      renderCart();
+    });
+
+    /* View Navigation Helper */
+    function showView(viewId) {
+      const views = ['storefront-view', 'confirmation-view', 'admin-login-view', 'admin-dashboard-view'];
+      views.forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(viewId).classList.remove('hidden');
+    }
+
+    /* Product & Cart Logic */
+    function renderProducts() {
+      const container = document.getElementById('product-list');
+      container.innerHTML = PRODUCTS.map(product => {
+        const qty = cart[product.id] || 0;
+        return `
+          <div class="product-card">
+            <div>
+              <div class="product-title">${product.name}</div>
+              <div class="product-price">$${product.price.toFixed(2)}</div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty('${product.id}', -1)">-</button>
+              <span class="qty-count">${qty}</span>
+              <button class="qty-btn" onclick="updateQty('${product.id}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateQty(productId, change) {
+      const current = cart[productId] || 0;
+      const next = current + change;
+      if (next <= 0) {
+        delete cart[productId];
+      } else {
+        cart[productId] = next;
+      }
+      renderProducts();
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-container');
+      const totalDisplay = document.getElementById('cart-total-display');
+      
+      const keys = Object.keys(cart);
+      if (keys.length === 0) {
+        container.innerHTML = '<div class="empty-state">No items added yet.</div>';
+        totalDisplay.textContent = '$0.00';
+        return;
+      }
+
+      let grandTotal = 0;
+      let html = '';
+
+      keys.forEach(id => {
+        const product = PRODUCTS.find(p => p.id === id);
+        const qty = cart[id];
+        const lineTotal = product.price * qty;
+        grandTotal += lineTotal;
+
+        html += `
+          <div class="cart-item-row">
+            <span>${product.name} x${qty}</span>
+            <span>$${lineTotal.toFixed(2)}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      totalDisplay.textContent = `$${grandTotal.toFixed(2)}`;
+    }
+
+    /* Order Submission & WhatsApp Integration */
+    function submitPreOrder() {
+      const nameInput = document.getElementById('cust-name').value.trim();
+      const classInput = document.getElementById('cust-class').value.trim();
+      const cartKeys = Object.keys(cart);
+
+      if (cartKeys.length === 0) {
+        alert('Please select at least one item before placing your order.');
+        return;
+      }
+
+      if (!nameInput || !classInput) {
+        alert('Please fill in both Customer Name and Class / Grade.');
+        return;
+      }
+
+      // Generate Order Data
+      const orderItems = cartKeys.map(id => {
+        const product = PRODUCTS.find(p => p.id === id);
+        return {
+          name: product.name,
+          qty: cart[id],
+          unitPrice: product.price,
+          total: product.price * cart[id]
+        };
+      });
+
+      const totalAmount = orderItems.reduce((acc, item) => acc + item.total, 0);
+      const orderId = Math.floor(1000 + Math.random() * 9000).toString();
+
+      const newOrder = {
+        id: orderId,
+        customerName: nameInput,
+        customerClass: classInput,
+        items: orderItems,
+        total: totalAmount,
+        status: 'pending',
+        timestamp: new Date().toISOString()
+      };
+
+      orders.push(newOrder);
+      saveOrders();
+
+      // Display Confirmation Screen Data
+      document.getElementById('conf-order-id').textContent = `#${orderId}`;
+      document.getElementById('conf-name').textContent = nameInput;
+      document.getElementById('conf-class').textContent = classInput;
+      
+      const itemsSummaryString = orderItems.map(i => `${i.name} (${i.qty})`).join(', ');
+      document.getElementById('conf-items').textContent = itemsSummaryString;
+      document.getElementById('conf-total').textContent = `$${totalAmount.toFixed(2)}`;
+
+      // Construct WhatsApp URL
+      const whatsappMessage = `Hi, I have placed a pre-order. Order ID: #${orderId}. Name: ${nameInput}. Class: ${classInput}. Items: ${itemsSummaryString}. Total: $${totalAmount.toFixed(2)}.`;
+      const encodedMsg = encodeURIComponent(whatsappMessage);
+      document.getElementById('whatsapp-link').href = `https://wa.me/6588351447?text=${encodedMsg}`;
+
+      showView('confirmation-view');
+    }
+
+    function resetStorefront() {
+      cart = {};
+      document.getElementById('cust-name').value = '';
+      document.getElementById('cust-class').value = '';
+      renderProducts();
+      renderCart();
+      showView('storefront-view');
+    }
+
+    /* Admin Authentication & Management */
+    function navigateAdmin() {
+      if (isAdminAuthenticated) {
+        renderAdminDashboard();
+        showView('admin-dashboard-view');
+      } else {
+        document.getElementById('admin-pass').value = '';
+        document.getElementById('auth-error').classList.add('hidden');
+        showView('admin-login-view');
+      }
+    }
+
+    function loginAdmin() {
+      const pass = document.getElementById('admin-pass').value;
+      if (pass === 'haniqo') {
+        isAdminAuthenticated = true;
+        renderAdminDashboard();
+        showView('admin-dashboard-view');
+      } else {
+        document.getElementById('auth-error').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminAuthenticated = false;
+      showView('storefront-view');
+    }
+
+    function switchAdminTab(tab) {
+      const pendingBtn = document.getElementById('tab-pending-btn');
+      const fulfilledBtn = document.getElementById('tab-fulfilled-btn');
+      const pendingTab = document.getElementById('admin-tab-pending');
+      const fulfilledTab = document.getElementById('admin-tab-fulfilled');
+
+      if (tab === 'pending') {
+        pendingBtn.classList.add('active');
+        fulfilledBtn.classList.remove('active');
+        pendingTab.classList.remove('hidden');
+        fulfilledTab.classList.add('hidden');
+      } else {
+        fulfilledBtn.classList.add('active');
+        pendingBtn.classList.remove('active');
+        fulfilledTab.classList.remove('hidden');
+        pendingTab.classList.add('hidden');
+      }
+    }
+
+    function renderAdminDashboard() {
+      const pendingBody = document.getElementById('table-pending-body');
+      const fulfilledBody = document.getElementById('table-fulfilled-body');
+
+      const pendingOrders = orders.filter(o => o.status === 'pending');
+      const fulfilledOrders = orders.filter(o => o.status === 'fulfilled');
+
+      document.getElementById('pending-count').textContent = pendingOrders.length;
+      document.getElementById('fulfilled-count').textContent = fulfilledOrders.length;
+
+      // Render Pending Orders
+      if (pendingOrders.length === 0) {
+        pendingBody.innerHTML = '<tr><td colspan="6" class="empty-state">No pending orders found.</td></tr>';
+      } else {
+        pendingBody.innerHTML = pendingOrders.map(o => `
+          <tr>
+            <td><strong>#${o.id}</strong></td>
+            <td>${o.customerName}</td>
+            <td>${o.customerClass}</td>
+            <td>${o.items.map(i => `${i.name} x${i.qty}`).join(', ')}</td>
+            <td>$${o.total.toFixed(2)}</td>
+            <td>
+              <button class="btn-action btn-action-paid" onclick="markAsPaid('${o.id}')">Mark as Paid</button>
+              <button class="btn-action btn-action-cancel" onclick="cancelOrder('${o.id}')">Cancel</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Fulfilled Orders
+      if (fulfilledOrders.length === 0) {
+        fulfilledBody.innerHTML = '<tr><td colspan="6" class="empty-state">No fulfilled orders recorded.</td></tr>';
+      } else {
+        fulfilledBody.innerHTML = fulfilledOrders.map(o => `
+          <tr>
+            <td><strong>#${o.id}</strong></td>
+            <td>${o.customerName}</td>
+            <td>${o.customerClass}</td>
+            <td>${o.items.map(i => `${i.name} x${i.qty}`).join(', ')}</td>
+            <td>$${o.total.toFixed(2)}</td>
+            <td><span class="badge badge-paid">PAID & FULFILLED</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function markAsPaid(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        order.status = 'fulfilled';
+        saveOrders();
+        renderAdminDashboard();
+      }
+    }
+
+    function cancelOrder(orderId) {
+      if (confirm(`Are you sure you want to cancel Order #${orderId}?`)) {
+        orders = orders.filter(o => o.id !== orderId);
+        saveOrders();
+        renderAdminDashboard();
+      }
+    }
+
+    function saveOrders() {
+      localStorage.setItem('airheads_orders', JSON.stringify(orders));
+    }
+  </script>
+</body>
+</html>
