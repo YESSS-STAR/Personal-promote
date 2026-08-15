@@ -393,4 +393,588 @@
   } else {
     try {
       const firebaseConfig = {
-        databaseURL: "https://airheader-6ec67-default-rtd
+        databaseURL: "https://airheader-6ec67-default-rtdb.asia-southeast1.firebasedatabase.app/"
+      };
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      firebaseReady = true;
+      console.log('✓ Firebase initialized');
+    } catch (err) {
+      console.error('❌ Firebase init error:', err);
+      document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Setup error</strong><p style="margin-top:8px;font-size:14px;color:#666;">Firebase config failed. Contact support.</p></div>';
+    }
+  }
+
+
+  const ADMIN_PASSWORD = "haniqo";
+  const TEAM_ADMINS = {
+    "amr": { name: "Amr", password: "amr" }
+  };
+  const FLAVOR_COLORS = {
+    "Orange": "#FF8A3D",
+    "Blue Raspberry": "#3D8CFF",
+    "Grape": "#8E5CD9",
+    "Watermelon": "#FF5C7A",
+    "Cherry": "#E0203C",
+    "White Mystery": "#E8E2ED"
+  };
+  const FLAVOR_ORDER = ["Orange","Blue Raspberry","Grape","Watermelon","Cherry","White Mystery"];
+
+  // ---------- Theme ----------
+  const sunPath = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>`;
+  const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    const icon = document.getElementById('themeIcon');
+    if(icon) icon.innerHTML = t === 'dark' ? sunPath : moonPath;
+    localStorage.setItem('airheads-theme', t);
+  }
+  applyTheme(localStorage.getItem('airheads-theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+  // Toast notifications
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // Maintenance mode
+  let maintenanceActive = false;
+  const maintenanceBtn = document.getElementById('maintenanceToggle');
+  
+  maintenanceBtn.addEventListener('click', async () => {
+    if(!firebaseReady) return showToast('Database not ready');
+    maintenanceActive = !maintenanceActive;
+    maintenanceBtn.classList.toggle('active', maintenanceActive);
+    await db.ref('settings/maintenance').set(maintenanceActive);
+    showToast(maintenanceActive ? '🔧 Maintenance ON - students see pause screen' : '✓ Maintenance OFF - storefront open');
+  });
+
+  // Check maintenance status on load
+  if(firebaseReady){
+    db.ref('settings/maintenance').once('value', snap => {
+      maintenanceActive = snap.val() === true;
+      maintenanceBtn.classList.toggle('active', maintenanceActive);
+    });
+  }
+
+  // ---------- Auth (client-side gate) ----------
+  const loginWrap = document.getElementById('loginWrap');
+  const dash = document.getElementById('dash');
+  const pwInput = document.getElementById('pwInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+
+  function tryLogin(){
+    const pw = pwInput.value;
+    let adminName = null;
+    
+    if(pw === ADMIN_PASSWORD){
+      adminName = 'Main Admin';
+      sessionStorage.setItem('airheads-admin', '1');
+      sessionStorage.setItem('adminName', adminName);
+      loginWrap.style.display = 'none';
+      dash.style.display = 'block';
+      initDashboard();
+    } else if(TEAM_ADMINS[pw]){
+      adminName = TEAM_ADMINS[pw].name;
+      sessionStorage.setItem('airheads-admin', '1');
+      sessionStorage.setItem('adminName', adminName);
+      sessionStorage.setItem('isSubAdmin', '1');
+      loginWrap.style.display = 'none';
+      dash.style.display = 'block';
+      initDashboard();
+    } else {
+      loginError.textContent = 'Incorrect password. Try again.';
+    }
+  }
+  loginBtn.addEventListener('click', tryLogin);
+  pwInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('airheads-admin');
+    location.reload();
+  });
+
+  if(sessionStorage.getItem('airheads-admin') === '1'){
+    loginWrap.style.display = 'none';
+    dash.style.display = 'block';
+    initDashboard();
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab + 'Section').classList.add('active');
+    });
+  });
+
+  let dashboardInitialized = false;
+  let currentOrders = {};
+  let currentFilter = 'all';
+
+  function initDashboard(){
+    if(dashboardInitialized) return;
+    if(!firebaseReady){
+      document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Database connection lost</strong><p style="margin-top:8px;font-size:14px;color:#666;">Please refresh the page.</p></div>';
+      return;
+    }
+    dashboardInitialized = true;
+    listenInventory();
+    listenOrders();
+    loadTeamData();
+    listenCoupons();
+
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.status;
+        renderOrders();
+      });
+    });
+  }
+
+  // ---------- Inventory ----------
+  function listenInventory(){
+    db.ref('inventory').on('value', snap => {
+      const inv = snap.val() || {};
+      renderInventory(inv);
+    }, err => {
+      console.error('❌ Inventory listen error:', err);
+      document.getElementById('inventoryList').innerHTML = '<div class="empty-state">Error loading inventory. Refresh the page.</div>';
+    });
+  }
+
+  function renderInventory(inv){
+    const wrap = document.getElementById('inventoryList');
+    wrap.innerHTML = "";
+    FLAVOR_ORDER.forEach(flavor => {
+      const item = inv[flavor] || {price:0, stock:0};
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="inv-row">
+          <div class="flavor-dot" style="background:${FLAVOR_COLORS[flavor]}"></div>
+          <div class="inv-name">${flavor}</div>
+          <div class="inv-fields">
+            <div class="field-group">
+              <label>Price ($)</label>
+              <input type="number" min="0" step="0.10" value="${Number(item.price||0).toFixed(2)}" data-flavor="${flavor}" data-field="price">
+            </div>
+            <div class="field-group">
+              <label>Stock</label>
+              <input type="number" min="0" step="1" value="${Number(item.stock||0)}" data-flavor="${flavor}" data-field="stock">
+            </div>
+          </div>
+        </div>
+        <div class="save-badge" id="badge-${flavor.replace(/\s+/g,'')}">Saved</div>
+      `;
+      wrap.appendChild(card);
+    });
+
+    wrap.querySelectorAll('input').forEach(inp => {
+      let debounceTimer;
+      inp.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => saveInventoryField(inp), 500);
+      });
+    });
+  }
+
+  async function saveInventoryField(inp){
+    const flavor = inp.dataset.flavor;
+    const field = inp.dataset.field;
+    let value = parseFloat(inp.value);
+    if(isNaN(value) || value < 0) value = 0;
+    await db.ref(`inventory/${flavor}/${field}`).set(value);
+    const badge = document.getElementById(`badge-${flavor.replace(/\s+/g,'')}`);
+    if(badge){
+      badge.classList.add('show');
+      setTimeout(()=>badge.classList.remove('show'), 1200);
+    }
+  }
+
+  // ---------- Orders ----------
+  function listenOrders(){
+    let loadTimeout;
+    console.log('📡 Starting orders listener...');
+    db.ref('orders').on('value', snap => {
+      clearTimeout(loadTimeout);
+      currentOrders = snap.val() || {};
+      console.log('✓ Orders loaded:', Object.keys(currentOrders).length, 'orders');
+      renderOrders();
+      renderStats();
+    }, err => {
+      clearTimeout(loadTimeout);
+      console.error('❌ Orders listen error:', err);
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">⚠️ Error loading orders<br><small>${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;">Retry</button></div>`;
+    });
+    // Timeout after 5 seconds if no response
+    loadTimeout = setTimeout(() => {
+      console.warn('⏱️ Orders load timeout');
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">⏱️ Taking too long to load<br><small>Check your connection or Firebase rules</small><br><button onclick="location.reload()" style="margin-top:10px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;">Retry</button></div>`;
+    }, 5000);
+  }
+
+  function renderStats(){
+    const list = Object.values(currentOrders);
+    const pending = list.filter(o => o.status === 'pending').length;
+    const paid = list.filter(o => o.status === 'paid').length;
+    const fulfilled = list.filter(o => o.status === 'fulfilled').length;
+    const revenue = list.filter(o => o.status !== 'cancelled').reduce((s,o)=> s + (Number(o.total)||0), 0);
+    const stats = document.getElementById('statsRow');
+    stats.innerHTML = `
+      <div class="stat-box"><div class="num">${pending}</div><div class="lbl">Pending</div></div>
+      <div class="stat-box"><div class="num">${paid}</div><div class="lbl">Paid</div></div>
+      <div class="stat-box"><div class="num">${fulfilled}</div><div class="lbl">Fulfilled</div></div>
+      <div class="stat-box"><div class="num">$${revenue.toFixed(2)}</div><div class="lbl">Revenue</div></div>
+    `;
+  }
+
+  function renderOrders(){
+    const wrap = document.getElementById('ordersList');
+    let entries = Object.entries(currentOrders);
+    if(currentFilter !== 'all'){
+      entries = entries.filter(([id,o]) => o.status === currentFilter);
+    }
+    entries.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+
+    if(entries.length === 0){
+      wrap.innerHTML = `<div class="empty-state">No orders here yet.</div>`;
+      return;
+    }
+
+    wrap.innerHTML = entries.map(([id, o]) => {
+      const status = o.status || 'pending';
+      const items = (o.items||[]).map(i => `
+        <div class="order-item-line"><span>${i.qty}x ${i.flavor}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
+      `).join('');
+      const time = o.createdAt ? new Date(o.createdAt).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '';
+      const isCancelled = status === 'cancelled';
+      const isFulfilled = status === 'fulfilled';
+
+      return `
+        <div class="card order-card">
+          <div class="order-head">
+            <div>
+              <div class="order-buyer">${escapeHtml(o.name||'—')}</div>
+              <div class="order-class">${escapeHtml(o.className||'—')}</div>
+              <div class="order-time">${time}</div>
+            </div>
+            <span class="status-pill status-${status}">${status}</span>
+          </div>
+          <div class="order-items">
+            ${items}
+            <div class="order-total"><span>Total</span><span>$${Number(o.total||0).toFixed(2)}</span></div>
+          </div>
+          <div class="order-actions">
+            <button class="act-btn paid" data-id="${id}" data-status="paid" ${isCancelled||status==='paid' ? 'disabled':''}>Mark Paid</button>
+            <button class="act-btn fulfilled" data-id="${id}" data-status="fulfilled" ${isCancelled||isFulfilled ? 'disabled':''}>Mark Fulfilled</button>
+            <button class="act-btn cancel" data-id="${id}" data-status="cancelled" ${isCancelled ? 'disabled':''}>Cancel</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    wrap.querySelectorAll('.act-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const newStatus = btn.dataset.status;
+        const currentAdmin = sessionStorage.getItem('adminName') || 'Main Admin';
+        const isSubAdmin = sessionStorage.getItem('isSubAdmin') === '1';
+        
+        // If marking as PAID, award credits
+        if(newStatus === 'paid'){
+          const orderSnap = await db.ref(`orders/${id}`).once('value');
+          const order = orderSnap.val();
+          if(order){
+            // Award credit to referrer
+            if(order.referredBy){
+              const pendingRef = db.ref(`referrals/${order.referredBy}/pendingCredits`);
+              const pending = (await pendingRef.once('value')).val() || 0;
+              const earnedRef = db.ref(`referrals/${order.referredBy}/earnings`);
+              const earned = (await earnedRef.once('value')).val() || 0;
+              const creditAmount = order.subtotal * 0.15;
+              await earnedRef.set(earned + creditAmount);
+              await pendingRef.set(Math.max(0, pending - creditAmount));
+            }
+            // Award credit to student if they referred others (accumulate)
+            if(order.studentInfo){
+              const studentCreditRef = db.ref(`students/${order.studentInfo.name}/${order.studentInfo.class}/credit`);
+              const currentCredit = (await studentCreditRef.once('value')).val() || 0;
+              // Students earn 15c per dollar they spend (but paid status doesn't earn, referrals do)
+              // Actually, let me reconsider - students earn via referral program, not from their own orders
+              // So no auto-credit here
+            }
+            // Mark creditAwarded so we don't double-award
+            await db.ref(`orders/${id}/creditAwarded`).set(true);
+          }
+        }
+        
+        if(!isSubAdmin){
+          // Main admin: direct update
+          await db.ref(`orders/${id}/status`).set(newStatus);
+        } else {
+          // Sub-admin: create approval request
+          const approvalRef = db.ref('pending_approvals').push();
+          await approvalRef.set({
+            orderId: id,
+            action: newStatus,
+            adminName: currentAdmin,
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+          });
+          showToast('Request sent to main admin for approval');
+        }
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ========== CALCULATOR ==========
+  function calculateBaseline(){
+    const batchCost = parseFloat(document.getElementById('batchCost').value) || 0;
+    const totalUnits = parseFloat(document.getElementById('totalUnits').value) || 1;
+    const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+
+    const unitCost = batchCost / totalUnits;
+    const unitProfit = sellingPrice - unitCost;
+    const totalRevenue = sellingPrice * totalUnits;
+    const totalProfit = totalRevenue - batchCost;
+    const profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+    const markup = unitCost > 0 ? ((sellingPrice - unitCost) / unitCost) * 100 : 0;
+
+    document.getElementById('calcUnitCost').value = unitCost.toFixed(2);
+
+    document.getElementById('baselineResults').innerHTML = `
+      <div class="calc-result"><span class="label">Unit Cost:</span><span class="value">$${unitCost.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Unit Profit:</span><span class="value">$${unitProfit.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Total Revenue:</span><span class="value">$${totalRevenue.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Total Profit:</span><span class="value">$${totalProfit.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Profit Margin:</span><span class="value">${profitMargin.toFixed(1)}%</span></div>
+      <div class="calc-result"><span class="label">Markup:</span><span class="value">${markup.toFixed(1)}%</span></div>
+    `;
+  }
+
+  function calculateRisk(){
+    const batchCost = parseFloat(document.getElementById('batchCost').value) || 0;
+    const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+    const unitsSold = parseFloat(document.getElementById('unitsSold').value) || 0;
+    const unitsUnsold = parseFloat(document.getElementById('unitsUnsold').value) || 0;
+    const unitCost = parseFloat(document.getElementById('calcUnitCost').value) || 0;
+
+    const capitalAtRisk = unitsUnsold * unitCost;
+    const safetyBuffer = batchCost / sellingPrice;
+    const grossProfit = (unitsSold * sellingPrice) - batchCost;
+    const gmroi = batchCost > 0 ? grossProfit / batchCost : 0;
+
+    document.getElementById('riskResults').innerHTML = `
+      <div class="calc-result"><span class="label">Capital at Risk:</span><span class="value">$${capitalAtRisk.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Safety Buffer (units):</span><span class="value">${Math.ceil(safetyBuffer)}</span></div>
+      <div class="calc-result"><span class="label">Gross Profit:</span><span class="value">$${Math.max(0,grossProfit).toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">GMROI (Return/Dollar):</span><span class="value">${gmroi.toFixed(2)}x</span></div>
+    `;
+  }
+
+  function calculatePromo(){
+    const bundlePrice = parseFloat(document.getElementById('bundlePrice').value) || 0;
+    const bundleUnits = parseFloat(document.getElementById('bundleUnits').value) || 1;
+    const weeklyPurchases = parseFloat(document.getElementById('weeklyPurchases').value) || 0;
+    const termWeeks = parseFloat(document.getElementById('termWeeks').value) || 1;
+    const unitCost = parseFloat(document.getElementById('calcUnitCost').value) || 0;
+
+    const effectivePrice = bundlePrice / bundleUnits;
+    const unitProfit = effectivePrice - unitCost;
+    const clv = (weeklyPurchases * unitProfit) * termWeeks;
+
+    document.getElementById('promoResults').innerHTML = `
+      <div class="calc-result"><span class="label">Effective Price/Unit:</span><span class="value">$${effectivePrice.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Profit per Bundle:</span><span class="value">$${Math.max(0, bundlePrice - (unitCost * bundleUnits)).toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">CLV (per student/term):</span><span class="value">$${Math.max(0,clv).toFixed(2)}</span></div>
+    `;
+  }
+
+  // ========== MULTI-ADMIN ==========
+  let teamMembers = {};
+  let pendingApprovals = {};
+
+  function loadTeamData(){
+    db.ref('admin_team').on('value', snap => {
+      teamMembers = snap.val() || {};
+      renderTeam();
+    });
+    db.ref('pending_approvals').on('value', snap => {
+      pendingApprovals = snap.val() || {};
+      renderApprovals();
+    });
+  }
+
+  function renderTeam(){
+    const list = document.getElementById('teamList');
+    const entries = Object.entries(teamMembers);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No team members yet. You are the main admin.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([id, member]) => `
+      <div class="team-card">
+        <div class="team-info">
+          <div class="name">${escapeHtml(member.name || 'Unknown')}</div>
+          <div class="role">Can approve orders</div>
+        </div>
+        <button class="remove-admin" data-id="${id}" onclick="removeTeamMember('${id}')">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  function renderApprovals(){
+    const list = document.getElementById('approvalsList');
+    const entries = Object.entries(pendingApprovals);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No pending approvals.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([id, approval]) => `
+      <div class="approval-card">
+        <strong>${approval.orderId}</strong> · ${approval.action.toUpperCase()}
+        <div class="approval-action"><small>${approval.adminName} on ${new Date(approval.createdAt).toLocaleString()}</small></div>
+        <div class="approval-btns">
+          <button class="approve-btn" onclick="approveChange('${id}', '${approval.orderId}', '${approval.action}')">✓ Approve</button>
+          <button class="reject-btn" onclick="rejectChange('${id}')">✕ Reject</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addTeamMember(){
+    const name = document.getElementById('newAdminName').value.trim();
+    const pw = document.getElementById('newAdminPassword').value;
+    if(!name || !pw){
+      showToast('Please enter name and password');
+      return;
+    }
+    const newRef = db.ref('admin_team').push();
+    await newRef.set({ name, password: pw, addedAt: firebase.database.ServerValue.TIMESTAMP });
+    document.getElementById('newAdminName').value = '';
+    document.getElementById('newAdminPassword').value = '';
+    showToast('Team member added!');
+  }
+
+  async function removeTeamMember(id){
+    if(!confirm('Remove this team member?')) return;
+    await db.ref(`admin_team/${id}`).remove();
+    showToast('Team member removed');
+  }
+
+  async function approveChange(approvalId, orderId, action){
+    // If approving a PAID status, award credits
+    if(action === 'paid'){
+      const orderSnap = await db.ref(`orders/${orderId}`).once('value');
+      const order = orderSnap.val();
+      if(order && !order.creditAwarded){
+        // Award credit to referrer
+        if(order.referredBy){
+          const pendingRef = db.ref(`referrals/${order.referredBy}/pendingCredits`);
+          const pending = (await pendingRef.once('value')).val() || 0;
+          const earnedRef = db.ref(`referrals/${order.referredBy}/earnings`);
+          const earned = (await earnedRef.once('value')).val() || 0;
+          const creditAmount = order.subtotal * 0.15;
+          await earnedRef.set(earned + creditAmount);
+          await pendingRef.set(Math.max(0, pending - creditAmount));
+        }
+        await db.ref(`orders/${orderId}/creditAwarded`).set(true);
+      }
+    }
+    
+    await db.ref(`orders/${orderId}/status`).set(action);
+    await db.ref(`pending_approvals/${approvalId}`).remove();
+    showToast(`Order marked as ${action}`);
+  }
+
+  async function rejectChange(approvalId){
+    await db.ref(`pending_approvals/${approvalId}`).remove();
+    showToast('Approval rejected');
+  }
+
+  // ========== COUPONS ==========
+  function listenCoupons(){
+    db.ref('coupons').on('value', snap => {
+      coupons = snap.val() || {};
+      renderCoupons();
+    });
+  }
+
+  function renderCoupons(){
+    const list = document.getElementById('couponsList');
+    const entries = Object.entries(coupons);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No coupons yet.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([code, coupon]) => `
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-weight:700;font-size:14px;">${code}</div>
+          <div style="font-size:12px;color:${coupon.type === 'percentage' ? 'var(--primary)' : 'var(--accent)'};">${coupon.type === 'percentage' ? coupon.value + '%' : '$' + coupon.value.toFixed(2)}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Type: ${coupon.type === 'percentage' ? 'Percentage off' : 'Fixed amount off'}</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="toggleCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;font-weight:600;">${coupon.active === false ? 'Enable' : 'Disable'}</button>
+          <button onclick="deleteCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function createCoupon(){
+    const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
+    const type = document.getElementById('newCouponType').value;
+    const value = parseFloat(document.getElementById('newCouponValue').value) || 0;
+
+    if(!code || value <= 0){
+      showToast('Enter valid code and value');
+      return;
+    }
+
+    if(coupons[code]){
+      showToast('Coupon already exists');
+      return;
+    }
+
+    await db.ref(`coupons/${code}`).set({
+      type, value, active: true, createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    document.getElementById('newCouponCode').value = '';
+    document.getElementById('newCouponValue').value = '';
+    showToast('Coupon created!');
+  }
+
+  async function toggleCoupon(code){
+    const current = coupons[code].active !== false;
+    await db.ref(`coupons/${code}/active`).set(!current);
+  }
+
+  async function deleteCoupon(code){
+    if(!confirm('Delete this coupon?')) return;
+    await db.ref(`coupons/${code}`).remove();
+  }
+</script>
+</body>
+</html>
