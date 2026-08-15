@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airheads Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9FB;
+    --surface:#FFFFFF;
+    --text:#1C1420;
+    --muted:#8A7C87;
+    --border:#F1DDE5;
+    --primary:#FF4F81;
+    --primary-dark:#E23E6C;
+    --accent:#8E5CD9;
+    --success:#2FAE66;
+    --warn:#C97C0A;
+    --danger:#E14A4A;
+    --shadow: 0 2px 10px rgba(28,20,32,0.06);
+    --radius:14px;
+  }
+  html[data-theme="dark"]{
+    --bg:#17111A;
+    --surface:#221A26;
+    --text:#F5EEF2;
+    --muted:#B39EAC;
+    --border:#33262E;
+    --primary:#FF6B93;
+    --primary-dark:#FF4F81;
+    --accent:#B085F5;
+    --warn:#FFB55C;
+    --shadow: 0 2px 14px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; transition:background .25s, color .25s; min-height:100vh;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
+
+  /* Login */
+  .login-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:32px 26px; width:100%; max-width:340px; box-shadow:var(--shadow); text-align:center;
+  }
+  .login-mark{
+    width:46px;height:46px;border-radius:50%; margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+  }
+  .login-card h2{margin:0 0 4px; font-size:19px;}
+  .login-card p{margin:0 0 18px; color:var(--muted); font-size:13px;}
+  input[type=password], input[type=text], input[type=number]{
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:14.5px;
+  }
+  input:focus{outline:2px solid var(--primary); outline-offset:1px;}
+  .login-btn, .primary-btn{
+    width:100%; margin-top:14px; padding:13px; border:none; border-radius:12px;
+    background:var(--primary); color:#fff; font-weight:700; font-size:14.5px; cursor:pointer;
+  }
+  .error-msg{color:var(--danger); font-size:12.5px; margin-top:10px; min-height:16px;}
+
+  /* Dashboard */
+  .dash{display:none;}
+  .topbar{
+    position:sticky; top:0; z-index:10; background:var(--bg);
+    border-bottom:1px solid var(--border); padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between; backdrop-filter:blur(6px);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{width:32px;height:32px;border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); flex-shrink:0;}
+  .brand-text h1{font-size:16px; margin:0;}
+  .brand-text span{font-size:11px; color:var(--muted); font-weight:500;}
+  .header-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:36px;height:36px;border-radius:50%; border:1px solid var(--border); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text);
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .logout-btn{
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    padding:0 14px; height:36px; border-radius:20px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+
+  main{max-width:640px; margin:0 auto; padding:18px 16px 60px;}
+
+  .tabs{display:flex; gap:6px; margin-bottom:16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:4px;}
+  .tab-btn{
+    flex:1; padding:9px 0; text-align:center; border:none; background:none; color:var(--muted);
+    font-weight:600; font-size:13px; border-radius:10px; cursor:pointer;
+  }
+  .tab-btn.active{background:var(--primary); color:#fff;}
+
+  .section{display:none;}
+  .section.active{display:block;}
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow);
+  }
+
+  /* Inventory */
+  .inv-row{display:flex; align-items:center; gap:12px;}
+  .flavor-dot{width:32px;height:32px;border-radius:50%; flex-shrink:0;}
+  .inv-name{font-weight:700; font-size:14.5px; flex:1;}
+  .inv-fields{display:flex; gap:8px;}
+  .field-group{display:flex; flex-direction:column; gap:3px;}
+  .field-group label{font-size:10.5px; color:var(--muted); font-weight:600;}
+  .field-group input{width:78px; padding:7px 8px; font-size:13.5px; border-radius:8px;}
+  .save-badge{
+    font-size:11px; color:var(--success); font-weight:600; opacity:0; transition:opacity .3s ease;
+    margin-top:6px; text-align:right;
+  }
+  .save-badge.show{opacity:1;}
+
+  /* Orders */
+  .order-card{margin-bottom:12px;}
+  .order-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;}
+  .order-buyer{font-weight:700; font-size:14.5px;}
+  .order-class{font-size:12px; color:var(--muted);}
+  .order-time{font-size:11px; color:var(--muted);}
+  .status-pill{
+    font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; text-transform:capitalize; white-space:nowrap;
+  }
+  .status-pending{background:rgba(201,124,10,0.15); color:var(--warn);}
+  .status-paid{background:rgba(94,124,226,0.15); color:#5E7CE2;}
+  .status-fulfilled{background:rgba(47,174,102,0.15); color:var(--success);}
+  .status-cancelled{background:rgba(225,74,74,0.12); color:var(--danger); text-decoration:line-through;}
+
+  .order-items{font-size:13px; color:var(--text); margin:8px 0; padding:8px 10px; background:var(--bg); border-radius:10px;}
+  .order-item-line{display:flex; justify-content:space-between; padding:2px 0;}
+  .order-total{display:flex; justify-content:space-between; font-weight:700; font-size:13.5px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);}
+
+  .order-actions{display:flex; gap:7px; margin-top:10px; flex-wrap:wrap;}
+  .act-btn{
+    flex:1; min-width:90px; padding:9px 0; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .act-btn.paid{border-color:#5E7CE2; color:#5E7CE2;}
+  .act-btn.fulfilled{border-color:var(--success); color:var(--success);}
+  .act-btn.cancel{border-color:var(--danger); color:var(--danger);}
+  .act-btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  .empty-state{text-align:center; color:var(--muted); padding:40px 0; font-size:13.5px;}
+
+  .filter-row{display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px;}
+  .filter-chip{
+    flex-shrink:0; padding:6px 13px; border-radius:20px; border:1px solid var(--border);
+    background:var(--surface); color:var(--muted); font-size:12px; font-weight:600; cursor:pointer;
+  }
+  .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text);}
+
+  .stats-row{display:flex; gap:10px; margin-bottom:16px;}
+  .stat-box{
+    flex:1; background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:12px; text-align:center;
+  }
+  .stat-box .num{font-size:19px; font-weight:800; font-family:'Poppins',sans-serif;}
+  .stat-box .lbl{font-size:10.5px; color:var(--muted); font-weight:600; margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-mark"></div>
+    <h2>Admin access</h2>
+    <p>Enter the password to manage Airheads orders &amp; stock.</p>
+    <input type="password" id="pwInput" placeholder="Password">
+    <button class="login-btn" id="loginBtn">Log in</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dash" id="dash">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <h1>Airheads Admin</h1>
+        <span>Inventory &amp; Orders</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeToggle" title="Toggle dark mode">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+      <button class="logout-btn" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="orders">Orders</button>
+      <button class="tab-btn" data-tab="inventory">Inventory &amp; Prices</button>
+    </div>
+
+    <div class="section active" id="ordersSection">
+      <div class="filter-row" id="filterRow">
+        <button class="filter-chip active" data-status="all">All</button>
+        <button class="filter-chip" data-status="pending">Pending</button>
+        <button class="filter-chip" data-status="paid">Paid</button>
+        <button class="filter-chip" data-status="fulfilled">Fulfilled</button>
+        <button class="filter-chip" data-status="cancelled">Cancelled</button>
+      </div>
+      <div id="ordersList"><div class="empty-state">Loading orders...</div></div>
+    </div>
+
+    <div class="section" id="inventorySection">
+      <div id="inventoryList"><div class="empty-state">Loading inventory...</div></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  let db;
+  let firebaseReady = false;
+
+  // Check if Firebase loaded
+  if (typeof firebase === 'undefined') {
+    console.error('❌ Firebase SDK failed to load. Check your network connection.');
+    document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Connection error</strong><p style="margin-top:8px;font-size:14px;color:#666;">Unable to load Firebase. Please check your network and refresh.</p></div>';
+  } else {
+    try {
+      const firebaseConfig = {
+        databaseURL: "https://airheader-6ec67-default-rtdb.asia-southeast1.firebasedatabase.app/"
+      };
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      firebaseReady = true;
+      console.log('✓ Firebase initialized');
+    } catch (err) {
+      console.error('❌ Firebase init error:', err);
+      document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Setup error</strong><p style="margin-top:8px;font-size:14px;color:#666;">Firebase config failed. Contact support.</p></div>';
+    }
+  }
+
+
+  const ADMIN_PASSWORD = "haniqo";
+  const FLAVOR_COLORS = {
+    "Orange": "#FF8A3D",
+    "Blue Raspberry": "#3D8CFF",
+    "Grape": "#8E5CD9",
+    "Watermelon": "#FF5C7A",
+    "Cherry": "#E0203C",
+    "White Mystery": "#E8E2ED"
+  };
+  const FLAVOR_ORDER = ["Orange","Blue Raspberry","Grape","Watermelon","Cherry","White Mystery"];
+
+  // ---------- Theme ----------
+  const sunPath = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>`;
+  const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    const icon = document.getElementById('themeIcon');
+    if(icon) icon.innerHTML = t === 'dark' ? sunPath : moonPath;
+    localStorage.setItem('airheads-theme', t);
+  }
+  applyTheme(localStorage.getItem('airheads-theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // ---------- Auth (client-side gate) ----------
+  const loginWrap = document.getElementById('loginWrap');
+  const dash = document.getElementById('dash');
+  const pwInput = document.getElementById('pwInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+
+  function tryLogin(){
+    if(pwInput.value === ADMIN_PASSWORD){
+      sessionStorage.setItem('airheads-admin', '1');
+      loginWrap.style.display = 'none';
+      dash.style.display = 'block';
+      initDashboard();
+    } else {
+      loginError.textContent = 'Incorrect password. Try again.';
+    }
+  }
+  loginBtn.addEventListener('click', tryLogin);
+  pwInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('airheads-admin');
+    location.reload();
+  });
+
+  if(sessionStorage.getItem('airheads-admin') === '1'){
+    loginWrap.style.display = 'none';
+    dash.style.display = 'block';
+    initDashboard();
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab + 'Section').classList.add('active');
+    });
+  });
+
+  let dashboardInitialized = false;
+  let currentOrders = {};
+  let currentFilter = 'all';
+
+  function initDashboard(){
+    if(dashboardInitialized) return;
+    if(!firebaseReady){
+      document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Database connection lost</strong><p style="margin-top:8px;font-size:14px;color:#666;">Please refresh the page.</p></div>';
+      return;
+    }
+    dashboardInitialized = true;
+    listenInventory();
+    listenOrders();
+
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.status;
+        renderOrders();
+      });
+    });
+  }
+
+  // ---------- Inventory ----------
+  function listenInventory(){
+    db.ref('inventory').on('value', snap => {
+      const inv = snap.val() || {};
+      renderInventory(inv);
+    }, err => {
+      console.error('❌ Inventory listen error:', err);
+      document.getElementById('inventoryList').innerHTML = '<div class="empty-state">Error loading inventory. Refresh the page.</div>';
+    });
+  }
+
+  function renderInventory(inv){
+    const wrap = document.getElementById('inventoryList');
+    wrap.innerHTML = "";
+    FLAVOR_ORDER.forEach(flavor => {
+      const item = inv[flavor] || {price:0, stock:0};
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="inv-row">
+          <div class="flavor-dot" style="background:${FLAVOR_COLORS[flavor]}"></div>
+          <div class="inv-name">${flavor}</div>
+          <div class="inv-fields">
+            <div class="field-group">
+              <label>Price ($)</label>
+              <input type="number" min="0" step="0.10" value="${Number(item.price||0).toFixed(2)}" data-flavor="${flavor}" data-field="price">
+            </div>
+            <div class="field-group">
+              <label>Stock</label>
+              <input type="number" min="0" step="1" value="${Number(item.stock||0)}" data-flavor="${flavor}" data-field="stock">
+            </div>
+          </div>
+        </div>
+        <div class="save-badge" id="badge-${flavor.replace(/\s+/g,'')}">Saved</div>
+      `;
+      wrap.appendChild(card);
+    });
+
+    wrap.querySelectorAll('input').forEach(inp => {
+      let debounceTimer;
+      inp.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => saveInventoryField(inp), 500);
+      });
+    });
+  }
+
+  async function saveInventoryField(inp){
+    const flavor = inp.dataset.flavor;
+    const field = inp.dataset.field;
+    let value = parseFloat(inp.value);
+    if(isNaN(value) || value < 0) value = 0;
+    await db.ref(`inventory/${flavor}/${field}`).set(value);
+    const badge = document.getElementById(`badge-${flavor.replace(/\s+/g,'')}`);
+    if(badge){
+      badge.classList.add('show');
+      setTimeout(()=>badge.classList.remove('show'), 1200);
+    }
+  }
+
+  // ---------- Orders ----------
+  function listenOrders(){
+    let loadTimeout;
+    console.log('📡 Starting orders listener...');
+    db.ref('orders').on('value', snap => {
+      clearTimeout(loadTimeout);
+      currentOrders = snap.val() || {};
+      console.log('✓ Orders loaded:', Object.keys(currentOrders).length, 'orders');
+      renderOrders();
+      renderStats();
+    }, err => {
+      clearTimeout(loadTimeout);
+      console.error('❌ Orders listen error:', err);
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">⚠️ Error loading orders<br><small>${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;">Retry</button></div>`;
+    });
+    // Timeout after 5 seconds if no response
+    loadTimeout = setTimeout(() => {
+      console.warn('⏱️ Orders load timeout');
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state">⏱️ Taking too long to load<br><small>Check your connection or Firebase rules</small><br><button onclick="location.reload()" style="margin-top:10px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;">Retry</button></div>`;
+    }, 5000);
+  }
+
+  function renderStats(){
+    const list = Object.values(currentOrders);
+    const pending = list.filter(o => o.status === 'pending').length;
+    const paid = list.filter(o => o.status === 'paid').length;
+    const fulfilled = list.filter(o => o.status === 'fulfilled').length;
+    const revenue = list.filter(o => o.status !== 'cancelled').reduce((s,o)=> s + (Number(o.total)||0), 0);
+    const stats = document.getElementById('statsRow');
+    stats.innerHTML = `
+      <div class="stat-box"><div class="num">${pending}</div><div class="lbl">Pending</div></div>
+      <div class="stat-box"><div class="num">${paid}</div><div class="lbl">Paid</div></div>
+      <div class="stat-box"><div class="num">${fulfilled}</div><div class="lbl">Fulfilled</div></div>
+      <div class="stat-box"><div class="num">$${revenue.toFixed(2)}</div><div class="lbl">Revenue</div></div>
+    `;
+  }
+
+  function renderOrders(){
+    const wrap = document.getElementById('ordersList');
+    let entries = Object.entries(currentOrders);
+    if(currentFilter !== 'all'){
+      entries = entries.filter(([id,o]) => o.status === currentFilter);
+    }
+    entries.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+
+    if(entries.length === 0){
+      wrap.innerHTML = `<div class="empty-state">No orders here yet.</div>`;
+      return;
+    }
+
+    wrap.innerHTML = entries.map(([id, o]) => {
+      const status = o.status || 'pending';
+      const items = (o.items||[]).map(i => `
+        <div class="order-item-line"><span>${i.qty}x ${i.flavor}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
+      `).join('');
+      const time = o.createdAt ? new Date(o.createdAt).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '';
+      const isCancelled = status === 'cancelled';
+      const isFulfilled = status === 'fulfilled';
+
+      return `
+        <div class="card order-card">
+          <div class="order-head">
+            <div>
+              <div class="order-buyer">${escapeHtml(o.name||'—')}</div>
+              <div class="order-class">${escapeHtml(o.className||'—')}</div>
+              <div class="order-time">${time}</div>
+            </div>
+            <span class="status-pill status-${status}">${status}</span>
+          </div>
+          <div class="order-items">
+            ${items}
+            <div class="order-total"><span>Total</span><span>$${Number(o.total||0).toFixed(2)}</span></div>
+          </div>
+          <div class="order-actions">
+            <button class="act-btn paid" data-id="${id}" data-status="paid" ${isCancelled||status==='paid' ? 'disabled':''}>Mark Paid</button>
+            <button class="act-btn fulfilled" data-id="${id}" data-status="fulfilled" ${isCancelled||isFulfilled ? 'disabled':''}>Mark Fulfilled</button>
+            <button class="act-btn cancel" data-id="${id}" data-status="cancelled" ${isCancelled ? 'disabled':''}>Cancel</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    wrap.querySelectorAll('.act-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const newStatus = btn.dataset.status;
+        await db.ref(`orders/${id}/status`).set(newStatus);
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>
