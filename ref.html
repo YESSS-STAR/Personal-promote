@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airheads Referrals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9FB;
+    --surface:#FFFFFF;
+    --text:#1C1420;
+    --muted:#8A7C87;
+    --border:#F1DDE5;
+    --primary:#FF4F81;
+    --primary-dark:#E23E6C;
+    --accent:#8E5CD9;
+    --success:#2FAE66;
+    --shadow: 0 2px 10px rgba(28,20,32,0.06);
+    --radius:16px;
+  }
+  html[data-theme="dark"]{
+    --bg:#17111A;
+    --surface:#221A26;
+    --text:#F5EEF2;
+    --muted:#B39EAC;
+    --border:#33262E;
+    --primary:#FF6B93;
+    --accent:#B085F5;
+    --success:#2FAE66;
+    --shadow: 0 2px 14px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;transition:background .25s,color .25s;min-height:100vh;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
+
+  .topbar{
+    position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);
+    padding:14px 18px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(6px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));flex-shrink:0;}
+  .brand-text h1{font-size:17px;margin:0;letter-spacing:.2px;}
+  .brand-text span{font-size:11px;color:var(--muted);font-weight:500;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);
+  }
+  .icon-btn svg{width:18px;height:18px;}
+  .header-actions{display:flex;gap:8px;}
+
+  main{max-width:560px;margin:0 auto;padding:20px 16px 60px;}
+  
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
+
+  .hero{margin-bottom:18px;}
+  .hero h2{font-size:22px;margin:0 0 4px;font-weight:700;}
+  .hero p{margin:0;color:var(--muted);font-size:13.5px;}
+
+  input[type=text], input[type=password]{
+    width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+    background:var(--bg);color:var(--text);font-size:14.5px;margin-bottom:10px;
+  }
+  input:focus{outline:2px solid var(--primary);outline-offset:1px;}
+
+  .primary-btn{
+    width:100%;padding:14px;border:none;border-radius:14px;background:var(--primary);color:#fff;
+    font-weight:700;font-size:15px;cursor:pointer;transition:background .15s ease;
+  }
+  .primary-btn:active{transform:scale(0.98);}
+  .primary-btn:disabled{background:var(--border);color:var(--muted);}
+
+  .stat-box{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px;
+  }
+  .stat-box .num{font-size:28px;font-weight:800;font-family:'Poppins',sans-serif;color:var(--primary);}
+  .stat-box .lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;}
+
+  .ref-code-display{
+    background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;
+    border-radius:14px;padding:20px;text-align:center;margin:16px 0;
+  }
+  .ref-code-display .label{font-size:12px;opacity:0.9;margin-bottom:6px;}
+  .ref-code-display .code{font-size:24px;font-weight:800;font-family:'Poppins',sans-serif;letter-spacing:2px;margin-bottom:12px;}
+  .ref-code-display .hint{font-size:11px;opacity:0.85;}
+
+  .copy-btn{
+    width:100%;padding:10px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);
+    color:#fff;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;
+  }
+
+  .share-link{
+    background:var(--bg);padding:12px;border-radius:10px;border:1px solid var(--border);
+    font-size:12px;word-break:break-all;font-family:monospace;color:var(--muted);margin:10px 0;
+  }
+
+  .referral-list{margin-top:16px;}
+  .referral-item{background:var(--bg);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);}
+  .referral-item .name{font-size:13px;font-weight:600;}
+  .referral-item .earned{font-size:12px;color:var(--success);font-weight:700;}
+
+  .error{color:#E14A4A;font-size:12.5px;margin-top:8px;}
+  .success{color:var(--success);font-size:12.5px;margin-top:8px;}
+
+  .toast{
+    position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);
+    background:var(--text);color:var(--bg);padding:10px 18px;border-radius:20px;
+    font-size:13px;font-weight:600;opacity:0;pointer-events:none;
+    transition:all .25s ease;z-index:60;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .footer-link{text-align:center;margin:30px 0;font-size:12px;color:var(--muted);}
+  .footer-link a{color:var(--muted);text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">
+      <h1>Airheads</h1>
+      <span>Earn Rewards</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="themeToggle">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+  </div>
+</div>
+
+<main>
+  <!-- Login Screen -->
+  <div class="screen active" id="loginScreen">
+    <div class="hero">
+      <h2>Sign in to referrals</h2>
+      <p>No email needed. Just name and password.</p>
+    </div>
+    <div class="card">
+      <input type="text" id="loginName" placeholder="Your name" maxlength="30">
+      <input type="password" id="loginPassword" placeholder="Password" maxlength="20">
+      <button class="primary-btn" id="loginBtn">Sign in</button>
+      <div id="loginError" class="error"></div>
+      <button onclick="switchToSignup()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--primary);font-weight:600;font-size:13px;cursor:pointer;">New account? Sign up</button>
+    </div>
+  </div>
+
+  <!-- Signup Screen -->
+  <div class="screen" id="signupScreen">
+    <div class="hero">
+      <h2>Create referral account</h2>
+      <p>Start earning 15¢ for every dollar your friends spend.</p>
+    </div>
+    <div class="card">
+      <input type="text" id="signupName" placeholder="Your name" maxlength="30">
+      <input type="password" id="signupPassword" placeholder="Password" maxlength="20">
+      <input type="password" id="signupPasswordConfirm" placeholder="Confirm password" maxlength="20">
+      <button class="primary-btn" id="signupBtn">Create account</button>
+      <div id="signupError" class="error"></div>
+      <button onclick="switchToLogin()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">Already have account? Sign in</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Screen -->
+  <div class="screen" id="dashboardScreen">
+    <div class="hero">
+      <h2>Your referrals</h2>
+      <p>Share your code, earn rewards.</p>
+    </div>
+
+    <div class="ref-code-display">
+      <div class="label">Your referral code</div>
+      <div class="code" id="refCodeDisplay">LOAD...</div>
+      <div class="hint">Share this code with friends</div>
+      <button class="copy-btn" id="copyRefBtn">📋 Copy code</button>
+    </div>
+
+    <div class="stat-box">
+      <div class="num" id="earningsDisplay">$0.00</div>
+      <div class="lbl">Total earned (15¢ per $1 spent)</div>
+    </div>
+
+    <div class="stat-box" style="margin-top:-2px;">
+      <div class="num" id="pendingDisplay" style="color:var(--accent);">$0.00</div>
+      <div class="lbl">Pending (awarded once friend's order is paid)</div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;"><strong>Share your link:</strong></div>
+      <div class="share-link" id="shareLink"></div>
+      <button onclick="copyShareLink()" style="width:100%;padding:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;margin-top:8px;">📋 Copy link</button>
+    </div>
+
+    <div class="referral-list">
+      <h3 style="font-size:14px;margin:16px 0 10px;">Friends who ordered through your code</h3>
+      <div id="friendsList"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">No referrals yet</div></div>
+    </div>
+
+    <button onclick="logout()" style="width:100%;margin-top:20px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">Sign out</button>
+  </div>
+
+  <div class="footer-link"><a href="/">← Back to shop</a></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    databaseURL: "https://airheader-6ec67-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  // Note: for best performance on the referral orders query below, add
+  // { "orders": { ".indexOn": ["referredBy"] } } to your Firebase Realtime
+  // Database rules. It will still work without it, just less efficiently
+  // as the number of orders grows.
+
+  let currentUser = null;
+  let currentRefCode = null;
+  let referralSettings = { rate: 0.15 };
+  db.ref('settings/referral').on('value', snap => {
+    const data = snap.val();
+    if(data && typeof data.rate === 'number') referralSettings = data;
+    const lbl = document.querySelector('.stat-box .lbl');
+    if(lbl) lbl.textContent = `Total earned (${Math.round(referralSettings.rate*100)}¢ per $1 spent)`;
+  });
+
+  // Theme
+  const sunPath = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>`;
+  const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('themeIcon').innerHTML = t === 'dark' ? sunPath : moonPath;
+    localStorage.setItem('airheads-theme', t);
+  }
+  applyTheme(localStorage.getItem('airheads-theme') ||
+    'dark');
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // Toast
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+
+  // Screen switching
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function switchToSignup(){ showScreen('signupScreen'); }
+  function switchToLogin(){ showScreen('loginScreen'); }
+
+  // Login
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const name = document.getElementById('loginName').value.trim();
+    const pw = document.getElementById('loginPassword').value;
+    if(!name || !pw){ return document.getElementById('loginError').textContent = 'Enter name and password'; }
+    const nameKey = name.toLowerCase();
+
+    try {
+      // Fast path: look up the user id via the name index instead of scanning every referral record.
+      const indexSnap = await db.ref(`ref_lookup/${nameKey}`).once('value');
+      const userId = indexSnap.val();
+
+      let foundId = null, foundUser = null;
+
+      if(userId){
+        const userSnap = await db.ref(`referrals/${userId}`).once('value');
+        const user = userSnap.val();
+        if(user && user.password === pw){
+          foundId = userId;
+          foundUser = user;
+        }
+      } else {
+        // Fallback for accounts created before the index existed
+        const snap = await db.ref(`referrals`).once('value');
+        const allUsers = snap.val() || {};
+        const found = Object.entries(allUsers).find(([id, u]) => u.name === name && u.password === pw);
+        if(found){ foundId = found[0]; foundUser = found[1]; }
+      }
+
+      if(!foundId){
+        return document.getElementById('loginError').textContent = 'Name or password incorrect';
+      }
+      currentUser = foundId;
+      currentRefCode = foundId;
+      localStorage.setItem('ref-user', foundId);
+      loadDashboard();
+    } catch(err){
+      document.getElementById('loginError').textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Signup
+  document.getElementById('signupBtn').addEventListener('click', async () => {
+    const name = document.getElementById('signupName').value.trim();
+    const pw = document.getElementById('signupPassword').value;
+    const pwConfirm = document.getElementById('signupPasswordConfirm').value;
+    
+    if(!name || !pw){ return document.getElementById('signupError').textContent = 'Enter name and password'; }
+    if(pw !== pwConfirm){ return document.getElementById('signupError').textContent = 'Passwords don\'t match'; }
+    if(pw.length < 3){ return document.getElementById('signupError').textContent = 'Password too short'; }
+
+    const nameKey = name.toLowerCase();
+
+    try {
+      // Prevent duplicate names, which previously made login ambiguous (first match wins)
+      const existing = await db.ref(`ref_lookup/${nameKey}`).once('value');
+      if(existing.val()){
+        return document.getElementById('signupError').textContent = 'That name is already taken. Try signing in, or use a different name.';
+      }
+
+      const refCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+      const newRef = db.ref('referrals').push();
+      await newRef.set({
+        name, password: pw, code: refCode, earnings: 0, pendingCredits: 0, createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      await db.ref(`ref_lookup/${nameKey}`).set(newRef.key);
+      currentUser = newRef.key;
+      currentRefCode = refCode;
+      localStorage.setItem('ref-user', newRef.key);
+      showToast('Account created!');
+      loadDashboard();
+    } catch(err){
+      console.error('Signup error:', err);
+      document.getElementById('signupError').textContent = 'Error: ' + err.message;
+    }
+  });
+
+  async function loadDashboard(){
+    if(!currentUser) return;
+    const snap = await db.ref(`referrals/${currentUser}`).once('value');
+    const user = snap.val();
+    if(!user) return logout();
+
+    currentRefCode = user.code;
+    document.getElementById('refCodeDisplay').textContent = user.code;
+    document.getElementById('earningsDisplay').textContent = `$${(user.earnings||0).toFixed(2)}`;
+    document.getElementById('pendingDisplay').textContent = `$${(user.pendingCredits||0).toFixed(2)}`;
+    document.getElementById('shareLink').textContent = `${window.location.origin}?ref=${user.code}`;
+
+    showScreen('dashboardScreen');
+    loadReferredOrders(user.code);
+  }
+
+  async function loadReferredOrders(code){
+    const listEl = document.getElementById('friendsList');
+    try {
+      const snap = await db.ref('orders').orderByChild('referredBy').equalTo(code).once('value');
+      const orders = snap.val() || {};
+      const entries = Object.values(orders).sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+      if(entries.length === 0){
+        listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">No referrals yet</div>';
+        return;
+      }
+
+      listEl.innerHTML = entries.map(o => {
+        const earnedFromOrder = (o.subtotal || 0) * referralSettings.rate;
+        const isPaidOut = o.status === 'paid' || o.status === 'fulfilled';
+        const statusLabel = o.status === 'cancelled' ? 'cancelled' : (isPaidOut ? 'earned' : 'pending');
+        const amountColor = o.status === 'cancelled' ? 'var(--muted)' : (isPaidOut ? 'var(--success)' : 'var(--accent)');
+        return `
+          <div class="referral-item">
+            <span class="name">${(o.name || 'A friend').replace(/</g,'&lt;')}</span>
+            <span class="earned" style="color:${amountColor};">${o.status === 'cancelled' ? 'cancelled' : '+$' + earnedFromOrder.toFixed(2) + ' (' + statusLabel + ')'}</span>
+          </div>
+        `;
+      }).join('');
+    } catch(err){
+      console.error('Referral orders load error:', err);
+      listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Could not load referrals right now.</div>';
+    }
+  }
+
+  document.getElementById('copyRefBtn').addEventListener('click', () => {
+    if(!currentRefCode) return showToast('Still loading your code...');
+    navigator.clipboard.writeText(currentRefCode).then(() => showToast('Copied!'));
+  });
+
+  function copyShareLink(){
+    const link = document.getElementById('shareLink').textContent;
+    if(!link) return showToast('Still loading your link...');
+    navigator.clipboard.writeText(link).then(() => showToast('Link copied!'));
+  }
+
+  function logout(){
+    currentUser = null;
+    currentRefCode = null;
+    localStorage.removeItem('ref-user');
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('signupName').value = '';
+    document.getElementById('signupPassword').value = '';
+    document.getElementById('signupPasswordConfirm').value = '';
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('signupError').textContent = '';
+    showScreen('loginScreen');
+  }
+
+  // Check for existing session
+  const savedUser = localStorage.getItem('ref-user');
+  if(savedUser){
+    currentUser = savedUser;
+    loadDashboard();
+  }
+</script>
+</body>
+</html>
