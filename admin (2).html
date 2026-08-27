@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airheads Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9FB;
+    --surface:#FFFFFF;
+    --text:#1C1420;
+    --muted:#8A7C87;
+    --border:#F1DDE5;
+    --primary:#FF4F81;
+    --primary-dark:#E23E6C;
+    --accent:#8E5CD9;
+    --success:#2FAE66;
+    --warn:#C97C0A;
+    --danger:#E14A4A;
+    --shadow: 0 2px 10px rgba(28,20,32,0.06);
+    --radius:14px;
+  }
+  html[data-theme="dark"]{
+    --bg:#17111A;
+    --surface:#221A26;
+    --text:#F5EEF2;
+    --muted:#B39EAC;
+    --border:#33262E;
+    --primary:#FF6B93;
+    --primary-dark:#FF4F81;
+    --accent:#B085F5;
+    --warn:#FFB55C;
+    --shadow: 0 2px 14px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; transition:background .25s, color .25s; min-height:100vh;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
+
+  /* Login */
+  .login-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:32px 26px; width:100%; max-width:340px; box-shadow:var(--shadow); text-align:center;
+  }
+  .login-mark{
+    width:46px;height:46px;border-radius:50%; margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+  }
+  .login-card h2{margin:0 0 4px; font-size:19px;}
+  .login-card p{margin:0 0 18px; color:var(--muted); font-size:13px;}
+  input[type=password], input[type=text], input[type=number]{
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:14.5px;
+  }
+  input:focus{outline:2px solid var(--primary); outline-offset:1px;}
+  .login-btn, .primary-btn{
+    width:100%; margin-top:14px; padding:13px; border:none; border-radius:12px;
+    background:var(--primary); color:#fff; font-weight:700; font-size:14.5px; cursor:pointer;
+  }
+  .error-msg{color:var(--danger); font-size:12.5px; margin-top:10px; min-height:16px;}
+
+  /* Dashboard */
+  .dash{display:none;}
+  .topbar{
+    position:sticky; top:0; z-index:10; background:var(--bg);
+    border-bottom:1px solid var(--border); padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between; backdrop-filter:blur(6px);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{width:32px;height:32px;border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); flex-shrink:0;}
+  .brand-text h1{font-size:16px; margin:0;}
+  .brand-text span{font-size:11px; color:var(--muted); font-weight:500;}
+  .header-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:36px;height:36px;border-radius:50%; border:1px solid var(--border); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text);
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .logout-btn{
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    padding:0 14px; height:36px; border-radius:20px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+
+  main{max-width:640px; margin:0 auto; padding:18px 16px 60px;}
+
+  .tabs{display:flex; gap:6px; margin-bottom:16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:4px;}
+  .tab-btn{
+    flex:1; padding:9px 0; text-align:center; border:none; background:none; color:var(--muted);
+    font-weight:600; font-size:13px; border-radius:10px; cursor:pointer;
+  }
+  .tab-btn.active{background:var(--primary); color:#fff;}
+
+  .section{display:none;}
+  .section.active{display:block;}
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow);
+  }
+
+  /* Inventory */
+  .inv-row{display:flex; align-items:center; gap:12px;}
+  .flavor-dot{width:32px;height:32px;border-radius:50%; flex-shrink:0;}
+  .inv-name{font-weight:700; font-size:14.5px; flex:1;}
+  .inv-fields{display:flex; gap:8px;}
+  .field-group{display:flex; flex-direction:column; gap:3px;}
+  .field-group label{font-size:10.5px; color:var(--muted); font-weight:600;}
+  .field-group input{width:78px; padding:7px 8px; font-size:13.5px; border-radius:8px;}
+  .save-badge{
+    font-size:11px; color:var(--success); font-weight:600; opacity:0; transition:opacity .3s ease;
+    margin-top:6px; text-align:right;
+  }
+  .save-badge.show{opacity:1;}
+
+  /* Orders */
+  .order-card{margin-bottom:12px;}
+  .order-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;}
+  .order-buyer{font-weight:700; font-size:14.5px;}
+  .order-class{font-size:12px; color:var(--muted);}
+  .order-time{font-size:11px; color:var(--muted);}
+  .status-pill{
+    font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; text-transform:capitalize; white-space:nowrap;
+  }
+  .status-pending{background:rgba(201,124,10,0.15); color:var(--warn);}
+  .status-paid{background:rgba(94,124,226,0.15); color:#5E7CE2;}
+  .status-fulfilled{background:rgba(47,174,102,0.15); color:var(--success);}
+  .status-cancelled{background:rgba(225,74,74,0.12); color:var(--danger); text-decoration:line-through;}
+
+  .order-items{font-size:13px; color:var(--text); margin:8px 0; padding:8px 10px; background:var(--bg); border-radius:10px;}
+  .order-item-line{display:flex; justify-content:space-between; padding:2px 0;}
+  .order-total{display:flex; justify-content:space-between; font-weight:700; font-size:13.5px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);}
+
+  .order-actions{display:flex; gap:7px; margin-top:10px; flex-wrap:wrap;}
+  .act-btn{
+    flex:1; min-width:90px; padding:9px 0; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .act-btn.paid{border-color:#5E7CE2; color:#5E7CE2;}
+  .act-btn.fulfilled{border-color:var(--success); color:var(--success);}
+  .act-btn.cancel{border-color:var(--danger); color:var(--danger);}
+  .act-btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  .empty-state{text-align:center; color:var(--muted); padding:40px 0; font-size:13.5px;}
+
+  .calc-group{margin-bottom:10px;}
+  .calc-group label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+  .calc-group input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
+  
+  select{border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
+  
+  .calc-result{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .calc-result:last-child{border-bottom:none;}
+  .calc-result .label{font-weight:600;}
+  .calc-result .value{font-weight:700;color:var(--primary);}
+
+  .team-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .team-info .name{font-weight:700;font-size:13px;}
+  .team-info .role{font-size:11px;color:var(--muted);}
+  .remove-admin{background:none;border:1px solid var(--danger);color:var(--danger);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;}
+
+  .approval-card{background:var(--bg);border:2px solid var(--accent);border-radius:12px;padding:12px;margin-bottom:10px;}
+  .approval-action{font-size:12px;margin:6px 0;padding:6px 0;border-bottom:1px solid var(--border);}
+  .approval-action:last-child{border-bottom:none;}
+  .approval-btns{display:flex;gap:8px;margin-top:10px;}
+  .approve-btn{flex:1;padding:8px;border:none;border-radius:8px;background:var(--success);color:#fff;font-weight:600;font-size:11.5px;cursor:pointer;}
+  .reject-btn{flex:1;padding:8px;border:none;border-radius:8px;background:var(--danger);color:#fff;font-weight:600;font-size:11.5px;cursor:pointer;}
+
+  .toast{
+    position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-10px);
+    background:var(--text); color:var(--bg); padding:10px 18px; border-radius:20px;
+    font-size:13px; font-weight:600; opacity:0; pointer-events:none;
+    transition:all .25s ease; z-index:60; white-space:nowrap;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .filter-row{display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px;}
+  .filter-chip{
+    flex-shrink:0; padding:6px 13px; border-radius:20px; border:1px solid var(--border);
+    background:var(--surface); color:var(--muted); font-size:12px; font-weight:600; cursor:pointer;
+  }
+  .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text);}
+
+  .stats-row{display:flex; gap:10px; margin-bottom:16px;}
+  .stat-box{
+    flex:1; background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:12px; text-align:center;
+  }
+  .stat-box .num{font-size:19px; font-weight:800; font-family:'Poppins',sans-serif; color:var(--primary);}
+  .stat-box .lbl{font-size:10.5px; color:var(--muted); font-weight:600; margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-mark"></div>
+    <h2>Admin access</h2>
+    <p>Enter the password to manage Airheads orders &amp; stock.</p>
+    <input type="password" id="pwInput" placeholder="Password">
+    <button class="login-btn" id="loginBtn">Log in</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dash" id="dash">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <h1>Airheads Admin</h1>
+        <span>Inventory &amp; Orders</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="maintenanceToggle" title="Toggle maintenance mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26H22L17.55 12.25L19.64 18.5L12 14.51L4.36 18.5L6.45 12.25L2 8.26H8.91L12 2Z"></path></svg>
+      </button>
+      <button class="icon-btn" id="themeToggle" title="Toggle dark mode">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+      <button class="logout-btn" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="orders">Orders</button>
+      <button class="tab-btn" data-tab="inventory">Inventory &amp; Prices</button>
+      <button class="tab-btn" data-tab="coupons">Coupons</button>
+      <button class="tab-btn" data-tab="bundles">Bundles</button>
+      <button class="tab-btn" data-tab="calculator">Calculator</button>
+      <button class="tab-btn" data-tab="upsale">Upsale</button>
+      <button class="tab-btn" data-tab="referral">Referral</button>
+      <button class="tab-btn" data-tab="admin-users">Team</button>
+    </div>
+
+    <div class="section active" id="ordersSection">
+      <input type="text" id="orderSearch" placeholder="Search by name or class..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;">
+      <div class="filter-row" id="filterRow">
+        <button class="filter-chip active" data-status="all">All</button>
+        <button class="filter-chip" data-status="pending">Pending</button>
+        <button class="filter-chip" data-status="paid">Paid</button>
+        <button class="filter-chip" data-status="fulfilled">Fulfilled</button>
+        <button class="filter-chip" data-status="cancelled">Cancelled</button>
+      </div>
+      <div id="ordersList"><div class="empty-state">Loading orders...</div></div>
+    </div>
+
+    <div class="section" id="inventorySection">
+      <div id="inventoryList"><div class="empty-state">Loading inventory...</div></div>
+    </div>
+
+    <div class="section" id="couponsSection">
+      <h3 style="margin-top:0;">Manage Coupons</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Create discount codes for special promotions.</p>
+      
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 12px;font-size:13px;">Create New Coupon</h4>
+        
+        <div class="calc-group">
+          <label>Coupon Code (uppercase)</label>
+          <input type="text" id="newCouponCode" placeholder="e.g. SAVE20" maxlength="15">
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <div style="flex:1;">
+            <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Type</label>
+            <select id="newCouponType" style="width:100%;padding:9px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+              <option value="percentage">Percentage off</option>
+              <option value="fixed">Fixed amount off</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Value</label>
+            <input type="number" id="newCouponValue" placeholder="e.g. 20" min="0" step="0.01">
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Max uses (leave blank for unlimited)</label>
+          <input type="number" id="newCouponMaxUses" placeholder="e.g. 50" min="1" step="1">
+        </div>
+
+        <button onclick="createCoupon()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;">Create Coupon</button>
+      </div>
+
+      <div>
+        <h4 style="margin:0 0 10px;font-size:13px;font-weight:700;">Active Coupons</h4>
+        <div id="couponsList"></div>
+      </div>
+    </div>
+
+    <div class="section" id="bundlesSection">
+      <h3 style="margin-top:0;">Manage Bundles</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Bundle multiple flavors together at a set price. Buying one bundle deducts stock from each flavor it contains.</p>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 12px;font-size:13px;">Create New Bundle</h4>
+
+        <div class="calc-group">
+          <label>Bundle Name</label>
+          <input type="text" id="newBundleName" placeholder="e.g. Citrus Duo" maxlength="40">
+        </div>
+
+        <div class="calc-group">
+          <label>Bundle Price</label>
+          <input type="number" id="newBundlePrice" placeholder="e.g. 2.00" min="0" step="0.01">
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Contains</label>
+          <div id="bundleComponentRows"></div>
+          <button type="button" onclick="addBundleComponentRow()" style="margin-top:6px;padding:6px 10px;font-size:12px;border:1px dashed var(--border);background:transparent;color:var(--text);border-radius:8px;cursor:pointer;">+ Add flavor</button>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Max bundles sold (leave blank for unlimited)</label>
+          <input type="number" id="newBundleMaxSold" placeholder="e.g. 20" min="1" step="1">
+        </div>
+
+        <button onclick="createBundle()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;">Create Bundle</button>
+      </div>
+
+      <div>
+        <h4 style="margin:0 0 10px;font-size:13px;font-weight:700;">Active Bundles</h4>
+        <div id="bundlesList"></div>
+      </div>
+    </div>
+
+    <div class="section" id="calculatorSection">
+      <div style="max-width:500px;">
+        <h3 style="margin-top:0;">Business Formulas Calculator</h3>
+        
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+          <h4 style="margin:0 0 12px;font-size:13px;">Baseline Cost & Pricing</h4>
+          <div class="calc-group">
+            <label>Total Batch Cost ($)</label>
+            <input type="number" id="batchCost" min="0" step="0.01" placeholder="e.g. 44.50">
+          </div>
+          <div class="calc-group">
+            <label>Total Units</label>
+            <input type="number" id="totalUnits" min="1" step="1" placeholder="e.g. 60">
+          </div>
+          <div class="calc-group">
+            <label>Selling Price ($)</label>
+            <input type="number" id="sellingPrice" min="0" step="0.01" placeholder="e.g. 1.50">
+          </div>
+          <button onclick="calculateBaseline()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
+          <div id="baselineResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+          <h4 style="margin:0 0 12px;font-size:13px;">Risk & Profitability</h4>
+          <div class="calc-group">
+            <label>Units Sold</label>
+            <input type="number" id="unitsSold" min="0" step="1" placeholder="e.g. 45">
+          </div>
+          <div class="calc-group">
+            <label>Unsold Units</label>
+            <input type="number" id="unitsUnsold" min="0" step="1" placeholder="e.g. 15">
+          </div>
+          <div class="calc-group">
+            <label>Unit Cost ($)</label>
+            <input type="number" id="calcUnitCost" min="0" step="0.01" placeholder="Auto-calculated above">
+          </div>
+          <button onclick="calculateRisk()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
+          <div id="riskResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+          <h4 style="margin:0 0 12px;font-size:13px;">Promotions & Loyalty</h4>
+          <div class="calc-group">
+            <label>Bundle Price ($)</label>
+            <input type="number" id="bundlePrice" min="0" step="0.01" placeholder="e.g. 2.50">
+          </div>
+          <div class="calc-group">
+            <label>Units in Bundle</label>
+            <input type="number" id="bundleUnits" min="1" step="1" placeholder="e.g. 2">
+          </div>
+          <div class="calc-group">
+            <label>Bundle Purchases / Week</label>
+            <input type="number" id="weeklyPurchases" min="0" step="0.1" placeholder="e.g. 3.5">
+          </div>
+          <div class="calc-group">
+            <label>Weeks (Term Length)</label>
+            <input type="number" id="termWeeks" min="1" step="1" placeholder="e.g. 12">
+          </div>
+          <button onclick="calculatePromo()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
+          <div id="promoResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="upsaleSection">
+      <h3 style="margin-top:0;">Upsale Settings</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Customize the upsale offer that appears when cart total exceeds the threshold.</p>
+      
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <div class="calc-group">
+          <label>Minimum Cart Total (threshold)</label>
+          <div style="display:flex;gap:8px;">
+            <span style="padding:10px;background:var(--bg);border-radius:10px;flex:1;">$</span>
+            <input type="number" id="upsaleThreshold" min="0" step="0.01" placeholder="1.20" style="flex:3;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+          <small style="color:var(--muted);font-size:11px;margin-top:4px;">When cart total exceeds this, show upsale offer</small>
+        </div>
+
+        <div class="calc-group">
+          <label>Upsale Price (discount)</label>
+          <div style="display:flex;gap:8px;">
+            <span style="padding:10px;background:var(--bg);border-radius:10px;flex:1;">$</span>
+            <input type="number" id="upsalePrice" min="0" step="0.01" placeholder="0.90" style="flex:3;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+          <small style="color:var(--muted);font-size:11px;margin-top:4px;">Price to offer for the upsale flavor</small>
+        </div>
+
+        <div class="calc-group">
+          <label>Upsale Flavor</label>
+          <select id="upsaleFlavor" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="Orange">Orange</option>
+            <option value="Blue Raspberry">Blue Raspberry</option>
+            <option value="Grape">Grape</option>
+            <option value="Watermelon">Watermelon</option>
+            <option value="Cherry">Cherry</option>
+            <option value="White Mystery">White Mystery</option>
+          </select>
+          <small style="color:var(--muted);font-size:11px;margin-top:4px;">Which flavor to upsell</small>
+        </div>
+
+        <button onclick="saveUpsaleSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:12px;">Save Upsale Settings</button>
+        <div id="upsaleStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
+      </div>
+
+      <div style="background:var(--accent);opacity:0.1;border-radius:var(--radius);padding:12px;margin-top:12px;">
+        <p style="margin:0;font-size:12px;color:var(--text);"><strong>Preview:</strong> When a student's cart is over <span id="previewThreshold">$1.20</span>, they'll see an offer to add <span id="previewFlavor">Orange</span> for <span id="previewPrice">$0.90</span>.</p>
+      </div>
+    </div>
+
+    <div class="section" id="referralSection">
+      <h3 style="margin-top:0;">Referral Settings</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Set how much credit a referrer earns per $1 their referral spends.</p>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <div class="calc-group">
+          <label>Referral Rate (cents per $1 spent)</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="referralRatePercent" min="0" max="100" step="1" placeholder="15" style="flex:3;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <span style="padding:10px;background:var(--bg);border-radius:10px;flex:1;text-align:center;">%</span>
+          </div>
+          <small style="color:var(--muted);font-size:11px;margin-top:4px;">e.g. 15 means referrer earns $0.15 for every $1 their friend spends</small>
+        </div>
+
+        <button onclick="saveReferralSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:12px;">Save Referral Settings</button>
+        <div id="referralStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
+      </div>
+
+      <div style="background:var(--accent);opacity:0.1;border-radius:var(--radius);padding:12px;margin-top:12px;">
+        <p style="margin:0;font-size:12px;color:var(--text);"><strong>Preview:</strong> If a referred friend spends $10, the referrer earns <span id="previewReferralAmount">$1.50</span>.</p>
+      </div>
+
+      <div style="background:rgba(255,159,28,0.1);border:1px solid var(--warn);border-radius:var(--radius);padding:12px;margin-top:12px;">
+        <p style="margin:0;font-size:12px;color:var(--text);">⚠️ Changing this only affects future orders. Past pending/earned credits are not recalculated.</p>
+      </div>
+
+      <h3 style="margin-top:24px;">Referrer Balances</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Manually adjust any referrer's earned or pending credit — e.g. to correct a mistake or pay them out in cash.</p>
+      <input type="text" id="referrerSearch" placeholder="Search by name or code..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;">
+      <div id="referrerListWrap"><div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Loading referrers...</div></div>
+    </div>
+
+    <div class="section" id="adminUsersSection">
+      <h3 style="margin-top:0;">Team Access</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Add sub-admins who can mark orders as Paid/Fulfilled, but changes require your approval.</p>
+      
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <label style="font-weight:600;color:var(--text);display:block;margin-bottom:8px;">Add New Team Member</label>
+        <input type="text" id="newAdminName" placeholder="Name (e.g. Fadil)" maxlength="30" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;">
+        <input type="password" id="newAdminPassword" placeholder="Set password" maxlength="20" style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;">
+        <button onclick="addTeamMember()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Add to Team</button>
+      </div>
+
+      <div style="margin-top:16px;">
+        <h4 style="margin:0 0 10px;font-size:13px;font-weight:700;">Current Team</h4>
+        <div id="teamList"></div>
+      </div>
+
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+        <h4 style="margin:0 0 10px;font-size:13px;font-weight:700;">Pending Approvals</h4>
+        <div id="approvalsList"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  let db;
+  let firebaseReady = false;
+
+  // Check if Firebase loaded
+  if (typeof firebase === 'undefined') {
+    console.error('❌ Firebase SDK failed to load. Check your network connection.');
+    document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Connection error</strong><p style="margin-top:8px;font-size:14px;color:#666;">Unable to load Firebase. Please check your network and refresh.</p></div>';
+  } else {
+    try {
+      const firebaseConfig = {
+        databaseURL: "https://airheader-6ec67-default-rtdb.asia-southeast1.firebasedatabase.app/"
+      };
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      firebaseReady = true;
+      console.log('✓ Firebase initialized');
+    } catch (err) {
+      console.error('❌ Firebase init error:', err);
+      document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Setup error</strong><p style="margin-top:8px;font-size:14px;color:#666;">Firebase config failed. Contact support.</p></div>';
+    }
+  }
+
+
+  const ADMIN_PASSWORD = "haniqo";
+  // Fallback/bootstrap team admins - team members added via the Team tab are
+  // loaded from Firebase into `dbTeamMembers` below and checked first.
+  const TEAM_ADMINS = {
+    "amr": { name: "Amr", password: "amr" }
+  };
+  // Populated from Firebase `admin_team` before login is possible. This is what actually
+  // lets team members added through the "Add to Team" UI log in - previously that list
+  // was never consulted at login, only the hardcoded TEAM_ADMINS object above.
+  let dbTeamMembers = {};
+  function findTeamMemberByPassword(pw){
+    const match = Object.values(dbTeamMembers).find(m => m.password === pw);
+    return match ? match.name : null;
+  }
+  const FLAVOR_COLORS = {
+    "Orange": "#FF8A3D",
+    "Blue Raspberry": "#3D8CFF",
+    "Grape": "#8E5CD9",
+    "Watermelon": "#FF5C7A",
+    "Cherry": "#E0203C",
+    "White Mystery": "#E8E2ED"
+  };
+  const FLAVOR_ORDER = ["Orange","Blue Raspberry","Grape","Watermelon","Cherry","White Mystery"];
+
+  // ---------- Theme ----------
+  const sunPath = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>`;
+  const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    const icon = document.getElementById('themeIcon');
+    if(icon) icon.innerHTML = t === 'dark' ? sunPath : moonPath;
+    localStorage.setItem('airheads-theme', t);
+  }
+  applyTheme(localStorage.getItem('airheads-theme') ||
+    'dark');
+
+  // Toast notifications
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // Maintenance mode
+  let maintenanceActive = false;
+  const maintenanceBtn = document.getElementById('maintenanceToggle');
+  
+  maintenanceBtn.addEventListener('click', async () => {
+    if(!firebaseReady) return showToast('Database not ready');
+    maintenanceActive = !maintenanceActive;
+    maintenanceBtn.classList.toggle('active', maintenanceActive);
+    await db.ref('settings/maintenance').set(maintenanceActive);
+    showToast(maintenanceActive ? '🔧 Maintenance ON - students see pause screen' : '✓ Maintenance OFF - storefront open');
+  });
+
+  // Check maintenance status on load
+  if(firebaseReady){
+    db.ref('settings/maintenance').once('value', snap => {
+      maintenanceActive = snap.val() === true;
+      maintenanceBtn.classList.toggle('active', maintenanceActive);
+    });
+  }
+
+  // Load team members before login so team-added passwords actually work (see findTeamMemberByPassword)
+  if(firebaseReady){
+    db.ref('admin_team').on('value', snap => {
+      dbTeamMembers = snap.val() || {};
+    });
+  }
+
+  // ---------- Auth (client-side gate) ----------
+  const loginWrap = document.getElementById('loginWrap');
+  const dash = document.getElementById('dash');
+  const pwInput = document.getElementById('pwInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+
+  function tryLogin(){
+    const pw = pwInput.value;
+    let adminName = null;
+    const dbMatchName = findTeamMemberByPassword(pw);
+
+    if(pw === ADMIN_PASSWORD){
+      adminName = 'Main Admin';
+      localStorage.setItem('airheads-admin', '1');
+      localStorage.setItem('adminName', adminName);
+      loginWrap.style.display = 'none';
+      dash.style.display = 'block';
+      initDashboard();
+    } else if(TEAM_ADMINS[pw] || dbMatchName){
+      adminName = dbMatchName || TEAM_ADMINS[pw].name;
+      localStorage.setItem('airheads-admin', '1');
+      localStorage.setItem('adminName', adminName);
+      localStorage.setItem('isSubAdmin', '1');
+      loginWrap.style.display = 'none';
+      dash.style.display = 'block';
+      initDashboard();
+    } else {
+      loginError.textContent = 'Incorrect password. Try again.';
+    }
+  }
+  loginBtn.addEventListener('click', tryLogin);
+  pwInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('airheads-admin');
+    localStorage.removeItem('adminName');
+    localStorage.removeItem('isSubAdmin');
+    location.reload();
+  });
+
+  // Migrate any existing sessionStorage login (from before this fix) so
+  // nobody gets logged out once by the switch to localStorage.
+  if(sessionStorage.getItem('airheads-admin') === '1' && !localStorage.getItem('airheads-admin')){
+    localStorage.setItem('airheads-admin', '1');
+    if(sessionStorage.getItem('adminName')) localStorage.setItem('adminName', sessionStorage.getItem('adminName'));
+    if(sessionStorage.getItem('isSubAdmin')) localStorage.setItem('isSubAdmin', sessionStorage.getItem('isSubAdmin'));
+  }
+
+  // Check if already logged in via localStorage; if so, wait for Firebase to initialize
+  // before showing the dashboard (so db.ref() calls don't crash).
+  if(localStorage.getItem('airheads-admin') === '1'){
+    // Show dashboard UI, but don't populate it yet
+    loginWrap.style.display = 'none';
+    dash.style.display = 'block';
+    
+    // Wait for Firebase to be ready (polling every 50ms)
+    const waitForFirebase = setInterval(() => {
+      if(firebaseReady){
+        clearInterval(waitForFirebase);
+        initDashboard();
+      }
+    }, 50);
+    
+    // Safety timeout: if Firebase doesn't initialize in 10 seconds, show error
+    setTimeout(() => {
+      if(!firebaseReady){
+        clearInterval(waitForFirebase);
+        document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Database connection timeout</strong><p style="margin-top:8px;font-size:14px;color:#666;">Please refresh the page.</p></div>';
+      }
+    }, 10000);
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab + 'Section').classList.add('active');
+    });
+  });
+
+  // Small helper: delays a function until the user pauses (e.g. stops typing)
+  // so a full list re-render doesn't fire on every single keystroke.
+  function debounce(fn, wait){
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), wait);
+    };
+  }
+
+  let dashboardInitialized = false;
+  let currentOrders = {};
+  let currentFilter = 'all';
+  let currentSearch = '';
+  
+  // Upsale settings (default values)
+  let upsaleSettings = {
+    threshold: 1.20,
+    price: 0.90,
+    flavor: 'Orange'
+  };
+
+  // Referral settings (default value, stored as decimal e.g. 0.15 = 15%)
+  let referralSettings = {
+    rate: 0.15
+  };
+
+  let coupons = {};
+  let bundles = {};
+
+  function initDashboard(){
+    if(dashboardInitialized) return;
+    if(!firebaseReady){
+      document.body.innerHTML = '<div style="padding:40px 20px;text-align:center;font-family:sans-serif;"><strong>⚠️ Database connection lost</strong><p style="margin-top:8px;font-size:14px;color:#666;">Please refresh the page.</p></div>';
+      return;
+    }
+    dashboardInitialized = true;
+    listenInventory();
+    listenOrders();
+    loadTeamData();
+    listenCoupons();
+    listenBundles();
+    loadUpsaleSettings();
+    loadReferralSettings();
+    loadReferrers();
+
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.status;
+        renderOrders();
+      });
+    });
+
+    document.getElementById('orderSearch').addEventListener('input', debounce(e => {
+      currentSearch = e.target.value.trim().toLowerCase();
+      renderOrders();
+    }, 200));
+  }
+
+  // ---------- Inventory ----------
+  function listenInventory(){
+    db.ref('inventory').on('value', snap => {
+      const inv = snap.val() || {};
+      renderInventory(inv);
+    }, err => {
+      console.error('❌ Inventory listen error:', err);
+      document.getElementById('inventoryList').innerHTML = '<div class="empty-state">Error loading inventory. Refresh the page.</div>';
+    });
+  }
+
+  function renderInventory(inv){
+    const wrap = document.getElementById('inventoryList');
+    wrap.innerHTML = "";
+    FLAVOR_ORDER.forEach(flavor => {
+      const item = inv[flavor] || {price:0, stock:0};
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="inv-row">
+          <div class="flavor-dot" style="background:${FLAVOR_COLORS[flavor]}"></div>
+          <div class="inv-name">${flavor}</div>
+          <div class="inv-fields">
+            <div class="field-group">
+              <label>Price ($)</label>
+              <input type="number" min="0" step="0.10" value="${Number(item.price||0).toFixed(2)}" data-flavor="${flavor}" data-field="price">
+            </div>
+            <div class="field-group">
+              <label>Stock</label>
+              <input type="number" min="0" step="1" value="${Number(item.stock||0)}" data-flavor="${flavor}" data-field="stock">
+            </div>
+          </div>
+        </div>
+        <div class="save-badge" id="badge-${flavor.replace(/\s+/g,'')}">Saved</div>
+      `;
+      wrap.appendChild(card);
+    });
+
+    wrap.querySelectorAll('input').forEach(inp => {
+      let debounceTimer;
+      inp.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => saveInventoryField(inp), 500);
+      });
+    });
+  }
+
+  async function saveInventoryField(inp){
+    const flavor = inp.dataset.flavor;
+    const field = inp.dataset.field;
+    let value = parseFloat(inp.value);
+    if(isNaN(value) || value < 0) value = 0;
+    await db.ref(`inventory/${flavor}/${field}`).set(value);
+    const badge = document.getElementById(`badge-${flavor.replace(/\s+/g,'')}`);
+    if(badge){
+      badge.classList.add('show');
+      setTimeout(()=>badge.classList.remove('show'), 1200);
+    }
+  }
+
+  // ---------- Orders ----------
+  function listenOrders(){
+    let loadTimeout;
+    let hasLoaded = false;
+    console.log('📡 Starting orders listener...');
+    
+    db.ref('orders').on('value', snap => {
+      clearTimeout(loadTimeout);
+      hasLoaded = true;
+      currentOrders = snap.val() || {};
+      console.log('✓ Orders loaded:', Object.keys(currentOrders).length, 'orders');
+      renderOrders();
+      renderStats();
+    }, err => {
+      clearTimeout(loadTimeout);
+      hasLoaded = true;
+      console.error('❌ Orders listen error:', err);
+      document.getElementById('ordersList').innerHTML = `<div class="empty-state" style="padding:20px;">⚠️ Error loading orders<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`;
+    });
+    
+    // Timeout after 8 seconds if no response (increased for mobile)
+    loadTimeout = setTimeout(() => {
+      if(!hasLoaded){
+        console.warn('⏱️ Orders load timeout after 8s');
+        hasLoaded = true;
+        document.getElementById('ordersList').innerHTML = `<div class="empty-state" style="padding:20px;">⏱️ Taking too long to load<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">This might be a slow connection. Check your internet or Firebase rules.</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`;
+      }
+    }, 8000);
+  }
+
+  function renderStats(){
+    const list = Object.values(currentOrders);
+    const pending = list.filter(o => o.status === 'pending').length;
+    const paid = list.filter(o => o.status === 'paid').length;
+    const fulfilled = list.filter(o => o.status === 'fulfilled').length;
+    const revenue = list.filter(o => o.status !== 'cancelled').reduce((s,o)=> s + (Number(o.total)||0), 0);
+    const stats = document.getElementById('statsRow');
+    stats.innerHTML = `
+      <div class="stat-box"><div class="num">${pending}</div><div class="lbl">Pending</div></div>
+      <div class="stat-box"><div class="num">${paid}</div><div class="lbl">Paid</div></div>
+      <div class="stat-box"><div class="num">${fulfilled}</div><div class="lbl">Fulfilled</div></div>
+      <div class="stat-box"><div class="num">$${revenue.toFixed(2)}</div><div class="lbl">Revenue</div></div>
+    `;
+  }
+
+  function renderOrders(){
+    const wrap = document.getElementById('ordersList');
+    let entries = Object.entries(currentOrders);
+    if(currentFilter !== 'all'){
+      entries = entries.filter(([id,o]) => o.status === currentFilter);
+    }
+    if(currentSearch){
+      entries = entries.filter(([id,o]) =>
+        (o.name||'').toLowerCase().includes(currentSearch) ||
+        (o.className||'').toLowerCase().includes(currentSearch)
+      );
+    }
+    entries.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+
+    if(entries.length === 0){
+      wrap.innerHTML = `<div class="empty-state">${currentSearch ? 'No orders match your search.' : 'No orders here yet.'}</div>`;
+      return;
+    }
+
+    wrap.innerHTML = entries.map(([id, o]) => {
+      const status = o.status || 'pending';
+      const items = (o.items||[]).map(i => `
+        <div class="order-item-line"><span>${i.qty}x ${i.flavor}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
+      `).join('');
+      const time = o.createdAt ? new Date(o.createdAt).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '';
+      const isCancelled = status === 'cancelled';
+      const isFulfilled = status === 'fulfilled';
+
+      return `
+        <div class="card order-card">
+          <div class="order-head">
+            <div>
+              <div class="order-buyer">${escapeHtml(o.name||'—')}</div>
+              <div class="order-class">${escapeHtml(o.className||'—')}</div>
+              <div class="order-time">${time}</div>
+            </div>
+            <span class="status-pill status-${status}">${status}</span>
+          </div>
+          <div class="order-items">
+            ${items}
+            <div class="order-total"><span>Total</span><span>$${Number(o.total||0).toFixed(2)}</span></div>
+          </div>
+          <div class="order-actions">
+            <button class="act-btn paid" data-id="${id}" data-status="paid" ${isCancelled||status==='paid' ? 'disabled':''}>Mark Paid</button>
+            <button class="act-btn fulfilled" data-id="${id}" data-status="fulfilled" ${isCancelled||isFulfilled ? 'disabled':''}>Mark Fulfilled</button>
+            <button class="act-btn cancel" data-id="${id}" data-status="cancelled" ${isCancelled ? 'disabled':''}>Cancel</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    wrap.querySelectorAll('.act-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const newStatus = btn.dataset.status;
+        const currentAdmin = localStorage.getItem('adminName') || 'Main Admin';
+        const isSubAdmin = localStorage.getItem('isSubAdmin') === '1';
+
+        if(!isSubAdmin){
+          // Main admin: apply the status change directly, and award/reverse
+          // referral credit only now that the change is actually final.
+          await applyOrderStatusChange(id, newStatus);
+          showToast(`Order marked as ${newStatus}`);
+        } else {
+          // Sub-admin: only create an approval request. Credit is intentionally
+          // NOT touched here - it's awarded/reversed only once the main admin
+          // approves, otherwise a rejected change would leave credit already paid out.
+          const approvalRef = db.ref('pending_approvals').push();
+          await approvalRef.set({
+            orderId: id,
+            action: newStatus,
+            adminName: currentAdmin,
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+          });
+          showToast('Request sent to main admin for approval');
+        }
+      });
+    });
+  }
+
+  // Shared logic for actually committing an order status change: awards referral
+  // credit when moving to "paid", and reverses any un-awarded pending credit when
+  // an order is cancelled (previously pendingCredits was never reversed on cancel).
+  async function applyOrderStatusChange(orderId, newStatus){
+    const orderSnap = await db.ref(`orders/${orderId}`).once('value');
+    const order = orderSnap.val();
+
+    if(order && newStatus === 'paid' && !order.creditAwarded){
+      if(order.referredBy){
+        // Use the credit amount locked in at order placement time, not the current rate,
+        // so a later rate change never silently alters an already-placed order's payout.
+        const creditAmount = typeof order.referralCreditAmount === 'number'
+          ? order.referralCreditAmount
+          : order.subtotal * referralSettings.rate; // fallback for orders placed before this fix
+        const pendingRef = db.ref(`referrals/${order.referredBy}/pendingCredits`);
+        const earnedRef = db.ref(`referrals/${order.referredBy}/earnings`);
+        // Transactions avoid clobbering a concurrent update (e.g. the storefront
+        // adding a new pending credit) that a plain read-then-write could stomp on.
+        await earnedRef.transaction(current => (current || 0) + creditAmount);
+        await pendingRef.transaction(current => Math.max(0, (current || 0) - creditAmount));
+      }
+      await db.ref(`orders/${orderId}/creditAwarded`).set(true);
+    }
+
+    if(order && newStatus === 'cancelled' && order.referredBy && !order.creditAwarded && !order.creditReversed){
+      // This order's referral credit was only ever "pending" (never paid out) - reverse it.
+      const creditAmount = typeof order.referralCreditAmount === 'number'
+        ? order.referralCreditAmount
+        : order.subtotal * referralSettings.rate; // fallback for orders placed before this fix
+      const pendingRef = db.ref(`referrals/${order.referredBy}/pendingCredits`);
+      await pendingRef.transaction(current => Math.max(0, (current || 0) - creditAmount));
+      await db.ref(`orders/${orderId}/creditReversed`).set(true);
+    }
+
+    await db.ref(`orders/${orderId}/status`).set(newStatus);
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ========== CALCULATOR ==========
+  function calculateBaseline(){
+    const batchCost = parseFloat(document.getElementById('batchCost').value) || 0;
+    const totalUnits = parseFloat(document.getElementById('totalUnits').value) || 1;
+    const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+
+    const unitCost = batchCost / totalUnits;
+    const unitProfit = sellingPrice - unitCost;
+    const totalRevenue = sellingPrice * totalUnits;
+    const totalProfit = totalRevenue - batchCost;
+    const profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+    const markup = unitCost > 0 ? ((sellingPrice - unitCost) / unitCost) * 100 : 0;
+
+    document.getElementById('calcUnitCost').value = unitCost.toFixed(2);
+
+    document.getElementById('baselineResults').innerHTML = `
+      <div class="calc-result"><span class="label">Unit Cost:</span><span class="value">$${unitCost.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Unit Profit:</span><span class="value">$${unitProfit.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Total Revenue:</span><span class="value">$${totalRevenue.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Total Profit:</span><span class="value">$${totalProfit.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Profit Margin:</span><span class="value">${profitMargin.toFixed(1)}%</span></div>
+      <div class="calc-result"><span class="label">Markup:</span><span class="value">${markup.toFixed(1)}%</span></div>
+    `;
+  }
+
+  function calculateRisk(){
+    const batchCost = parseFloat(document.getElementById('batchCost').value) || 0;
+    const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+    const unitsSold = parseFloat(document.getElementById('unitsSold').value) || 0;
+    const unitsUnsold = parseFloat(document.getElementById('unitsUnsold').value) || 0;
+    const unitCostField = document.getElementById('calcUnitCost');
+    const unitCost = parseFloat(unitCostField.value) || 0;
+
+    if(!unitCostField.value){
+      showToast('Tip: run "Baseline Cost & Pricing" first to auto-fill Unit Cost');
+    }
+
+    const capitalAtRisk = unitsUnsold * unitCost;
+    const safetyBuffer = batchCost / sellingPrice;
+    const grossProfit = (unitsSold * sellingPrice) - batchCost;
+    const gmroi = batchCost > 0 ? grossProfit / batchCost : 0;
+
+    document.getElementById('riskResults').innerHTML = `
+      <div class="calc-result"><span class="label">Capital at Risk:</span><span class="value">$${capitalAtRisk.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Safety Buffer (units):</span><span class="value">${Math.ceil(safetyBuffer)}</span></div>
+      <div class="calc-result"><span class="label">Gross Profit:</span><span class="value">$${Math.max(0,grossProfit).toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">GMROI (Return/Dollar):</span><span class="value">${gmroi.toFixed(2)}x</span></div>
+    `;
+  }
+
+  function calculatePromo(){
+    const bundlePrice = parseFloat(document.getElementById('bundlePrice').value) || 0;
+    const bundleUnits = parseFloat(document.getElementById('bundleUnits').value) || 1;
+    const weeklyPurchases = parseFloat(document.getElementById('weeklyPurchases').value) || 0;
+    const termWeeks = parseFloat(document.getElementById('termWeeks').value) || 1;
+    const unitCostField = document.getElementById('calcUnitCost');
+    const unitCost = parseFloat(unitCostField.value) || 0;
+
+    if(!unitCostField.value){
+      showToast('Tip: run "Baseline Cost & Pricing" first to auto-fill Unit Cost');
+    }
+
+    const effectivePrice = bundlePrice / bundleUnits;
+    const profitPerBundle = bundlePrice - (unitCost * bundleUnits);
+    // CLV = profit earned per bundle x how many bundles bought per week x how many weeks in the term.
+    // (Previously this multiplied per-unit profit by a "weekly purchases" figure that was
+    // actually meant to represent bundle purchases, understating CLV by a factor of bundleUnits.)
+    const clv = (weeklyPurchases * profitPerBundle) * termWeeks;
+
+    document.getElementById('promoResults').innerHTML = `
+      <div class="calc-result"><span class="label">Effective Price/Unit:</span><span class="value">$${effectivePrice.toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">Profit per Bundle:</span><span class="value">$${Math.max(0, profitPerBundle).toFixed(2)}</span></div>
+      <div class="calc-result"><span class="label">CLV (per student/term):</span><span class="value">$${Math.max(0,clv).toFixed(2)}</span></div>
+    `;
+  }
+
+  // ========== MULTI-ADMIN ==========
+  let teamMembers = {};
+  let pendingApprovals = {};
+
+  function loadTeamData(){
+    db.ref('admin_team').on('value', snap => {
+      teamMembers = snap.val() || {};
+      renderTeam();
+    });
+    db.ref('pending_approvals').on('value', snap => {
+      pendingApprovals = snap.val() || {};
+      renderApprovals();
+    });
+  }
+
+  function renderTeam(){
+    const list = document.getElementById('teamList');
+    const entries = Object.entries(teamMembers);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No team members yet. You are the main admin.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([id, member]) => `
+      <div class="team-card">
+        <div class="team-info">
+          <div class="name">${escapeHtml(member.name || 'Unknown')}</div>
+          <div class="role">Can approve orders</div>
+        </div>
+        <button class="remove-admin" data-id="${id}" onclick="removeTeamMember('${id}')">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  function renderApprovals(){
+    const list = document.getElementById('approvalsList');
+    const entries = Object.entries(pendingApprovals);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No pending approvals.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([id, approval]) => `
+      <div class="approval-card">
+        <strong>${approval.orderId}</strong> · ${approval.action.toUpperCase()}
+        <div class="approval-action"><small>${approval.adminName} on ${new Date(approval.createdAt).toLocaleString()}</small></div>
+        <div class="approval-btns">
+          <button class="approve-btn" onclick="approveChange('${id}', '${approval.orderId}', '${approval.action}')">✓ Approve</button>
+          <button class="reject-btn" onclick="rejectChange('${id}')">✕ Reject</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addTeamMember(){
+    const name = document.getElementById('newAdminName').value.trim();
+    const pw = document.getElementById('newAdminPassword').value;
+    if(!name || !pw){
+      showToast('Please enter name and password');
+      return;
+    }
+    if(pw === ADMIN_PASSWORD || findTeamMemberByPassword(pw)){
+      showToast('That password is already in use - pick a different one');
+      return;
+    }
+    const newRef = db.ref('admin_team').push();
+    await newRef.set({ name, password: pw, addedAt: firebase.database.ServerValue.TIMESTAMP });
+    document.getElementById('newAdminName').value = '';
+    document.getElementById('newAdminPassword').value = '';
+    showToast('Team member added!');
+  }
+
+  async function removeTeamMember(id){
+    if(!confirm('Remove this team member?')) return;
+    await db.ref(`admin_team/${id}`).remove();
+    showToast('Team member removed');
+  }
+
+  async function approveChange(approvalId, orderId, action){
+    await applyOrderStatusChange(orderId, action);
+    await db.ref(`pending_approvals/${approvalId}`).remove();
+    showToast(`Order marked as ${action}`);
+  }
+
+  async function rejectChange(approvalId){
+    await db.ref(`pending_approvals/${approvalId}`).remove();
+    showToast('Approval rejected');
+  }
+
+  // ========== COUPONS ==========
+  function listenCoupons(){
+    db.ref('coupons').on('value', snap => {
+      coupons = snap.val() || {};
+      renderCoupons();
+    });
+  }
+
+  function renderCoupons(){
+    const list = document.getElementById('couponsList');
+    const entries = Object.entries(coupons);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No coupons yet.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([code, coupon]) => {
+      const used = coupon.usedCount || 0;
+      const limit = coupon.maxUses;
+      const limitReached = limit != null && used >= limit;
+      const usageText = limit != null ? `${used}/${limit} used` : `${used} used (unlimited)`;
+      return `
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-weight:700;font-size:14px;">${escapeHtml(code)}</div>
+          <div style="font-size:12px;color:${coupon.type === 'percentage' ? 'var(--primary)' : 'var(--accent)'};">${coupon.type === 'percentage' ? coupon.value + '%' : '$' + coupon.value.toFixed(2)}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Type: ${coupon.type === 'percentage' ? 'Percentage off' : 'Fixed amount off'}</div>
+        <div style="font-size:11px;color:${limitReached ? 'var(--danger)' : 'var(--muted)'};margin-bottom:8px;">${usageText}${limitReached ? ' — limit reached' : ''}</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="toggleCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;font-weight:600;">${coupon.active === false ? 'Enable' : 'Disable'}</button>
+          <button onclick="deleteCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
+        </div>
+      </div>
+    `;
+    }).join('');
+  }
+
+  async function createCoupon(){
+    const code = document.getElementById('newCouponCode').value.trim().toUpperCase();
+    const type = document.getElementById('newCouponType').value;
+    const value = parseFloat(document.getElementById('newCouponValue').value) || 0;
+    const maxUsesRaw = document.getElementById('newCouponMaxUses').value.trim();
+    const maxUses = maxUsesRaw ? parseInt(maxUsesRaw, 10) : null; // null = unlimited
+
+    if(!code || value <= 0){
+      showToast('Enter valid code and value');
+      return;
+    }
+    if(maxUsesRaw && (isNaN(maxUses) || maxUses < 1)){
+      showToast('Max uses must be a positive number');
+      return;
+    }
+
+    if(coupons[code]){
+      showToast('Coupon already exists');
+      return;
+    }
+
+    try {
+      const couponData = {
+        type, value, active: true, createdAt: firebase.database.ServerValue.TIMESTAMP,
+        usedCount: 0
+      };
+      if(maxUses !== null) couponData.maxUses = maxUses;
+      await db.ref(`coupons/${code}`).set(couponData);
+
+      document.getElementById('newCouponCode').value = '';
+      document.getElementById('newCouponValue').value = '';
+      document.getElementById('newCouponMaxUses').value = '';
+      showToast('Coupon created!');
+    } catch(err){
+      console.error('Coupon creation error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  async function toggleCoupon(code){
+    const current = coupons[code].active !== false;
+    await db.ref(`coupons/${code}/active`).set(!current);
+  }
+
+  async function deleteCoupon(code){
+    if(!confirm('Delete this coupon?')) return;
+    await db.ref(`coupons/${code}`).remove();
+  }
+
+  // ========== BUNDLES ==========
+  function listenBundles(){
+    db.ref('bundles').on('value', snap => {
+      bundles = snap.val() || {};
+      renderBundles();
+    });
+  }
+
+  function addBundleComponentRow(){
+    const wrap = document.getElementById('bundleComponentRows');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center;';
+    row.innerHTML = `
+      <select class="bundle-comp-flavor" style="flex:2;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+        ${FLAVOR_ORDER.map(f => `<option value="${f}">${f}</option>`).join('')}
+      </select>
+      <input type="number" class="bundle-comp-qty" value="1" min="1" step="1" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+      <button type="button" onclick="this.parentElement.remove()" style="padding:8px 10px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-size:12px;">✕</button>
+    `;
+    wrap.appendChild(row);
+  }
+
+  function readBundleComponentRows(){
+    const rows = document.querySelectorAll('#bundleComponentRows > div');
+    const components = {};
+    rows.forEach(row => {
+      const flavor = row.querySelector('.bundle-comp-flavor').value;
+      const qty = parseInt(row.querySelector('.bundle-comp-qty').value, 10) || 0;
+      if(flavor && qty > 0){
+        components[flavor] = (components[flavor] || 0) + qty; // merge if same flavor picked twice
+      }
+    });
+    return components;
+  }
+
+  async function createBundle(){
+    const name = document.getElementById('newBundleName').value.trim();
+    const price = parseFloat(document.getElementById('newBundlePrice').value) || 0;
+    const maxSoldRaw = document.getElementById('newBundleMaxSold').value.trim();
+    const maxSold = maxSoldRaw ? parseInt(maxSoldRaw, 10) : null; // null = unlimited
+    const components = readBundleComponentRows();
+
+    if(!name){
+      showToast('Enter a bundle name');
+      return;
+    }
+    if(price <= 0){
+      showToast('Enter a valid price');
+      return;
+    }
+    if(Object.keys(components).length === 0){
+      showToast('Add at least one flavor to the bundle');
+      return;
+    }
+    if(maxSoldRaw && (isNaN(maxSold) || maxSold < 1)){
+      showToast('Max bundles sold must be a positive number');
+      return;
+    }
+
+    try {
+      const bundleData = {
+        name, price, components, active: true, soldCount: 0,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      if(maxSold !== null) bundleData.maxSold = maxSold;
+
+      await db.ref('bundles').push(bundleData);
+
+      document.getElementById('newBundleName').value = '';
+      document.getElementById('newBundlePrice').value = '';
+      document.getElementById('newBundleMaxSold').value = '';
+      document.getElementById('bundleComponentRows').innerHTML = '';
+      addBundleComponentRow(); // leave one empty row ready for next bundle
+      showToast('Bundle created!');
+    } catch(err){
+      console.error('Bundle creation error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  function renderBundles(){
+    const list = document.getElementById('bundlesList');
+    if(!list) return;
+    const entries = Object.entries(bundles);
+    if(entries.length === 0){
+      list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No bundles yet.</small></div>';
+      return;
+    }
+    list.innerHTML = entries.map(([id, bundle]) => {
+      const used = bundle.soldCount || 0;
+      const limit = bundle.maxSold;
+      const limitReached = limit != null && used >= limit;
+      const usageText = limit != null ? `${used}/${limit} sold` : `${used} sold (unlimited)`;
+      const comps = Object.entries(bundle.components || {}).map(([f,q]) => `${q}x ${f}`).join(' + ');
+      return `
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-weight:700;font-size:14px;">${escapeHtml(bundle.name)}</div>
+          <div style="font-size:12px;color:var(--primary);">$${Number(bundle.price).toFixed(2)}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Contains: ${escapeHtml(comps)}</div>
+        <div style="font-size:11px;color:${limitReached ? 'var(--danger)' : 'var(--muted)'};margin-bottom:8px;">${usageText}${limitReached ? ' — limit reached' : ''}</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="toggleBundle('${id}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;font-weight:600;">${bundle.active === false ? 'Enable' : 'Disable'}</button>
+          <button onclick="deleteBundle('${id}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
+        </div>
+      </div>
+    `;
+    }).join('');
+  }
+
+  async function toggleBundle(id){
+    const current = bundles[id].active !== false;
+    await db.ref(`bundles/${id}/active`).set(!current);
+  }
+
+  async function deleteBundle(id){
+    if(!confirm('Delete this bundle?')) return;
+    await db.ref(`bundles/${id}`).remove();
+  }
+
+  // Seed one empty component row so the create form isn't blank on first load
+  document.addEventListener('DOMContentLoaded', () => {
+    if(document.getElementById('bundleComponentRows') && document.getElementById('bundleComponentRows').children.length === 0){
+      addBundleComponentRow();
+    }
+  });
+
+  // Load upsale settings on init
+  async function loadUpsaleSettings(){
+    try {
+      const snap = await db.ref('settings/upsale').once('value');
+      const data = snap.val();
+      if(data){
+        upsaleSettings = data;
+        document.getElementById('upsaleThreshold').value = upsaleSettings.threshold;
+        document.getElementById('upsalePrice').value = upsaleSettings.price;
+        document.getElementById('upsaleFlavor').value = upsaleSettings.flavor;
+      }
+      updateUpsalePreview();
+    } catch(err){
+      console.error('Upsale load error:', err);
+    }
+  }
+
+  function updateUpsalePreview(){
+    document.getElementById('previewThreshold').textContent = '$' + upsaleSettings.threshold.toFixed(2);
+    document.getElementById('previewPrice').textContent = '$' + upsaleSettings.price.toFixed(2);
+    document.getElementById('previewFlavor').textContent = upsaleSettings.flavor;
+  }
+
+  async function saveUpsaleSettings(){
+    const threshold = parseFloat(document.getElementById('upsaleThreshold').value);
+    const price = parseFloat(document.getElementById('upsalePrice').value);
+    const flavor = document.getElementById('upsaleFlavor').value;
+
+    if(isNaN(threshold) || isNaN(price) || !flavor){
+      showToast('Fill in all fields');
+      return;
+    }
+
+    if(threshold < 0 || price < 0){
+      showToast('Values must be positive');
+      return;
+    }
+
+    try {
+      upsaleSettings = { threshold, price, flavor };
+      await db.ref('settings/upsale').set(upsaleSettings);
+      updateUpsalePreview();
+      document.getElementById('upsaleStatus').textContent = '✓ Saved! Storefront will update in 2-3 seconds.';
+      setTimeout(() => {
+        document.getElementById('upsaleStatus').textContent = '';
+      }, 3000);
+      showToast('Upsale settings updated!');
+    } catch(err){
+      console.error('Upsale save error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  // Load referral settings on init
+  async function loadReferralSettings(){
+    try {
+      const snap = await db.ref('settings/referral').once('value');
+      const data = snap.val();
+      if(data && typeof data.rate === 'number'){
+        referralSettings = data;
+      }
+      document.getElementById('referralRatePercent').value = Math.round(referralSettings.rate * 100);
+      updateReferralPreview();
+    } catch(err){
+      console.error('Referral settings load error:', err);
+    }
+  }
+
+  function updateReferralPreview(){
+    const amount = 10 * referralSettings.rate;
+    document.getElementById('previewReferralAmount').textContent = '$' + amount.toFixed(2);
+  }
+
+  async function saveReferralSettings(){
+    const percent = parseFloat(document.getElementById('referralRatePercent').value);
+
+    if(isNaN(percent)){
+      showToast('Enter a referral rate');
+      return;
+    }
+
+    if(percent < 0 || percent > 100){
+      showToast('Rate must be between 0 and 100');
+      return;
+    }
+
+    try {
+      referralSettings = { rate: percent / 100 };
+      await db.ref('settings/referral').set(referralSettings);
+      updateReferralPreview();
+      document.getElementById('referralStatus').textContent = '✓ Saved! Applies to orders marked Paid from now on.';
+      setTimeout(() => {
+        document.getElementById('referralStatus').textContent = '';
+      }, 3000);
+      showToast('Referral rate updated!');
+    } catch(err){
+      console.error('Referral settings save error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  // ---------- Referrer Balance Management ----------
+  let allReferrers = {};
+  let referrerSearchTerm = '';
+
+  function loadReferrers(){
+    db.ref('referrals').on('value', snap => {
+      allReferrers = snap.val() || {};
+      renderReferrerList();
+    });
+  }
+
+  function renderReferrerList(){
+    const wrap = document.getElementById('referrerListWrap');
+    if(!wrap) return;
+
+    // Don't blow away an in-progress edit if the admin is mid-typing when a
+    // live Firebase update triggers a re-render (e.g. an order gets marked Paid).
+    const active = document.activeElement;
+    if(active && wrap.contains(active) && (active.id.startsWith('earn-') || active.id.startsWith('pend-'))){
+      return;
+    }
+
+    let entries = Object.entries(allReferrers);
+
+    if(referrerSearchTerm){
+      const term = referrerSearchTerm.toLowerCase();
+      entries = entries.filter(([id, r]) =>
+        (r.name || '').toLowerCase().includes(term) ||
+        (r.code || '').toLowerCase().includes(term)
+      );
+    }
+
+    if(entries.length === 0){
+      wrap.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No referrers found.</small></div>';
+      return;
+    }
+
+    wrap.innerHTML = entries.map(([id, r]) => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div>
+            <div style="font-weight:600;font-size:13.5px;">${escapeHtml(r.name || 'Unknown')}</div>
+            <div style="font-size:11px;color:var(--muted);">Code: ${escapeHtml(r.code || '—')}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <div style="flex:1;">
+            <label style="font-size:11px;color:var(--muted);">Earned (spendable/cash-out)</label>
+            <input type="number" step="0.01" min="0" id="earn-${id}" value="${(r.earnings || 0).toFixed(2)}" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px;color:var(--muted);">Pending (unpaid orders)</label>
+            <input type="number" step="0.01" min="0" id="pend-${id}" value="${(r.pendingCredits || 0).toFixed(2)}" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+          </div>
+        </div>
+        <button onclick="saveReferrerBalance('${id}')" style="width:100%;padding:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Save</button>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('referrerSearch')?.addEventListener('input', debounce(e => {
+    referrerSearchTerm = e.target.value.trim();
+    renderReferrerList();
+  }, 200));
+
+  async function saveReferrerBalance(id){
+    const earnEl = document.getElementById(`earn-${id}`);
+    const pendEl = document.getElementById(`pend-${id}`);
+    const earnings = parseFloat(earnEl.value);
+    const pendingCredits = parseFloat(pendEl.value);
+
+    if(isNaN(earnings) || isNaN(pendingCredits) || earnings < 0 || pendingCredits < 0){
+      showToast('Enter valid amounts');
+      return;
+    }
+
+    try {
+      await db.ref(`referrals/${id}`).update({ earnings, pendingCredits });
+      showToast('Balance updated!');
+    } catch(err){
+      console.error('Referrer balance save error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+</script>
+</body>
+</html>
