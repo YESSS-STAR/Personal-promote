@@ -256,6 +256,67 @@
     background-size:200% 100%; animation:shimmer 1.4s infinite;
   }
   @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  /* ---------- Rewards & spin the wheel ---------- */
+  .reward-banner{
+    margin-top:12px; padding:12px; border-radius:12px;
+    background:rgba(142,92,217,0.10); border:1px solid rgba(142,92,217,0.35);
+    font-size:12.5px;
+  }
+  .reward-banner .rb-title{font-weight:700; margin-bottom:8px;}
+  .reward-banner .rb-row{display:flex; gap:8px;}
+  select.select-input{
+    flex:1; padding:9px; border-radius:9px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:13px; font-family:'Inter',sans-serif;
+  }
+  .spin-fab{
+    position:fixed; left:16px; bottom:96px; z-index:40;
+    padding:11px 16px; border-radius:22px; border:none; cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),var(--primary));
+    color:#fff; font-weight:700; font-size:13px;
+    box-shadow:0 8px 20px rgba(142,92,217,0.4);
+    display:none;
+  }
+  .spin-fab.show{display:block;}
+
+  .spin-hero{text-align:center; margin-bottom:10px;}
+  .spin-hero h3{margin:0 0 4px; font-size:19px;}
+  .spin-hero p{margin:0; color:var(--muted); font-size:13px;}
+  .wheel-wrap{position:relative; width:280px; max-width:86vw; height:280px; margin:10px auto 2px;}
+  .wheel-pointer{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    width:0; height:0; z-index:3;
+    border-left:11px solid transparent; border-right:11px solid transparent;
+    border-top:20px solid var(--primary);
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));
+  }
+  .wheel-disc{
+    position:absolute; inset:0; border-radius:50%;
+    border:7px solid var(--surface);
+    box-shadow:0 6px 22px rgba(28,20,32,0.22), inset 0 0 0 3px var(--border);
+    transform:rotate(0deg);
+  }
+  .wheel-label{
+    position:absolute; left:50%; top:50%;
+    font-weight:700; line-height:1.15; text-align:center;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35);
+    pointer-events:none;
+  }
+  .wheel-hub{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:52px; height:52px; border-radius:50%;
+    background:var(--surface); border:3px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:22px; z-index:2;
+  }
+  .spin-result{text-align:center; font-weight:700; font-size:15.5px; margin-top:14px; min-height:22px;}
+  .spin-prize-list{
+    font-size:11.5px; color:var(--muted); margin-top:10px;
+    display:flex; flex-wrap:wrap; gap:6px; justify-content:center;
+  }
+  .spin-prize-list span{
+    background:var(--bg); border:1px solid var(--border);
+    padding:3px 8px; border-radius:20px; white-space:nowrap;
+  }
 </style>
 </head>
 <body>
@@ -336,6 +397,13 @@
       <button class="close-x" id="closeCart">&times;</button>
     </div>
     <div id="cartLines"></div>
+    <div class="reward-banner" id="rewardBanner" style="display:none;">
+      <div class="rb-title">🎁 You have <span id="rewardFreeCount">0</span> free Airheads from the wheel</div>
+      <div class="rb-row">
+        <select class="select-input" id="freeFlavorSelect" aria-label="Choose your free Airheads flavor"></select>
+        <button class="add-btn" id="addFreeBtn" style="padding:9px 14px;">Add free</button>
+      </div>
+    </div>
     <div class="cart-total-row">
       <span>Subtotal</span>
       <span id="sheetSubtotal">$0.00</span>
@@ -404,7 +472,34 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.04 3.7c-4.9 0-8.9 3.99-8.9 8.9 0 1.57.41 3.1 1.19 4.44L3 21.3l4.4-1.26a8.9 8.9 0 0 0 4.63 1.28h.01c4.9 0 8.9-3.99 8.9-8.9 0-2.38-.93-4.62-2.34-6.1zM12.04 19.9h-.01a7.35 7.35 0 0 1-3.75-1.03l-.27-.16-2.79.8.75-2.72-.18-.28a7.36 7.36 0 0 1-1.13-3.91c0-4.07 3.31-7.38 7.4-7.38a7.34 7.34 0 0 1 7.38 7.4c0 4.07-3.32 7.38-7.4 7.38zm4.05-5.53c-.22-.11-1.3-.64-1.5-.72-.2-.07-.35-.11-.5.11-.15.22-.57.72-.7.87-.13.15-.26.16-.48.05a6.05 6.05 0 0 1-1.78-1.1 6.66 6.66 0 0 1-1.23-1.53c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.68-1.65-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.6.28-.2.22-.79.77-.79 1.87 0 1.1.81 2.17.92 2.32.11.15 1.6 2.44 3.87 3.42.54.23.96.37 1.29.48.54.17 1.03.15 1.42.09.43-.06 1.3-.53 1.49-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.15-.42-.26z"/></svg>
       Message us on WhatsApp
     </a>
+    <div id="spinInvite" style="display:none;margin-top:12px;padding:12px;border-radius:12px;background:rgba(142,92,217,0.10);border:1px solid rgba(142,92,217,0.35);text-align:center;font-size:12.5px;">
+      <div style="font-weight:700;margin-bottom:8px;">🎡 You unlocked a spin for spending $5+!</div>
+      <button class="primary-btn" id="spinInviteBtn" style="margin-top:0;">Spin the wheel</button>
+    </div>
     <button class="secondary-btn" id="doneBtn">Done</button>
+  </div>
+</div>
+
+<button class="spin-fab" id="spinFab">🎡 Spin &amp; Win</button>
+
+<!-- Spin the Wheel -->
+<div class="overlay" id="spinOverlay" role="dialog" aria-modal="true" aria-labelledby="spinTitle">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3 id="spinTitle">Spin the wheel</h3>
+      <button class="close-x" id="closeSpin" aria-label="Close">&times;</button>
+    </div>
+    <div class="spin-hero">
+      <p id="spinSub">You unlocked one spin for spending $5+. Good luck!</p>
+    </div>
+    <div class="wheel-wrap">
+      <div class="wheel-pointer"></div>
+      <div class="wheel-disc" id="wheelDisc"></div>
+      <div class="wheel-hub">🎡</div>
+    </div>
+    <button class="primary-btn" id="spinBtn">Spin</button>
+    <div class="spin-result" id="spinResult" role="status" aria-live="polite"></div>
+    <div class="spin-prize-list" id="spinPrizeList"></div>
   </div>
 </div>
 
@@ -463,6 +558,65 @@
   let referralCode = null;
   let currentStudent = null; // {name, class, credit}
   let maintenanceActive = false;
+  let freeItems = 0;      // unspent "1 free Airheads" rewards won on the wheel
+  let cartFree = {};      // flavor -> qty of free reward units sitting in the cart
+  let promo = null;       // {flavor, price} - one unit of the upsale flavor at promo price
+  let pendingSpin = null; // {orderId, total} - a qualifying order that hasn't been spun yet
+
+  // ---------- Persistence ----------
+  const CART_STORAGE_KEY = 'airheads-cart';
+  const SPIN_STORAGE_KEY = 'airheads-pending-spin';
+  const SPIN_MIN_SPEND = 5; // spend this much on an order to unlock a spin
+
+  // localStorage is user-editable and survives code upgrades, so never trust the
+  // shape or the number-ness of what comes back - coerce to positive integers.
+  function cleanQtyMap(obj){
+    const out = {};
+    if(!obj || typeof obj !== 'object') return out;
+    Object.entries(obj).forEach(([key, val]) => {
+      const qty = Math.floor(Number(val));
+      if(Number.isFinite(qty) && qty > 0) out[key] = qty;
+    });
+    return out;
+  }
+
+  function persistCart(){
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ cart, cartBundles, cartFree, promo }));
+    } catch(err){
+      // Private browsing / storage quota - the cart just won't survive a refresh.
+      console.warn('Could not save cart:', err);
+    }
+  }
+
+  function restoreCart(){
+    let data = null;
+    try {
+      data = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || 'null');
+    } catch(err){
+      console.warn('Ignoring unreadable saved cart:', err);
+    }
+    if(!data || typeof data !== 'object') return;
+    cart = cleanQtyMap(data.cart);
+    cartBundles = cleanQtyMap(data.cartBundles);
+    cartFree = cleanQtyMap(data.cartFree);
+    promo = (data.promo && typeof data.promo === 'object' && typeof data.promo.flavor === 'string')
+      ? { flavor: data.promo.flavor, price: Number(data.promo.price) || 0 }
+      : null;
+  }
+
+  function restorePendingSpin(){
+    let data = null;
+    try {
+      data = JSON.parse(localStorage.getItem(SPIN_STORAGE_KEY) || 'null');
+    } catch(err){
+      data = null;
+    }
+    pendingSpin = (data && typeof data === 'object' && data.orderId) ? data : null;
+  }
+
+  restoreCart();
+  restorePendingSpin();
   
   // Upsale settings (will load from Firebase)
   let upsaleSettings = {
@@ -505,9 +659,55 @@
 
   // ---------- Render Inventory ----------
   const grid = document.getElementById('flavorGrid');
+
+  // A cart restored from localStorage is only as fresh as the visitor's last
+  // visit, so the first live inventory/bundle snapshot trims it back to what can
+  // still actually be bought today.
+  let flavorsHydrated = false;
+  let bundlesHydrated = false;
+
+  function refundFreeItems(count){
+    if(count <= 0 || !currentStudent || !firebaseReady) return;
+    db.ref(`students/${currentStudent.name}/${currentStudent.class}/freeItems`)
+      .transaction(current => (Number(current) || 0) + count)
+      .then(res => {
+        freeItems = Number(res.snapshot.val()) || 0;
+        renderRewardBanner();
+      })
+      .catch(err => console.error('Free item refund error:', err));
+  }
+
+  function pruneCartToInventory(){
+    let refunded = 0;
+    Object.keys(cartFree).forEach(flavor => {
+      if(!(flavor in inventory)){ refunded += cartFree[flavor]; delete cartFree[flavor]; return; }
+      const stock = Number(inventory[flavor].stock) || 0;
+      if(cartFree[flavor] > stock){ refunded += cartFree[flavor] - stock; cartFree[flavor] = stock; }
+      if(cartFree[flavor] <= 0) delete cartFree[flavor];
+    });
+    Object.keys(cart).forEach(flavor => {
+      if(!(flavor in inventory)){ delete cart[flavor]; return; }
+      const stock = Number(inventory[flavor].stock) || 0;
+      const available = Math.max(0, stock - (cartFree[flavor] || 0));
+      if(cart[flavor] > available) cart[flavor] = available;
+      if(cart[flavor] <= 0) delete cart[flavor];
+    });
+    // The promo price is tied to a flavor still being in the cart.
+    if(promo && !(promo.flavor in cart)) promo = null;
+    refundFreeItems(refunded);
+  }
+
+  function pruneBundleCart(){
+    Object.keys(cartBundles).forEach(id => {
+      const bundle = bundles[id];
+      if(!bundle || bundle.active === false) delete cartBundles[id];
+    });
+  }
+
   if (firebaseReady) {
     db.ref('inventory').on('value', snap => {
       inventory = snap.val() || {};
+      if(!flavorsHydrated){ flavorsHydrated = true; pruneCartToInventory(); }
       renderGrid();
     }, err => {
       console.error('❌ Inventory load error:', err);
@@ -523,6 +723,7 @@
     // bundle availability depends on live flavor stock too)
     db.ref('bundles').on('value', snap => {
       bundles = snap.val() || {};
+      if(!bundlesHydrated){ bundlesHydrated = true; pruneBundleCart(); }
       renderBundles();
       renderGrid();
     });
@@ -577,6 +778,10 @@
       const stock = Number(item.stock) || 0;
       const price = Number(item.price) || 0;
       const qty = cart[flavor] || 0;
+      const freeQty = cartFree[flavor] || 0;
+      // Free reward units are already booked against stock, so the "+" control
+      // must not push the combined total past what's actually left.
+      const available = Math.max(0, stock - freeQty);
 
       const card = document.createElement('div');
       card.className = 'flavor-card';
@@ -603,11 +808,11 @@
           <div class="qty-controls">
             <button class="qty-btn" data-action="dec" data-flavor="${flavor}">&minus;</button>
             <span class="qty-val">${qty}</span>
-            <button class="qty-btn" data-action="inc" data-flavor="${flavor}" ${qty >= stock ? 'disabled' : ''}>+</button>
+            <button class="qty-btn" data-action="inc" data-flavor="${flavor}" ${qty >= available ? 'disabled' : ''}>+</button>
           </div>
         ` : `
-          <button class="add-btn" data-action="add" data-flavor="${flavor}" ${stock <= 0 ? 'disabled' : ''}>
-            ${stock <= 0 ? 'Sold out' : 'Add'}
+          <button class="add-btn" data-action="add" data-flavor="${flavor}" ${available <= 0 ? 'disabled' : ''}>
+            ${available <= 0 ? 'Sold out' : 'Add'}
           </button>
         `}
       `;
@@ -623,13 +828,18 @@
     const flavor = btn.dataset.flavor;
     const action = btn.dataset.action;
     const stock = Number((inventory[flavor]||{}).stock) || 0;
+    const available = Math.max(0, stock - (cartFree[flavor] || 0));
     const cur = cart[flavor] || 0;
 
     if(action === 'add' || action === 'inc'){
-      if(cur < stock){ cart[flavor] = cur + 1; }
+      if(cur < available){ cart[flavor] = cur + 1; }
     } else if(action === 'dec'){
       cart[flavor] = Math.max(0, cur - 1);
-      if(cart[flavor] === 0) delete cart[flavor];
+      if(cart[flavor] === 0){
+        delete cart[flavor];
+        // The promo price only survives while that flavor is still in the cart.
+        if(promo && promo.flavor === flavor) promo = null;
+      }
     }
     renderGrid();
   });
@@ -721,27 +931,42 @@
   const cartOverlay = document.getElementById('cartOverlay');
   const confirmOverlay = document.getElementById('confirmOverlay');
 
+  // The upsale offer prices exactly one unit of one flavor below retail.
+  function isPromoUnit(flavor){
+    return !!promo && promo.flavor === flavor && (cart[flavor] || 0) >= 1;
+  }
+  function promoUnitPrice(flavor){
+    return isPromoUnit(flavor) ? (Number(promo.price) || 0) : 0;
+  }
+
   function cartTotal(){
-    const flavorTotal = Object.entries(cart).reduce((sum,[flavor,qty]) => {
+    let total = 0;
+    Object.entries(cart).forEach(([flavor, qty]) => {
       const price = Number((inventory[flavor]||{}).price) || 0;
-      return sum + price*qty;
-    }, 0);
-    const bundleTotal = Object.entries(cartBundles).reduce((sum,[id,qty]) => {
-      const price = Number((bundles[id]||{}).price) || 0;
-      return sum + price*qty;
-    }, 0);
-    return flavorTotal + bundleTotal;
+      if(isPromoUnit(flavor)){
+        // One unit at the promo price, the rest at retail.
+        total += price * Math.max(0, qty - 1) + promoUnitPrice(flavor);
+      } else {
+        total += price * qty;
+      }
+    });
+    Object.entries(cartBundles).forEach(([id,qty]) => {
+      total += (Number((bundles[id]||{}).price) || 0) * qty;
+    });
+    return total; // free reward units deliberately contribute $0
   }
   function cartCount(){
     const flavorCount = Object.values(cart).reduce((a,b)=>a+b,0);
     const bundleCount = Object.values(cartBundles).reduce((a,b)=>a+b,0);
-    return flavorCount + bundleCount;
+    const freeCount = Object.values(cartFree).reduce((a,b)=>a+b,0);
+    return flavorCount + bundleCount + freeCount;
   }
   function updateCartBar(){
     const count = cartCount();
     document.getElementById('cartCount').textContent = `${count} item${count===1?'':'s'}`;
     document.getElementById('cartAmt').textContent = `$${cartTotal().toFixed(2)}`;
     cartBar.classList.toggle('show', count > 0 && !maintenanceActive);
+    persistCart();
   }
 
   cartBar.addEventListener('click', () => { if(!maintenanceActive) openCartSheet(); });
@@ -749,23 +974,26 @@
   cartOverlay.addEventListener('click', e => { if(e.target === cartOverlay) cartOverlay.classList.remove('open'); });
 
   function openCartSheet(){
-    renderCartLines();
-    showPromoOffer();
+    renderCartLines(); // also refreshes the upsale offer banner
     cartOverlay.classList.add('open');
   }
 
   function showPromoOffer(){
     const total = cartTotal();
     const promoContainer = document.getElementById('cartLines');
-    const upsaleStock = inventory[upsaleSettings.flavor]?.stock ?? 0;
+    const flavor = upsaleSettings.flavor;
+    const upsaleStock = Number((inventory[flavor]||{}).stock) || 0;
+    const alreadyInCart = (cart[flavor] || 0) > 0 || (cartFree[flavor] || 0) > 0;
 
-    // Check if promo should show (order > threshold, flavor not already in cart, and in stock)
-    if(total > upsaleSettings.threshold && !cart[upsaleSettings.flavor] && upsaleStock > 0){
-      const normalPrice = inventory[upsaleSettings.flavor]?.price || 1.50;
+    // Show only when the cart is over the threshold, the flavor isn't in the cart
+    // yet, and there is stock left to sell.
+    if(total > upsaleSettings.threshold && !alreadyInCart && upsaleStock > 0){
+      const normalPrice = Number((inventory[flavor]||{}).price) || 1.50;
+      const promoPrice = Number(upsaleSettings.price) || 0;
       const promoHtml = `
         <div style="background:linear-gradient(135deg,#FF8A3D,#FFB366);border-radius:12px;padding:12px;margin-bottom:12px;color:#fff;">
           <div style="font-weight:700;font-size:13px;margin-bottom:6px;">🎉 Special Offer!</div>
-          <div style="font-size:12px;margin-bottom:8px;opacity:0.95;">Add ${upsaleSettings.flavor} for just <span style="font-weight:700;">$${upsaleSettings.price.toFixed(2)}</span> (normally $${normalPrice.toFixed(2)})</div>
+          <div style="font-size:12px;margin-bottom:8px;opacity:0.95;">Add ${flavor} for just <span style="font-weight:700;">$${promoPrice.toFixed(2)}</span> (normally $${normalPrice.toFixed(2)})</div>
           <button onclick="addPromoFlavor()" style="width:100%;padding:8px;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);color:#fff;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Add to order</button>
         </div>
       `;
@@ -774,11 +1002,20 @@
   }
 
   function addPromoFlavor(){
-    cart[upsaleSettings.flavor] = (cart[upsaleSettings.flavor] || 0) + 1;
+    const flavor = upsaleSettings.flavor;
+    const stock = Number((inventory[flavor]||{}).stock) || 0;
+    if((cart[flavor] || 0) + (cartFree[flavor] || 0) >= stock){
+      showToast(`Sorry, ${flavor} is out of stock`);
+      return;
+    }
+    const promoPrice = Number(upsaleSettings.price) || 0;
+    cart[flavor] = (cart[flavor] || 0) + 1;
+    // Lock the advertised price onto this cart. Reading the live settings again at
+    // checkout is what let a later admin change silently re-price an accepted offer.
+    promo = { flavor, price: promoPrice };
     renderGrid();
     renderCartLines();
-    showPromoOffer();
-    showToast(`${upsaleSettings.flavor} added at $${upsaleSettings.price.toFixed(2)}!`);
+    showToast(`${flavor} added at $${promoPrice.toFixed(2)}!`);
   }
 
   function applyCoupon(){
@@ -826,13 +1063,26 @@
   const skipLoginBtn = document.getElementById('skipLoginBtn');
   const creditDisplay = document.getElementById('creditDisplay');
 
-  // Check if student already logged in
-  const savedStudent = localStorage.getItem('student-user');
-  if(savedStudent){
-    currentStudent = JSON.parse(savedStudent);
-    if(firebaseReady){
-      loadStudentCredits();
+  // Check if student already logged in. localStorage can hold anything (older
+  // code versions, manual edits, another tab), so one bad value must never take
+  // the whole storefront down - it used to throw on JSON.parse and kill the script.
+  function readSavedStudent(){
+    try {
+      const data = JSON.parse(localStorage.getItem('student-user') || 'null');
+      if(data && typeof data === 'object' && typeof data.name === 'string' && typeof data.class === 'string' && data.name && data.class){
+        return { name: data.name, class: data.class, credit: Number(data.credit) || 0 };
+      }
+    } catch(err){
+      console.warn('Ignoring unreadable saved session:', err);
     }
+    return null;
+  }
+
+  const savedStudent = readSavedStudent();
+  if(savedStudent){
+    currentStudent = savedStudent;
+    // Re-hydrate the live balance (credit + free Airheads rewards) for the session.
+    if(firebaseReady) loadStudentCredits();
   }
   // Don't show login modal on startup (moved to checkout)
 
@@ -848,25 +1098,280 @@
       return;
     }
     currentStudent = { name, class: studentClass, credit: 0 };
+    freeItems = 0;
     localStorage.setItem('student-user', JSON.stringify(currentStudent));
     loginOverlay.classList.remove('open');
     if(firebaseReady){
-      loadStudentCredits();
+      await loadStudentCredits();
+    }
+    // Signing in is what unlocks the wheel for a qualifying order already placed.
+    updateSpinFab();
+    if(pendingSpin){
+      showToast('🎡 Your spin is ready!');
+      openSpin();
     }
   });
 
   async function loadStudentCredits(){
     if(!currentStudent || !firebaseReady) return;
     try {
-      const snap = await db.ref(`students/${currentStudent.name}/${currentStudent.class}/credit`).once('value');
-      const credit = snap.val() || 0;
-      currentStudent.credit = credit;
+      const basePath = `students/${currentStudent.name}/${currentStudent.class}`;
+      const [creditSnap, freeSnap] = await Promise.all([
+        db.ref(`${basePath}/credit`).once('value'),
+        db.ref(`${basePath}/freeItems`).once('value')
+      ]);
+      currentStudent.credit = Number(creditSnap.val()) || 0;
+      freeItems = Number(freeSnap.val()) || 0;
       creditDisplay.style.display = 'flex';
-      document.getElementById('creditAmount').textContent = '$' + credit.toFixed(2);
+      document.getElementById('creditAmount').textContent = '$' + currentStudent.credit.toFixed(2);
+      renderRewardBanner();
     } catch(err){
       console.error('Credit load error:', err);
     }
   }
+
+  // ---------- Free Airheads rewards (won on the wheel) ----------
+  function renderRewardBanner(){
+    const banner = document.getElementById('rewardBanner');
+    if(!banner) return;
+    const show = freeItems > 0 && !!currentStudent;
+    banner.style.display = show ? 'block' : 'none';
+    if(!show) return;
+    document.getElementById('rewardFreeCount').textContent = freeItems;
+    const select = document.getElementById('freeFlavorSelect');
+    const previous = select.value;
+    const options = FLAVOR_ORDER.filter(flavor => {
+      const stock = Number((inventory[flavor]||{}).stock) || 0;
+      return stock - (cart[flavor] || 0) - (cartFree[flavor] || 0) > 0;
+    });
+    select.innerHTML = options.length
+      ? options.map(flavor => `<option value="${flavor}">${flavor}</option>`).join('')
+      : '<option value="">No stock right now</option>';
+    if(previous && options.indexOf(previous) !== -1) select.value = previous;
+  }
+
+  async function addFreeFlavor(){
+    if(!currentStudent){
+      showToast('Sign in first to use your reward');
+      return;
+    }
+    if(freeItems <= 0){
+      showToast('No free Airheads available');
+      return;
+    }
+    const flavor = document.getElementById('freeFlavorSelect').value;
+    if(!flavor) return;
+    const stock = Number((inventory[flavor]||{}).stock) || 0;
+    if((cart[flavor] || 0) + (cartFree[flavor] || 0) >= stock){
+      showToast(`Not enough ${flavor} in stock`);
+      return;
+    }
+    try {
+      // Spend the entitlement atomically so two tabs can't redeem the same reward.
+      const res = await db.ref(`students/${currentStudent.name}/${currentStudent.class}/freeItems`)
+        .transaction(current => {
+          const left = Number(current) || 0;
+          if(left <= 0) return; // abort - already spent elsewhere
+          return left - 1;
+        });
+      freeItems = Number(res.snapshot.val()) || 0;
+      if(!res.committed){
+        showToast('That reward was already used');
+        renderRewardBanner();
+        return;
+      }
+      cartFree[flavor] = (cartFree[flavor] || 0) + 1;
+      renderGrid();
+      renderBundles();
+      renderCartLines();
+      showToast('Free Airheads added to your order!');
+    } catch(err){
+      console.error('Reward redeem error:', err);
+      showToast('Could not redeem your reward');
+    }
+  }
+
+  document.getElementById('addFreeBtn').addEventListener('click', addFreeFlavor);
+
+  // ---------- Spin the wheel ----------
+  // Weights are the published odds and total 100. The sectors are sized by weight
+  // rather than being equal slices, so the wheel shows the real distribution.
+  const SPIN_PRIZES = [
+    { key:'credit_small', type:'credit',   value:0.20, weight:60, label:'$0.20 off',     color:'#FF4F81' },
+    { key:'free_item',    type:'freeItem', value:1,    weight:10, label:'Free Airheads', color:'#8E5CD9' },
+    { key:'credit_big',   type:'credit',   value:1.50, weight:5,  label:'$1.50 off',     color:'#2FAE66' },
+    { key:'nothing',      type:'nothing',  value:0,    weight:25, label:'Nothing',       color:'#6B5A66' }
+  ];
+
+  function spinSectors(){
+    let start = 0;
+    return SPIN_PRIZES.map(prize => {
+      const span = (prize.weight / 100) * 360; // weight -> slice of the circle
+      const sector = Object.assign({}, prize, { start, span });
+      start += span;
+      return sector;
+    });
+  }
+
+  let wheelRotation = 0;
+  let spinning = false;
+
+  function buildWheel(){
+    const disc = document.getElementById('wheelDisc');
+    const sectors = spinSectors();
+    disc.style.background = 'conic-gradient(from 0deg, ' +
+      sectors.map(s => `${s.color} ${s.start}deg ${(s.start + s.span).toFixed(2)}deg`).join(', ') + ')';
+    disc.innerHTML = '';
+    sectors.forEach(sector => {
+      const mid = sector.start + sector.span / 2;
+      const big = sector.span >= 90;
+      const label = document.createElement('div');
+      label.className = 'wheel-label';
+      label.textContent = sector.label;
+      label.style.fontSize = big ? '11px' : (sector.span >= 30 ? '9.5px' : '8px');
+      label.style.width = big ? '84px' : '56px';
+      // Sit the label in the middle of its own slice, upright.
+      label.style.transform = `translate(-50%,-50%) rotate(${mid}deg) translateY(-${big ? 88 : 98}px) rotate(${-mid}deg)`;
+      disc.appendChild(label);
+    });
+  }
+
+  function rollPrize(){
+    const total = SPIN_PRIZES.reduce((sum, prize) => sum + prize.weight, 0);
+    let roll = Math.random() * total;
+    for(const prize of SPIN_PRIZES){
+      roll -= prize.weight;
+      if(roll < 0) return prize;
+    }
+    return SPIN_PRIZES[SPIN_PRIZES.length - 1];
+  }
+
+  function updateSpinFab(){
+    const fab = document.getElementById('spinFab');
+    if(!fab) return;
+    fab.classList.toggle('show', !!pendingSpin);
+    fab.textContent = currentStudent ? '🎡 Spin & Win' : '🎡 Sign in to spin';
+  }
+
+  function openSpin(){
+    if(!pendingSpin) return;
+    if(!spinning){
+      document.getElementById('spinBtn').disabled = false;
+      document.getElementById('spinResult').textContent = '';
+    }
+    document.getElementById('spinOverlay').classList.add('open');
+  }
+
+  function doSpin(){
+    if(spinning || !pendingSpin) return;
+    spinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinResult').textContent = 'Spinning…';
+
+    // Pick the prize first (weighted), then rotate so the pointer lands inside
+    // that prize's slice. The odds and the animation can never disagree.
+    const prize = rollPrize();
+    const sectors = spinSectors();
+    const sector = sectors[SPIN_PRIZES.findIndex(p => p.key === prize.key)];
+    const mid = sector.start + sector.span / 2;
+    const delta = ((-mid - wheelRotation) % 360 + 360) % 360;
+    wheelRotation += 360 * 5 + delta;
+
+    const disc = document.getElementById('wheelDisc');
+    disc.style.transition = 'transform 4.2s cubic-bezier(0.16, 0.84, 0.28, 1)';
+    disc.style.transform = `rotate(${wheelRotation}deg)`;
+
+    setTimeout(() => claimPrize(prize), 4400);
+  }
+
+  async function claimPrize(prize){
+    const info = pendingSpin;
+    pendingSpin = null;
+    spinning = false;
+    try { localStorage.removeItem(SPIN_STORAGE_KEY); } catch(err){}
+    updateSpinFab();
+
+    const resultEl = document.getElementById('spinResult');
+    resultEl.textContent = prize.type === 'nothing'
+      ? '😅 Nothing this time - thanks for playing!'
+      : `🎉 You won ${prize.label}!`;
+
+    if(!currentStudent){
+      // Rewards need an account to land in; the FAB keeps asking them to sign in.
+      return;
+    }
+    const basePath = `students/${currentStudent.name}/${currentStudent.class}`;
+    try {
+      if(prize.type === 'credit' && prize.value > 0){
+        await db.ref(`${basePath}/credit`).transaction(current => (Number(current) || 0) + prize.value);
+      } else if(prize.type === 'freeItem' && prize.value > 0){
+        await db.ref(`${basePath}/freeItems`).transaction(current => (Number(current) || 0) + prize.value);
+      }
+      // Keep a record of the win so the dashboard can show what was won.
+      await db.ref(`${basePath}/spinWins`).push({
+        key: prize.key,
+        label: prize.label,
+        value: prize.value,
+        orderId: (info && info.orderId) || null,
+        at: firebase.database.ServerValue.TIMESTAMP
+      });
+      if(info && info.orderId){
+        await db.ref(`orders/${info.orderId}/spinPrize`).set({ key: prize.key, label: prize.label, value: prize.value });
+      }
+      await loadStudentCredits();
+      if(prize.type !== 'nothing') showToast(`Reward added: ${prize.label}`);
+    } catch(err){
+      console.error('Spin reward error:', err);
+      resultEl.textContent = 'We could not save your prize - please show this screen to a staff member.';
+    }
+  }
+
+  function offerSpin(total, orderId){
+    if(!orderId || Number(total) < SPIN_MIN_SPEND) return;
+    pendingSpin = { orderId, total: Number(total) };
+    try { localStorage.setItem(SPIN_STORAGE_KEY, JSON.stringify(pendingSpin)); } catch(err){}
+    updateSpinFab();
+    const invite = document.getElementById('spinInvite');
+    const inviteBtn = document.getElementById('spinInviteBtn');
+    if(invite) invite.style.display = 'block';
+    if(inviteBtn){
+      inviteBtn.textContent = currentStudent
+        ? '🎡 You unlocked a spin - spin now!'
+        : '🎡 You unlocked a spin - sign in to spin';
+    }
+  }
+
+  document.getElementById('spinBtn').addEventListener('click', doSpin);
+  document.getElementById('closeSpin').addEventListener('click', () => document.getElementById('spinOverlay').classList.remove('open'));
+  document.getElementById('spinOverlay').addEventListener('click', e => {
+    if(e.target === document.getElementById('spinOverlay')) document.getElementById('spinOverlay').classList.remove('open');
+  });
+  document.getElementById('spinFab').addEventListener('click', () => {
+    if(!pendingSpin) return;
+    if(!currentStudent){
+      showToast('Sign in to spin the wheel');
+      loginOverlay.classList.add('open');
+      return;
+    }
+    openSpin();
+  });
+  document.getElementById('spinInviteBtn').addEventListener('click', () => {
+    if(!pendingSpin) return;
+    confirmOverlay.classList.remove('open');
+    if(!currentStudent){
+      loginOverlay.classList.add('open');
+      return;
+    }
+    openSpin();
+  });
+
+  buildWheel();
+  document.getElementById('spinPrizeList').innerHTML = SPIN_PRIZES
+    .slice()
+    .sort((a,b) => b.weight - a.weight)
+    .map(prize => `<span>${prize.label} · ${prize.weight}%</span>`)
+    .join('');
+  updateSpinFab();
 
   function applyCredit(){
     if(!currentStudent){
@@ -957,7 +1462,8 @@
     const wrap = document.getElementById('cartLines');
     const entries = Object.entries(cart);
     const bundleEntries = Object.entries(cartBundles);
-    if(entries.length === 0 && bundleEntries.length === 0){
+    const freeEntries = Object.entries(cartFree);
+    if(entries.length === 0 && bundleEntries.length === 0 && freeEntries.length === 0){
       wrap.innerHTML = `<div class="empty-cart">Your cart is empty</div>`;
     } else {
       const bundleHtml = bundleEntries.map(([id,qty]) => {
@@ -978,20 +1484,37 @@
       }).join('');
       const flavorHtml = entries.map(([flavor,qty]) => {
         const price = Number((inventory[flavor]||{}).price) || 0;
+        const promoHere = isPromoUnit(flavor);
+        const lineTotal = promoHere ? price * Math.max(0, qty - 1) + promoUnitPrice(flavor) : price * qty;
+        const sub = promoHere
+          ? `${qty} x $${price.toFixed(2)} · 1 at promo $${promoUnitPrice(flavor).toFixed(2)}`
+          : `${qty} x $${price.toFixed(2)}`;
         return `
           <div class="cart-line" data-flavor="${flavor}">
             <div>
               <div class="lname">${flavor}</div>
-              <div class="lsub">${qty} x $${price.toFixed(2)}</div>
+              <div class="lsub">${sub}</div>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
-              <span>$${(price*qty).toFixed(2)}</span>
+              <span>$${lineTotal.toFixed(2)}</span>
               <button class="remove-line" data-flavor="${flavor}">Remove</button>
             </div>
           </div>
         `;
       }).join('');
-      wrap.innerHTML = bundleHtml + flavorHtml;
+      const freeHtml = freeEntries.map(([flavor,qty]) => `
+          <div class="cart-line" data-free="${flavor}">
+            <div>
+              <div class="lname">🎁 ${flavor}</div>
+              <div class="lsub">${qty} x free Airheads reward</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="color:var(--success);font-weight:700;">FREE</span>
+              <button class="remove-line" data-free="${flavor}">Remove</button>
+            </div>
+          </div>
+        `).join('');
+      wrap.innerHTML = bundleHtml + flavorHtml + freeHtml;
     }
     const subtotal = cartTotal();
     const discount = getDiscountAmount(subtotal);
@@ -1010,16 +1533,38 @@
     }
     
     validateOrderBtn();
+    renderRewardBanner();
+    // Must run after the lines are rebuilt, otherwise the offer banner is wiped
+    // out by the innerHTML assignment above and never comes back.
+    showPromoOffer();
+    persistCart();
   }
 
-  document.getElementById('cartLines').addEventListener('click', e => {
+  document.getElementById('cartLines').addEventListener('click', async e => {
     const btn = e.target.closest('.remove-line');
     if(!btn) return;
-    if(btn.dataset.bundle){
+    if(btn.dataset.free){
+      // Hand the entitlement back to the account, so removing a free line never
+      // burns a reward the student already won.
+      const flavor = btn.dataset.free;
+      delete cartFree[flavor];
+      if(currentStudent && firebaseReady){
+        try {
+          const res = await db.ref(`students/${currentStudent.name}/${currentStudent.class}/freeItems`)
+            .transaction(current => (Number(current) || 0) + 1);
+          freeItems = Number(res.snapshot.val()) || 0;
+        } catch(err){
+          console.error('Free item refund error:', err);
+        }
+      }
+      renderGrid();
+      renderBundles();
+    } else if(btn.dataset.bundle){
       delete cartBundles[btn.dataset.bundle];
       renderBundles();
     } else {
       delete cart[btn.dataset.flavor];
+      if(promo && promo.flavor === btn.dataset.flavor) promo = null;
       renderGrid();
     }
     renderCartLines();
@@ -1136,6 +1681,10 @@
       Object.entries(cart).forEach(([flavor, qty]) => {
         combinedNeeds[flavor] = (combinedNeeds[flavor] || 0) + qty;
       });
+      // Free reward units still come out of real stock.
+      Object.entries(cartFree).forEach(([flavor, qty]) => {
+        combinedNeeds[flavor] = (combinedNeeds[flavor] || 0) + qty;
+      });
       Object.entries(cartBundles).forEach(([id, bundleQty]) => {
         const bundle = bundles[id];
         if(!bundle) return;
@@ -1193,7 +1742,18 @@
       // pricing instead of doing another full round-trip fetch here - we already
       // just confirmed stock per-flavor above, so this data is fresh enough.
       Object.entries(cart).forEach(([flavor, qty]) => {
-        items.push({ flavor, qty, price: Number((inventory[flavor]||{}).price) || 0 });
+        const price = Number((inventory[flavor]||{}).price) || 0;
+        if(isPromoUnit(flavor)){
+          // The upsale offer prices exactly one unit below retail - split it out so
+          // the admin's per-line totals still add up to the order subtotal.
+          if(qty > 1) items.push({ flavor, qty: qty - 1, price });
+          items.push({ flavor, qty: 1, price: promoUnitPrice(flavor), promo: true });
+        } else {
+          items.push({ flavor, qty, price });
+        }
+      });
+      Object.entries(cartFree).forEach(([flavor, qty]) => {
+        items.push({ flavor, qty, price: 0, free: true });
       });
       Object.entries(cartBundles).forEach(([id, qty]) => {
         const bundle = bundles[id] || {};
@@ -1260,6 +1820,8 @@
 
       cart = {};
       cartBundles = {};
+      cartFree = {};
+      promo = null;
       appliedCoupon = null;
       appliedCouponCode = null;
       appliedCredit = 0;
@@ -1276,6 +1838,8 @@
       confirmOverlay.classList.add('open');
       if(currentStudent) loadStudentCredits();
       renderGrid();
+      // $5+ spent unlocks one spin; offerSpin persists it so a refresh can't lose it.
+      offerSpin(final, newRef.key);
     } catch(err){
       console.error(err);
       // Roll back any stock we reserved before the failure so it isn't stuck as "sold"
@@ -1307,6 +1871,8 @@
 
   document.getElementById('doneBtn').addEventListener('click', () => {
     confirmOverlay.classList.remove('open');
+    // Straight to the wheel after a qualifying order so the reward isn't missed.
+    if(pendingSpin && currentStudent) openSpin();
   });
   confirmOverlay.addEventListener('click', e => { if(e.target === confirmOverlay) confirmOverlay.classList.remove('open'); });
 
