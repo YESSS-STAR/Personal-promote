@@ -875,9 +875,14 @@
 
     wrap.innerHTML = entries.map(([id, o]) => {
       const status = o.status || 'pending';
-      const items = (o.items||[]).map(i => `
-        <div class="order-item-line"><span>${i.qty}x ${i.flavor}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
-      `).join('');
+      const items = (o.items||[]).map(i => {
+        // Bundle line items carry `name` instead of `flavor`; showing i.flavor
+        // unconditionally printed "1x undefined" for every bundle bought.
+        const label = i.flavor || i.name || 'Item';
+        return `
+        <div class="order-item-line"><span>${i.qty}x ${label}${i.free ? ' <small style="color:var(--success);">FREE</small>' : ''}</span><span>$${(Number(i.price||0)*Number(i.qty||0)).toFixed(2)}</span></div>
+      `;
+      }).join('');
       const time = o.createdAt ? new Date(o.createdAt).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '';
       const isCancelled = status === 'cancelled';
       const isFulfilled = status === 'fulfilled';

@@ -8,7 +8,7 @@ A school candy pre-order storefront for **Airheads**, deployed at
 | File         | Purpose                                        |
 | ------------ | ---------------------------------------------- |
 | `index.html` | Customer storefront (browse, order, checkout)  |
-| `ref.html`   | Referral dashboard (sign up, share, track)     |
+| `ref.html`   | User dashboard (favorites, spend, rewards) + referrals |
 | `admin.html` | Staff admin panel (orders, stock, coupons)     |
 | `CNAME`      | Custom domain for GitHub Pages                 |
 
