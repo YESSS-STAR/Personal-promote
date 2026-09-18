@@ -414,12 +414,14 @@
 
       const orders = matchingStudentOrders(ordersSnap.val(), student.name, student.class);
 
-      let totalSpent = 0, totalSaved = 0;
+      let totalSpent = 0, totalSaved = 0, totalRebated = 0;
       orders.forEach(o => {
         totalSpent += Number(o.total) || 0;
         if(o.discount) totalSaved += Number(o.discount.amount) || 0;
+        totalSaved += Number(o.volumeDiscount) || 0;
         totalSaved += Number(o.creditUsed) || 0;
         totalSaved += Number(o.referralRedeemUsed) || 0;
+        totalRebated += Number(o.rebateAmount) || 0;
       });
 
       document.getElementById('totalSpentDisplay').textContent = `$${totalSpent.toFixed(2)}`;
@@ -427,6 +429,7 @@
 
       const s = studentSnap.val() || {};
       document.getElementById('studentCreditDisplay').textContent = `$${(Number(s.credit) || 0).toFixed(2)}`;
+      document.getElementById('studentRebateDisplay').textContent = `$${totalRebated.toFixed(2)}`;
       document.getElementById('studentFreeDisplay').textContent = String(Number(s.freeItems) || 0);
 
       const spins = Object.values(s.spinWins || {}).filter(Boolean);

@@ -1,0 +1,12 @@
+{
+  "name": "personal-promote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Airheads school pre-order storefront (static HTML + Firebase Realtime Database)",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "test:ui": "node tests/ui-check.js",
+    "serve": "python -m http.server 8000"
+  },
+  "license": "UNLICENSED"
+}

@@ -240,6 +240,7 @@
       <button class="tab-btn" data-tab="calculator">Calculator</button>
       <button class="tab-btn" data-tab="upsale">Upsale</button>
       <button class="tab-btn" data-tab="referral">Referral</button>
+      <button class="tab-btn" data-tab="marketing">Marketing</button>
       <button class="tab-btn" data-tab="admin-users">Team</button>
     </div>
 
@@ -476,6 +477,86 @@
       <div id="referrerListWrap"><div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Loading referrers...</div></div>
     </div>
 
+    <div class="section" id="marketingSection">
+      <h3 style="margin-top:0;">Psychological Pricing &amp; Marketing</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+        Every strategy below is calibrated on one concrete reference product:
+        <strong>Airheads (any flavour)</strong> bought at roughly <strong>$0.61</strong> per bar.
+        Change the buy price and the whole ladder, anchor and rebate maths re-derives itself.
+      </p>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 12px;font-size:13px;">Reference product &amp; price ladder</h4>
+
+        <div style="display:flex;gap:10px;">
+          <div class="calc-group" style="flex:1;">
+            <label>Buy price per bar ($)</label>
+            <input type="number" id="mktCost" min="0" step="0.01" value="0.61">
+          </div>
+          <div class="calc-group" style="flex:1;">
+            <label>Target markup (1.0 = 100%)</label>
+            <input type="number" id="mktMarkup" min="0" step="0.1" value="1.0">
+          </div>
+        </div>
+
+        <button onclick="renderPriceLadder()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:6px;">Recalculate strategy plan</button>
+        <div id="priceLadderResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
+
+        <button onclick="applyShelfPriceToInventory()" style="width:100%;padding:10px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;font-weight:600;cursor:pointer;margin-top:12px;">Apply recommended shelf price to all flavours</button>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 10px;font-size:13px;">Active tactics</h4>
+        <div id="marketingToggles"></div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 4px;font-size:13px;">Volume discount ladder</h4>
+        <p style="color:var(--muted);font-size:11.5px;margin:0 0 10px;">Unlock a % off the flavours-only subtotal once the cart holds this many bars. Bundles are already discounted and never stack into this.</p>
+        <div id="mktVolumeRows"></div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 4px;font-size:13px;">Tiered rebate (store credit)</h4>
+        <p style="color:var(--muted);font-size:11.5px;margin:0 0 10px;">Spend thresholds that pay back a % as store credit. Credit beats a discount here: it reads as a reward and guarantees a second visit.</p>
+        <div id="mktRebateRows"></div>
+        <div class="calc-group" style="margin-top:10px;">
+          <label>Rebate cap per order ($)</label>
+          <input type="number" id="mktRebateCap" min="0" step="0.01" value="1.50">
+          <small style="color:var(--muted);font-size:11px;margin-top:4px;">Stops one large order handing back the whole margin</small>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <h4 style="margin:0 0 10px;font-size:13px;">Storefront messaging</h4>
+        <div style="display:flex;gap:10px;">
+          <div class="calc-group" style="flex:1;">
+            <label>Scarcity threshold (bars left)</label>
+            <input type="number" id="mktScarcity" min="1" step="1" value="6">
+          </div>
+          <div class="calc-group" style="flex:1;">
+            <label>Social proof floor (bars/day)</label>
+            <input type="number" id="mktSocialFloor" min="1" step="1" value="5">
+          </div>
+        </div>
+        <div class="calc-group">
+          <label>Anchor uplift (0.35 = show a price 35% higher, struck through)</label>
+          <input type="number" id="mktAnchorUplift" min="0" step="0.05" value="0.35">
+        </div>
+      </div>
+
+      <button onclick="saveMarketingSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Save marketing settings</button>
+      <div id="marketingStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
+
+      <div style="background:var(--accent);opacity:0.1;border-radius:var(--radius);padding:12px;margin-top:12px;">
+        <p style="margin:0;font-size:12px;color:var(--text);"><strong>Live preview:</strong> <span id="marketingPreview">-</span></p>
+      </div>
+
+      <h3 style="margin-top:24px;">Strategy playbook</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">What each tactic is, why it works, and how it is wired into this shop.</p>
+      <div id="marketingPlaybook"></div>
+    </div>
+
     <div class="section" id="adminUsersSection">
       <h3 style="margin-top:0;">Team Access</h3>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Add sub-admins who can mark orders as Paid/Fulfilled, but changes require your approval.</p>
@@ -504,6 +585,9 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- Shared logic: restock maths (order-utils) and the pricing/rebate strategy engine -->
+<script src="order-utils.js"></script>
+<script src="pricing-strategies.js"></script>
 <script>
   let db;
   let firebaseReady = false;
@@ -733,6 +817,7 @@
     loadUpsaleSettings();
     loadReferralSettings();
     loadReferrers();
+    loadMarketingSettings();
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
@@ -887,6 +972,25 @@
       const isCancelled = status === 'cancelled';
       const isFulfilled = status === 'fulfilled';
 
+      // Marketing line items, so staff can see why an order's total sits below
+      // the sum of its lines (volume discount, rebate credit, coupon, credit).
+      const extras = [];
+      const couponOff = Number(o.discount && o.discount.amount) || 0;
+      const volumeOff = Number(o.volumeDiscount) || 0;
+      const rebateBack = Number(o.rebateAmount) || 0;
+      if(couponOff > 0){
+        extras.push(`<div class="order-item-line"><span>Coupon ${escapeHtml(o.discount.coupon || '')}</span><span>-$${couponOff.toFixed(2)}</span></div>`);
+      }
+      if(volumeOff > 0){
+        extras.push(`<div class="order-item-line"><span>Volume discount</span><span>-$${volumeOff.toFixed(2)}</span></div>`);
+      }
+      if(rebateBack > 0){
+        extras.push(`<div class="order-item-line"><span>Rebate credit${o.rebateAwarded ? ' (issued)' : ''}${o.rebateReversed ? ' (reversed)' : ''}</span><span style="color:var(--success);">+$${rebateBack.toFixed(2)}</span></div>`);
+      }
+      if(Number(o.creditUsed) > 0){
+        extras.push(`<div class="order-item-line"><span>Store credit used</span><span>-$${Number(o.creditUsed).toFixed(2)}</span></div>`);
+      }
+
       return `
         <div class="card order-card">
           <div class="order-head">
@@ -899,6 +1003,7 @@
           </div>
           <div class="order-items">
             ${items}
+            ${extras.join('')}
             <div class="order-total"><span>Total</span><span>$${Number(o.total||0).toFixed(2)}</span></div>
           </div>
           <div class="order-actions">
@@ -921,7 +1026,7 @@
           // Main admin: apply the status change directly, and award/reverse
           // referral credit only now that the change is actually final.
           await applyOrderStatusChange(id, newStatus);
-          showToast(`Order marked as ${newStatus}`);
+          showToast(newStatus === 'cancelled' ? 'Order cancelled - stock returned' : `Order marked as ${newStatus}`);
         } else {
           // Sub-admin: only create an approval request. Credit is intentionally
           // NOT touched here - it's awarded/reversed only once the main admin
@@ -940,8 +1045,9 @@
   }
 
   // Shared logic for actually committing an order status change: awards referral
-  // credit when moving to "paid", and reverses any un-awarded pending credit when
-  // an order is cancelled (previously pendingCredits was never reversed on cancel).
+  // credit when moving to "paid", reverses any un-awarded pending credit when an
+  // order is cancelled (previously pendingCredits was never reversed on cancel),
+  // and returns the cancelled order's units to inventory.
   async function applyOrderStatusChange(orderId, newStatus){
     const orderSnap = await db.ref(`orders/${orderId}`).once('value');
     const order = orderSnap.val();
@@ -973,7 +1079,36 @@
       await db.ref(`orders/${orderId}/creditReversed`).set(true);
     }
 
+    // Cancelling used to leave the units this order reserved permanently marked as
+    // "sold", so every cancellation quietly shrank the shelf. Put them back.
+    if(order && newStatus === 'cancelled'){
+      await restockCancelledOrder(orderId, order);
+    }
+
     await db.ref(`orders/${orderId}/status`).set(newStatus);
+  }
+
+  // Returns every unit a cancelled order had reserved to its flavour's available
+  // stock: plain flavour picks, free reward bars (they came out of real stock too)
+  // and bundle components (per bundle sold). Bundle sold-counts are released as
+  // well so a `maxSold` limit frees up again, and any rebate store credit the
+  // order was paid is clawed back.
+  //
+  // The orchestration lives in order-utils.js (restockOrder) so the exact code
+  // that runs here is covered by the test suite against a fake database.
+  async function restockCancelledOrder(orderId, order){
+    try {
+      const result = await OrderUtils.restockOrder(orderId, order, db);
+      if(result.restored){
+        console.log(`♻️ Restocked ${result.units} unit(s) from cancelled order ${orderId}`, result.flavors);
+      } else {
+        console.log(`♻️ Skipped restock for order ${orderId} (${result.reason})`);
+      }
+      return result;
+    } catch(err){
+      console.error('❌ Restock failed for order', orderId, err);
+      throw err;
+    }
   }
 
   function escapeHtml(str){
@@ -1456,6 +1591,283 @@
       showToast('Referral rate updated!');
     } catch(err){
       console.error('Referral settings save error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  // ---------- Marketing: psychological pricing & rebate strategies ----------
+  // Every calculation lives in pricing-strategies.js, calibrated on the
+  // reference product (Airheads, any flavour, buy price ~$0.61). This section
+  // only reads/writes settings and renders previews, so the shop maths and the
+  // tested maths stay the same code.
+  const MARKETING_TACTICS = [
+    { key:'charm',       label:'Charm pricing',        hint:'Snap every price to a .25 / .49 / .75 / .95 / .99 ending' },
+    { key:'anchor',      label:'Price anchoring',      hint:'Show a struck-through "was" price beside the real one' },
+    { key:'volume',      label:'Volume discount ladder', hint:'"Add 2 more to unlock 10% off" nudge in the cart' },
+    { key:'rebate',      label:'Tiered rebate',        hint:'Spend more, earn a % back as store credit' },
+    { key:'scarcity',    label:'Scarcity urgency',     hint:'"Only 4 left" once stock drops below the threshold' },
+    { key:'socialProof', label:'Social proof',         hint:'"37 sold today" bandwagon badge' }
+  ];
+
+  let marketingSettings = {
+    cost: PricingStrategies.REFERENCE_PRODUCT.buyPrice,
+    targetMarkup: PricingStrategies.DEFAULT_CONFIG.targetMarkup,
+    anchorUplift: PricingStrategies.DEFAULT_CONFIG.anchorUplift,
+    scarcityThreshold: PricingStrategies.DEFAULT_CONFIG.scarcityThreshold,
+    socialProofFloor: PricingStrategies.DEFAULT_CONFIG.socialProofFloor,
+    rebateCap: PricingStrategies.DEFAULT_CONFIG.rebateCap,
+    volumeTiers: JSON.parse(JSON.stringify(PricingStrategies.DEFAULT_CONFIG.volumeTiers)),
+    rebateTiers: JSON.parse(JSON.stringify(PricingStrategies.DEFAULT_CONFIG.rebateTiers)),
+    enabled: { charm:true, anchor:true, volume:true, rebate:true, scarcity:true, socialProof:true }
+  };
+
+  function renderMarketingToggles(){
+    document.getElementById('marketingToggles').innerHTML = MARKETING_TACTICS.map(t => `
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+        <input type="checkbox" class="mkt-toggle" data-tactic="${t.key}" ${marketingSettings.enabled[t.key] ? 'checked' : ''} style="width:auto;margin-top:2px;">
+        <span>
+          <span style="font-size:13px;font-weight:600;">${t.label}</span><br>
+          <small style="color:var(--muted);font-size:11px;">${t.hint}</small>
+        </span>
+      </label>
+    `).join('');
+  }
+
+  function renderVolumeRows(){
+    document.getElementById('mktVolumeRows').innerHTML = marketingSettings.volumeTiers.map((t, i) => `
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <span style="font-size:11.5px;color:var(--muted);width:34px;">Tier ${i + 1}</span>
+        <input type="number" class="mkt-vol-qty" min="1" step="1" value="${t.qty}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" placeholder="bars">
+        <span style="font-size:11.5px;color:var(--muted);">bars &rarr;</span>
+        <input type="number" class="mkt-vol-pct" min="0" max="90" step="1" value="${t.percent}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" placeholder="%">
+        <span style="font-size:11.5px;color:var(--muted);">% off</span>
+      </div>
+    `).join('');
+  }
+
+  function renderRebateRows(){
+    document.getElementById('mktRebateRows').innerHTML = marketingSettings.rebateTiers.map((t, i) => `
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <span style="font-size:11.5px;color:var(--muted);width:34px;">Tier ${i + 1}</span>
+        <span style="font-size:11.5px;color:var(--muted);">spend $</span>
+        <input type="number" class="mkt-reb-min" min="0" step="0.50" value="${t.minSpend}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+        <span style="font-size:11.5px;color:var(--muted);">&rarr;</span>
+        <input type="number" class="mkt-reb-rate" min="0" max="90" step="1" value="${t.rate}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+        <span style="font-size:11.5px;color:var(--muted);">% back</span>
+      </div>
+    `).join('');
+  }
+
+  function renderPlaybook(){
+    const wrap = document.getElementById('marketingPlaybook');
+    if(!wrap) return;
+    wrap.innerHTML = PricingStrategies.PRINCIPLES.map((p, i) => `
+      <div class="card" style="padding:12px;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">${i + 1}. ${escapeHtml(p.name)}</div>
+        <div style="font-size:12px;color:var(--text);margin-bottom:6px;"><strong>Tactic:</strong> ${escapeHtml(p.tactic)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><strong>Why it works:</strong> ${escapeHtml(p.why)}</div>
+        <div style="font-size:12px;color:var(--primary);"><strong>In this shop:</strong> ${escapeHtml(p.example)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Read the form back into a config object and render the derived plan.
+  function readMarketingForm(){
+    const cost = parseFloat(document.getElementById('mktCost').value);
+    const markup = parseFloat(document.getElementById('mktMarkup').value);
+    const uplift = parseFloat(document.getElementById('mktAnchorUplift').value);
+    const scarcity = parseInt(document.getElementById('mktScarcity').value, 10);
+    const socialFloor = parseInt(document.getElementById('mktSocialFloor').value, 10);
+    const rebateCap = parseFloat(document.getElementById('mktRebateCap').value);
+
+    const volumeTiers = [...document.querySelectorAll('#mktVolumeRows > div')].map(row => ({
+      qty: parseInt(row.querySelector('.mkt-vol-qty').value, 10),
+      percent: parseFloat(row.querySelector('.mkt-vol-pct').value)
+    }));
+    const rebateTiers = [...document.querySelectorAll('#mktRebateRows > div')].map(row => ({
+      minSpend: parseFloat(row.querySelector('.mkt-reb-min').value),
+      rate: parseFloat(row.querySelector('.mkt-reb-rate').value)
+    }));
+    const enabled = {};
+    document.querySelectorAll('.mkt-toggle').forEach(cb => { enabled[cb.dataset.tactic] = cb.checked; });
+
+    return { cost, markup, uplift, scarcity, socialFloor, rebateCap, volumeTiers, rebateTiers, enabled };
+  }
+
+  // Returns { ok, message, settings } - validation is shared by render and save.
+  function validateMarketingForm(){
+    const f = readMarketingForm();
+
+    if(isNaN(f.cost) || f.cost <= 0) return { ok:false, message:'Enter a buy price above $0 (Airheads reference is $0.61)' };
+    if(isNaN(f.markup) || f.markup < 0) return { ok:false, message:'Target markup must be 0 or more' };
+    if(isNaN(f.uplift) || f.uplift < 0) return { ok:false, message:'Anchor uplift must be 0 or more' };
+    if(isNaN(f.scarcity) || f.scarcity < 1) return { ok:false, message:'Scarcity threshold must be at least 1 bar' };
+    if(isNaN(f.socialFloor) || f.socialFloor < 1) return { ok:false, message:'Social proof floor must be at least 1 bar' };
+    if(isNaN(f.rebateCap) || f.rebateCap < 0) return { ok:false, message:'Rebate cap must be 0 or more' };
+
+    for(const t of f.volumeTiers){
+      if(isNaN(t.qty) || t.qty < 1) return { ok:false, message:'Every volume tier needs a bar count of at least 1' };
+      if(isNaN(t.percent) || t.percent < 0 || t.percent > 90) return { ok:false, message:'Volume discounts must be between 0% and 90%' };
+    }
+    for(const t of f.rebateTiers){
+      if(isNaN(t.minSpend) || t.minSpend < 0) return { ok:false, message:'Every rebate tier needs a spend threshold of $0 or more' };
+      if(isNaN(t.rate) || t.rate < 0 || t.rate > 90) return { ok:false, message:'Rebate rates must be between 0% and 90%' };
+    }
+
+    return {
+      ok: true,
+      settings: {
+        cost: f.cost,
+        targetMarkup: f.markup,
+        anchorUplift: f.uplift,
+        scarcityThreshold: f.scarcity,
+        socialProofFloor: f.socialFloor,
+        rebateCap: f.rebateCap,
+        volumeTiers: f.volumeTiers,
+        rebateTiers: f.rebateTiers,
+        enabled: f.enabled
+      }
+    };
+  }
+
+  function renderPriceLadder(){
+    const result = validateMarketingForm();
+    const out = document.getElementById('priceLadderResults');
+
+    if(!result.ok){
+      out.innerHTML = `<span style="color:var(--danger);">${escapeHtml(result.message)}</span>`;
+      return;
+    }
+
+    const s = result.settings;
+    const plan = PricingStrategies.recommendStrategies(s.cost, {
+      targetMarkup: s.targetMarkup,
+      anchorUplift: s.anchorUplift,
+      volumeTiers: s.volumeTiers,
+      rebateTiers: s.rebateTiers,
+      rebateCap: s.rebateCap,
+      scarcityThreshold: s.scarcityThreshold,
+      socialProofFloor: s.socialFloor
+    });
+
+    const row = (label, price, profit, margin, note) => `
+      <div class="calc-result">
+        <span class="label">${label}${note ? ` <small style="color:var(--muted);">${note}</small>` : ''}</span>
+        <span class="value">$${Number(price).toFixed(2)} <small style="color:var(--muted);">(+$${Number(profit).toFixed(2)} · ${Number(margin).toFixed(1)}%)</small></span>
+      </div>`;
+
+    const shelf = plan.charmPricing.shelfPrice;
+    const a = plan.anchoring;
+    const decoy = plan.decoy.options.map(o =>
+      `<div class="calc-result"><span class="label">${o.label}${o.decoy ? ' <small style="color:var(--warn);">decoy</small>' : ''}${o.recommended ? ' <small style="color:var(--success);">recommended</small>' : ''}</span><span class="value">$${o.price.toFixed(2)} <small style="color:var(--muted);">($${o.unitPrice.toFixed(2)}/bar)</small></span></div>`
+    ).join('');
+
+    const rebateLine = plan.rebate.tiers.map(t =>
+      `spend $${t.minSpend.toFixed(2)} &rarr; ${t.rate}% back`
+    ).join(' · ');
+
+    out.innerHTML = `
+      <div style="font-weight:700;font-size:12px;color:var(--text);margin-bottom:6px;">Charm price ladder (cost $${s.cost.toFixed(2)})</div>
+      ${plan.priceLadder.map(r => row(r.label, r.price, r.profit, r.marginPercent, `target $${r.targetPrice.toFixed(2)}`)).join('')}
+      <div style="font-weight:700;font-size:12px;color:var(--text);margin:12px 0 6px;">Anchor framing on the shelf price</div>
+      <div class="calc-result"><span class="label">Shown as</span><span class="value"><s>$${a.anchor.toFixed(2)}</s> &rarr; $${a.price.toFixed(2)} <small style="color:var(--success);">save $${a.savings.toFixed(2)} (${a.savingsPercent.toFixed(0)}%)</small></span></div>
+      <div style="font-weight:700;font-size:12px;color:var(--text);margin:12px 0 6px;">Decoy option set (pushes the large pack)</div>
+      ${decoy}
+      <div style="font-weight:700;font-size:12px;color:var(--text);margin:12px 0 6px;">Volume ladder</div>
+      <div class="calc-result"><span class="label">Tiers</span><span class="value">${plan.volume.tiers.map(t => `${t.qty} bars &rarr; ${t.percent}%`).join(' · ')}</span></div>
+      <div style="font-weight:700;font-size:12px;color:var(--text);margin:12px 0 6px;">Rebate</div>
+      <div class="calc-result"><span class="label">Tiers</span><span class="value">${rebateLine}</span></div>
+      <div class="calc-result"><span class="label">Cap</span><span class="value">$${Number(s.rebateCap).toFixed(2)} per order</span></div>
+      <div class="calc-result"><span class="label">Margin at shelf price</span><span class="value">$${plan.affordability.atShelfPrice.profit.toFixed(2)} (${plan.affordability.atShelfPrice.marginPercent.toFixed(1)}%)</span></div>
+      <div class="calc-result"><span class="label">Margin after top rebate tier</span><span class="value">$${plan.affordability.atBestRebateTier.profit.toFixed(2)} (${plan.affordability.atBestRebateTier.marginPercent.toFixed(1)}%)</span></div>
+      <div style="font-weight:700;font-size:12px;color:var(--text);margin:12px 0 6px;">Storefront copy</div>
+      <div class="calc-result"><span class="label">Scarcity badge</span><span class="value">${escapeHtml(plan.messaging.scarcity.text)}</span></div>
+      <div class="calc-result"><span class="label">Social proof badge</span><span class="value">${escapeHtml((plan.messaging.socialProof || {}).text || 'hidden until it is worth showing')}</span></div>
+    `;
+
+    document.getElementById('marketingPreview').innerHTML =
+      `A student sees <s>$${a.anchor.toFixed(2)}</s> <strong>$${shelf.toFixed(2)}</strong> ` +
+      `(buy price $${s.cost.toFixed(2)}, margin $${plan.affordability.atShelfPrice.profit.toFixed(2)}), ` +
+      `a nudge to reach ${plan.volume.tiers[0].qty} bars for ${plan.volume.tiers[0].percent}% off, ` +
+      `and up to $${Number(s.rebateCap).toFixed(2)} back as store credit.`;
+  }
+
+  async function applyShelfPriceToInventory(){
+    const result = validateMarketingForm();
+    if(!result.ok){
+      showToast(result.message);
+      return;
+    }
+
+    const shelf = PricingStrategies.recommendStrategies(result.settings.cost, result.settings)
+      .charmPricing.shelfPrice;
+
+    if(!confirm(`Set every flavour's price to the recommended shelf price of $${shelf.toFixed(2)}?`)) return;
+
+    try {
+      for(const flavor of FLAVOR_ORDER){
+        await db.ref(`inventory/${flavor}/price`).set(shelf);
+      }
+      showToast(`Shelf price $${shelf.toFixed(2)} applied to all flavours`);
+    } catch(err){
+      console.error('Shelf price apply error:', err);
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  async function loadMarketingSettings(){
+    try {
+      const snap = await db.ref('settings/marketing').once('value');
+      const data = snap.val();
+      if(data && typeof data === 'object'){
+        marketingSettings = Object.assign({}, marketingSettings, data);
+        marketingSettings.enabled = Object.assign(
+          { charm:true, anchor:true, volume:true, rebate:true, scarcity:true, socialProof:true },
+          data.enabled || {}
+        );
+        if(!Array.isArray(marketingSettings.volumeTiers) || !marketingSettings.volumeTiers.length){
+          marketingSettings.volumeTiers = JSON.parse(JSON.stringify(PricingStrategies.DEFAULT_CONFIG.volumeTiers));
+        }
+        if(!Array.isArray(marketingSettings.rebateTiers) || !marketingSettings.rebateTiers.length){
+          marketingSettings.rebateTiers = JSON.parse(JSON.stringify(PricingStrategies.DEFAULT_CONFIG.rebateTiers));
+        }
+      }
+    } catch(err){
+      console.error('Marketing settings load error:', err);
+    }
+
+    document.getElementById('mktCost').value = marketingSettings.cost;
+    document.getElementById('mktMarkup').value = marketingSettings.targetMarkup;
+    document.getElementById('mktAnchorUplift').value = marketingSettings.anchorUplift;
+    document.getElementById('mktScarcity').value = marketingSettings.scarcityThreshold;
+    document.getElementById('mktSocialFloor').value = marketingSettings.socialProofFloor;
+    document.getElementById('mktRebateCap').value = marketingSettings.rebateCap;
+
+    renderMarketingToggles();
+    renderVolumeRows();
+    renderRebateRows();
+    renderPlaybook();
+    renderPriceLadder();
+  }
+
+  async function saveMarketingSettings(){
+    const result = validateMarketingForm();
+    if(!result.ok){
+      showToast(result.message);
+      renderPriceLadder();
+      return;
+    }
+
+    try {
+      marketingSettings = result.settings;
+      await db.ref('settings/marketing').set(marketingSettings);
+      renderPriceLadder();
+      const status = document.getElementById('marketingStatus');
+      status.textContent = '✓ Saved! The storefront picks this up live.';
+      setTimeout(() => { status.textContent = ''; }, 3000);
+      showToast('Marketing settings saved');
+    } catch(err){
+      console.error('Marketing settings save error:', err);
       showToast('Error: ' + err.message);
     }
   }

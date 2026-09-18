@@ -212,6 +212,26 @@
   }
   .hero p{position:relative; margin:0; font-size:13.5px; color:rgba(255,255,255,.88);}
 
+  /* Social proof badge - bandwagon copy built from today's real sales */
+  .social-proof{
+    position:relative;
+    display:inline-block; margin-top:9px !important;
+    padding:4px 11px; border-radius:999px;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);
+    font-size:11.5px !important; font-weight:700; color:#fff !important;
+    letter-spacing:.01em;
+  }
+
+  /* Anchoring: struck-through "was" price next to the live price */
+  .price-was{
+    font-size:11.5px; font-weight:600; color:var(--muted);
+    text-decoration:line-through; margin-left:4px;
+  }
+  .price-save{
+    display:block; font-size:10.5px; font-weight:700; color:var(--success);
+    margin-top:1px;
+  }
+
   .section-head{
     display:flex; align-items:center; gap:8px;
     font-size:12px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
@@ -751,6 +771,7 @@
     <p class="hero-eyebrow"><span class="live-dot" aria-hidden="true"></span>Live stock</p>
     <h2>Pick your flavors</h2>
     <p>Stock updates live. Order now, pay &amp; collect in class.</p>
+    <p class="social-proof" id="socialProofBadge" style="display:none;"></p>
   </section>
 
   <section id="bundlesSection" style="display:none;margin-bottom:20px;">
@@ -799,6 +820,17 @@
     <div class="cart-total-row">
       <span>Subtotal</span>
       <span id="sheetSubtotal">$0.00</span>
+    </div>
+
+    <div class="cart-total-row" id="sheetVolumeRow" style="display:none;">
+      <span id="sheetVolumeLabel">Volume discount</span>
+      <span id="sheetVolumeAmt">-$0.00</span>
+    </div>
+    <div id="volumeNudge" style="display:none;font-size:11.5px;font-weight:600;color:var(--accent);margin:-4px 0 10px;text-align:right;"></div>
+
+    <div class="panel" id="rebateBanner" style="display:none;">
+      <div class="panel-title">💸 Rebate credit</div>
+      <div class="panel-hint" id="rebateText"></div>
     </div>
 
     <div class="panel">
@@ -904,6 +936,8 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- Psychological pricing + rebate strategy engine (calibrated on a $0.61 Airheads bar) -->
+<script src="pricing-strategies.js"></script>
 <script>
   let db;
   let firebaseReady = false;
@@ -1026,6 +1060,48 @@
     rate: 0.15
   };
 
+  // pricing-strategies.js is a sibling file. If it ever fails to load, fall back
+  // to pass-through behaviour so the storefront still takes orders instead of
+  // white-screening on a ReferenceError.
+  const Strategy = (typeof PricingStrategies !== 'undefined') ? PricingStrategies : {
+    REFERENCE_PRODUCT: { name: 'Airheads', buyPrice: 0.61 },
+    DEFAULT_CONFIG: {
+      targetMarkup: 1, anchorUplift: 0.35, scarcityThreshold: 6,
+      socialProofFloor: 5, rebateCap: 1.5, volumeTiers: [], rebateTiers: []
+    },
+    charmPrice: p => p,
+    round2: v => Math.round((Number(v) || 0) * 100) / 100,
+    anchorPrice: p => ({ price: p, anchor: p, savings: 0, savingsPercent: 0 }),
+    volumeDiscount: () => ({ percent: 0, amount: 0, appliedTier: null, nextTier: null, unitsToNextTier: 0, tiers: [] }),
+    volumeNudge: () => null,
+    rebateForSpend: () => ({ amount: 0, rate: 0, tiers: [], nextTier: null, spendToNextTier: 0 }),
+    rebateNudge: () => null,
+    scarcityMessage: s => ({ level: s <= 0 ? 'out' : (s <= 5 ? 'low' : 'ok'), text: s <= 0 ? 'Out of stock' : (s <= 5 ? s + ' left' : s + ' in stock') }),
+    socialProofMessage: () => null
+  };
+
+  // Psychological pricing / marketing strategy settings (loaded from Firebase).
+  // Defaults mirror pricing-strategies.js so the storefront behaves sensibly
+  // even before the admin has ever saved the Marketing tab.
+  const DEFAULT_ENABLED_TACTICS = {
+    charm: true, anchor: true, volume: true, rebate: true, scarcity: true, socialProof: true
+  };
+
+  let marketingSettings = {
+    cost: Strategy.REFERENCE_PRODUCT.buyPrice,
+    targetMarkup: Strategy.DEFAULT_CONFIG.targetMarkup,
+    anchorUplift: Strategy.DEFAULT_CONFIG.anchorUplift,
+    scarcityThreshold: Strategy.DEFAULT_CONFIG.scarcityThreshold,
+    socialProofFloor: Strategy.DEFAULT_CONFIG.socialProofFloor,
+    rebateCap: Strategy.DEFAULT_CONFIG.rebateCap,
+    volumeTiers: Strategy.DEFAULT_CONFIG.volumeTiers,
+    rebateTiers: Strategy.DEFAULT_CONFIG.rebateTiers,
+    enabled: Object.assign({}, DEFAULT_ENABLED_TACTICS)
+  };
+
+  // Bars sold today, for the social-proof badge.
+  let todayUnitsSold = 0;
+
   // ---------- Theme ----------
   const sunPath = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>`;
   const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
@@ -1142,6 +1218,26 @@
       }
     });
 
+    // Load psychological pricing / marketing strategy settings
+    db.ref('settings/marketing').on('value', snap => {
+      const data = snap.val();
+      if(data && typeof data === 'object'){
+        marketingSettings = Object.assign({}, marketingSettings, data);
+        marketingSettings.enabled = Object.assign({}, DEFAULT_ENABLED_TACTICS, data.enabled || {});
+        console.log('✓ Marketing settings loaded:', marketingSettings);
+      }
+      renderGrid();
+      renderCartLines();
+      renderSocialProof();
+    });
+
+    // Today's sales, powering the social-proof badge. Only used for display -
+    // nothing in the ordering path depends on it.
+    db.ref('orders').on('value', snap => {
+      todayUnitsSold = countTodayUnits(snap.val());
+      renderSocialProof();
+    });
+
     // Maintenance mode - blocks ordering when admin pauses the storefront
     db.ref('settings/maintenance').on('value', snap => {
       maintenanceActive = snap.val() === true;
@@ -1182,8 +1278,14 @@
       const card = document.createElement('div');
       card.className = 'flavor-card';
 
+      // Scarcity: an urgency badge ("Only 4 left") beats a neutral count when
+      // stock is tight. Falls back to the plain count if the tactic is off.
       let stockTagHtml = '';
-      if(stock <= 0){
+      if(marketingSettings.enabled.scarcity){
+        const scarcity = Strategy.scarcityMessage(stock, marketingSettings);
+        const cls = scarcity.level === 'out' ? 'stock-out' : (scarcity.level === 'ok' ? 'stock-ok' : 'stock-low');
+        stockTagHtml = `<span class="stock-tag ${cls}">${scarcity.text}</span>`;
+      } else if(stock <= 0){
         stockTagHtml = `<span class="stock-tag stock-out">Out of stock</span>`;
       } else if(stock <= 5){
         stockTagHtml = `<span class="stock-tag stock-low">${stock} left</span>`;
@@ -1191,12 +1293,24 @@
         stockTagHtml = `<span class="stock-tag stock-ok">${stock} in stock</span>`;
       }
 
+      // Anchoring: show a struck-through "was" price so the real price reads as
+      // a saving rather than a cost. The anchor is charm-priced by the engine.
+      let priceHtml = `<span class="price">$${price.toFixed(2)}</span>`;
+      if(marketingSettings.enabled.anchor && price > 0){
+        const anchored = Strategy.anchorPrice(price, marketingSettings);
+        if(anchored.savings > 0){
+          priceHtml = `<span class="price">$${price.toFixed(2)}</span>` +
+            `<s class="price-was">$${anchored.anchor.toFixed(2)}</s>` +
+            `<span class="price-save">Save $${anchored.savings.toFixed(2)}</span>`;
+        }
+      }
+
       card.innerHTML = `
         <div class="flavor-dot" style="background:${FLAVOR_COLORS[flavor]}"></div>
         <div class="flavor-info">
           <h3>${flavor}</h3>
           <div class="flavor-meta">
-            <span class="price">$${price.toFixed(2)}</span>
+            ${priceHtml}
             ${stockTagHtml}
           </div>
         </div>
@@ -1350,6 +1464,92 @@
       total += (Number((bundles[id]||{}).price) || 0) * qty;
     });
     return total; // free reward units deliberately contribute $0
+  }
+
+  // ---------- Marketing strategies (pricing, volume, rebate) ----------
+  // All the arithmetic lives in pricing-strategies.js; these helpers just feed
+  // it the live cart and read the admin's settings.
+
+  /** Billable bars in the cart: paid flavour picks + bundle components.
+   *  Free reward bars are excluded - they are not paid units. */
+  function cartPaidUnits(){
+    let units = 0;
+    Object.entries(cart).forEach(([, qty]) => { units += qty; });
+    Object.entries(cartBundles).forEach(([id, qty]) => {
+      const components = (bundles[id] || {}).components || {};
+      Object.values(components).forEach(per => {
+        units += (Math.floor(Number(per)) || 0) * qty;
+      });
+    });
+    return units;
+  }
+
+  /** The flavour-only subtotal. Bundles are already discounted, so the volume
+   *  ladder is never applied on top of them. */
+  function cartFlavorSubtotal(){
+    let total = 0;
+    Object.entries(cart).forEach(([flavor, qty]) => {
+      const price = Number((inventory[flavor]||{}).price) || 0;
+      if(isPromoUnit(flavor)){
+        total += price * Math.max(0, qty - 1) + promoUnitPrice(flavor);
+      } else {
+        total += price * qty;
+      }
+    });
+    return total;
+  }
+
+  const NO_VOLUME = { percent:0, amount:0, appliedTier:null, nextTier:null, unitsToNextTier:0, tiers:[] };
+  function getVolumeDiscount(){
+    if(!marketingSettings.enabled.volume) return NO_VOLUME;
+    return Strategy.volumeDiscount(cartPaidUnits(), cartFlavorSubtotal(), marketingSettings);
+  }
+
+  const NO_REBATE = { amount:0, rate:0, tiers:[], nextTier:null, spendToNextTier:0 };
+  function getRebate(spend){
+    if(!marketingSettings.enabled.rebate) return NO_REBATE;
+    return Strategy.rebateForSpend(spend, marketingSettings);
+  }
+
+  /** Bars sold today across every non-cancelled order. */
+  function countTodayUnits(orders){
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startMs = startOfToday.getTime();
+    let units = 0;
+
+    Object.values(orders || {}).forEach(order => {
+      if(!order || order.status === 'cancelled') return;
+      if((Number(order.createdAt) || 0) < startMs) return;
+      (order.items || []).forEach(item => {
+        if(!item) return;
+        const qty = Math.floor(Number(item.qty)) || 0;
+        if(qty <= 0) return;
+        if(item.bundle || item.components){
+          Object.values(item.components || {}).forEach(per => {
+            units += (Math.floor(Number(per)) || 0) * qty;
+          });
+        } else {
+          units += qty;
+        }
+      });
+    });
+
+    return units;
+  }
+
+  function renderSocialProof(){
+    const badge = document.getElementById('socialProofBadge');
+    if(!badge) return;
+    const proof = marketingSettings.enabled.socialProof
+      ? Strategy.socialProofMessage(todayUnitsSold, marketingSettings)
+      : null;
+    if(proof){
+      badge.textContent = `🔥 ${proof.text}`;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
   }
   function cartCount(){
     const flavorCount = Object.values(cart).reduce((a,b)=>a+b,0);
@@ -1920,12 +2120,44 @@
     }
     const subtotal = cartTotal();
     const discount = getDiscountAmount(subtotal);
-    const afterDiscount = Math.max(0, subtotal - discount);
+    const volume = getVolumeDiscount();
+    const afterDiscount = Math.max(0, subtotal - discount - volume.amount);
+    // The rebate is *earned* store credit, not a price cut, so it never reduces
+    // the total - it is credited after the order is placed.
+    const rebate = getRebate(afterDiscount);
     const final = Math.max(0, afterDiscount - appliedCredit - appliedReferralRedeem);
-    
+
     document.getElementById('sheetSubtotal').textContent = `$${subtotal.toFixed(2)}`;
     document.getElementById('sheetTotal').textContent = `$${final.toFixed(2)}`;
-    
+
+    // Volume discount row + the goal-gradient nudge towards the next tier
+    const volumeRow = document.getElementById('sheetVolumeRow');
+    if(volume.amount > 0){
+      volumeRow.style.display = '';
+      document.getElementById('sheetVolumeLabel').textContent = `Volume discount (${volume.percent}% off)`;
+      document.getElementById('sheetVolumeAmt').textContent = `-$${volume.amount.toFixed(2)}`;
+    } else {
+      volumeRow.style.display = 'none';
+    }
+    const nudgeEl = document.getElementById('volumeNudge');
+    const nudge = marketingSettings.enabled.volume ? Strategy.volumeNudge(volume) : null;
+    if(nudge){
+      nudgeEl.textContent = nudge;
+      nudgeEl.style.display = '';
+    } else {
+      nudgeEl.style.display = 'none';
+    }
+
+    // Rebate panel - what this order earns back as store credit
+    const rebateBanner = document.getElementById('rebateBanner');
+    const rebateCopy = marketingSettings.enabled.rebate ? Strategy.rebateNudge(rebate) : null;
+    if(rebateCopy){
+      document.getElementById('rebateText').textContent = rebateCopy;
+      rebateBanner.style.display = '';
+    } else {
+      rebateBanner.style.display = 'none';
+    }
+
     // Show credit section only if student logged in
     if(currentStudent && currentStudent.credit > 0){
       document.getElementById('creditSection').style.display = 'block';
@@ -2170,7 +2402,9 @@
 
       const subtotal = items.reduce((s,i)=> s + i.price*i.qty, 0);
       const discount = getDiscountAmount(subtotal);
-      const afterDiscount = Math.max(0, subtotal - discount);
+      const volume = getVolumeDiscount();
+      const afterDiscount = Math.max(0, subtotal - discount - volume.amount);
+      const rebate = getRebate(afterDiscount);
       const final = Math.max(0, afterDiscount - appliedCredit - appliedReferralRedeem);
 
       const order = {
@@ -2179,6 +2413,10 @@
         items,
         subtotal,
         discount: discount > 0 ? {amount: discount, coupon: appliedCouponCode || null} : null,
+        // Marketing strategies, recorded so staff can see why the total is below
+        // the sum of the lines and so a cancellation can claw the rebate back.
+        volumeDiscount: volume.amount > 0 ? volume.amount : null,
+        rebateAmount: rebate.amount > 0 ? rebate.amount : null,
         creditUsed: appliedCredit > 0 ? appliedCredit : null,
         referralRedeemUsed: appliedReferralRedeem > 0 ? appliedReferralRedeem : null,
         total: final,
@@ -2191,6 +2429,19 @@
 
       const newRef = db.ref('orders').push();
       await newRef.set(order);
+
+      // Rebate: spend-more-earn-more store credit, paid straight into the
+      // signed-in student's balance. Guests still get the amount recorded on the
+      // order so staff can issue it by hand. A later cancellation reverses this
+      // (see restockCancelledOrder in admin.html).
+      if(rebate.amount > 0 && currentStudent){
+        const studentCreditKey = `students/${currentStudent.name}/${currentStudent.class}/credit`;
+        // round2: float addition drifts (5.02 + 1.02 = 6.039999...), and credit
+        // balances must stay exact to the cent.
+        await db.ref(studentCreditKey).transaction(current => Strategy.round2((Number(current) || 0) + rebate.amount));
+        await newRef.child('rebateAwarded').set(true);
+        await newRef.child('rebateAwardedTo').set({ name: currentStudent.name, class: currentStudent.class });
+      }
 
       // Deduct credits from student account if used (atomic - prevents double-spend
       // across two tabs/devices reading the same stale balance at once)
@@ -2218,7 +2469,9 @@
         `Hi! I just placed an Airheads pre-order.\nName: ${order.name}\nClass: ${order.className}\nItems: ${lastOrderSummary}\nTotal: $${final.toFixed(2)}\nOrder ID: ${newRef.key}`
       );
       document.getElementById('waLink').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
-      document.getElementById('confirmSub').textContent = `${lastOrderSummary} · $${final.toFixed(2)}`;
+      document.getElementById('confirmSub').textContent =
+        `${lastOrderSummary} · $${final.toFixed(2)}` +
+        (rebate.amount > 0 ? ` (+$${rebate.amount.toFixed(2)} rebate credit)` : '');
 
       cart = {};
       cartBundles = {};
