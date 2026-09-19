@@ -761,6 +761,37 @@ test('the admin exposes the marketing settings tab', () => {
   assert.ok(/0\.61/.test(html), 'the $0.61 Airheads reference is not surfaced');
 });
 
+test('every admin tab button resolves to a section that exists', () => {
+  // Regression guard for the empty Teams tab: the button carried
+  // data-tab="admin-users" while the section was id="adminUsersSection", so the
+  // click handler's getElementById("<data-tab>Section") returned null and threw,
+  // leaving the tab rendering nothing. Checking every tab (not just one) means a
+  // mismatch introduced by any future tab fails here instead of in the browser.
+  const html = readPage('admin.html');
+  const tabs = [...html.matchAll(/data-tab="([a-zA-Z-]+)"/g)].map((m) => m[1]);
+  assert.ok(tabs.length >= 9, `expected the full tab set, found ${tabs.length}`);
+  assert.ok(tabs.includes('marketing'), 'marketing tab disappeared');
+
+  tabs.forEach((tab) => {
+    const expectedId = `${tab}Section`;
+    assert.ok(
+      html.includes(`id="${expectedId}"`),
+      `tab "${tab}" has no matching #${expectedId} section - clicking it would render nothing`
+    );
+  });
+});
+
+test('the admin subscribes to each Firebase path exactly once', () => {
+  // The Team tab's data used to be loaded twice: a pre-login listener filled
+  // dbTeamMembers for the login lookup, and loadTeamData() opened a second
+  // listener on the same path purely to render. Both fired on every team change.
+  const html = readPage('admin.html');
+  const refs = [...html.matchAll(/db\.ref\('([a-z_]+)'\)\.on\('value'/g)].map((m) => m[1]);
+  const duplicates = refs.filter((p, i) => refs.indexOf(p) !== i);
+  assert.deepStrictEqual(duplicates, [], `duplicate listeners on: ${duplicates.join(', ')}`);
+  assert.ok(refs.includes('admin_team'), 'admin_team is no longer watched (login lookup would break)');
+});
+
 test('the reference price used across the codebase is the $0.61 Airheads bar', () => {
   ['index.html', 'admin.html'].forEach((page) => {
     assert.ok(/0\.61/.test(readPage(page)), `${page} does not reference the $0.61 buy price`);

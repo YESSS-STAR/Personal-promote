@@ -557,7 +557,7 @@
       <div id="marketingPlaybook"></div>
     </div>
 
-    <div class="section" id="adminUsersSection">
+    <div class="section" id="admin-usersSection">
       <h3 style="margin-top:0;">Team Access</h3>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Add sub-admins who can mark orders as Paid/Fulfilled, but changes require your approval.</p>
       
@@ -682,10 +682,13 @@
     });
   }
 
-  // Load team members before login so team-added passwords actually work (see findTeamMemberByPassword)
+  // Single source of truth for the team list. Registered before login so
+  // team-added passwords work (see findTeamMemberByPassword), and it also drives
+  // the Team tab - one subscription, one copy of the data.
   if(firebaseReady){
     db.ref('admin_team').on('value', snap => {
       dbTeamMembers = snap.val() || {};
+      renderTeam();
     });
   }
 
@@ -763,12 +766,26 @@
   }
 
   // ---------- Tabs ----------
-  document.querySelectorAll('.tab-btn').forEach(btn => {
+  // Map each tab button to its section ONCE, by resolving the target id
+  // up-front. The Team tab used to silently render nothing: its button said
+  // data-tab="admin-users" so the click handler looked up "admin-usersSection",
+  // but the section's id was "adminUsersSection" - getElementById returned null
+  // and `.classList` threw, so no section was ever shown. The id now follows the
+  // <data-tab>Section convention every other tab uses, and resolving up-front
+  // means a future mismatch degrades to a console warning instead of a dead tab.
+  const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+  const tabSections = tabButtons.map(btn => {
+    const section = document.getElementById(btn.dataset.tab + 'Section');
+    if(!section) console.warn(`Tab "${btn.dataset.tab}" has no #${btn.dataset.tab}Section element`);
+    return section;
+  });
+  tabButtons.forEach((btn, i) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.tab + 'Section').classList.add('active');
+      tabButtons.forEach((b, j) => {
+        const on = i === j;
+        b.classList.toggle('active', on);
+        if(tabSections[j]) tabSections[j].classList.toggle('active', on);
+      });
     });
   });
 
@@ -786,6 +803,13 @@
   let currentOrders = {};
   let currentFilter = 'all';
   let currentSearch = '';
+  // Signature of the last HTML written to #ordersList. Re-rendering is by far the
+  // most expensive thing this page does (~20ms for 300 orders, almost all of it
+  // parsing the HTML string), and renderOrders() runs on every keystroke and on
+  // every Firebase order update - including updates that don't change what is on
+  // screen. Comparing a cheap signature first skips the whole rebuild when the
+  // output would be identical.
+  let lastOrdersRenderKey = null;
   
   // Upsale settings (default values)
   let upsaleSettings = {
@@ -911,7 +935,7 @@
       clearTimeout(loadTimeout);
       hasLoaded = true;
       console.error('❌ Orders listen error:', err);
-      document.getElementById('ordersList').innerHTML = `<div class="empty-state" style="padding:20px;">⚠️ Error loading orders<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`;
+      setOrdersListMessage(`<div class="empty-state" style="padding:20px;">⚠️ Error loading orders<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`);
     });
     
     // Timeout after 8 seconds if no response (increased for mobile)
@@ -919,9 +943,18 @@
       if(!hasLoaded){
         console.warn('⏱️ Orders load timeout after 8s');
         hasLoaded = true;
-        document.getElementById('ordersList').innerHTML = `<div class="empty-state" style="padding:20px;">⏱️ Taking too long to load<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">This might be a slow connection. Check your internet or Firebase rules.</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`;
+        setOrdersListMessage(`<div class="empty-state" style="padding:20px;">⏱️ Taking too long to load<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">This might be a slow connection. Check your internet or Firebase rules.</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`);
       }
     }, 8000);
+  }
+
+  // Writes a status/error message into the orders list and clears the render
+  // signature. Without this, a later renderOrders() whose data is unchanged would
+  // short-circuit on the cached signature and leave the error message on screen
+  // even though real orders had arrived.
+  function setOrdersListMessage(html){
+    lastOrdersRenderKey = null;
+    document.getElementById('ordersList').innerHTML = html;
   }
 
   function renderStats(){
@@ -953,8 +986,21 @@
     }
     entries.sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0));
 
+    // Cheap change check: only the fields that reach the markup. If none of them
+    // moved since the last render, the DOM is already correct, so skip the
+    // expensive innerHTML rebuild entirely.
+    const renderKey = currentFilter + '\u0000' + currentSearch + '\u0000' + entries.map(([id, o]) =>
+      [id, o.status, o.total, o.updatedAt || '', o.createdAt || '', o.name || '', o.className || '',
+       o.volumeDiscount || '', o.rebateAmount || '', o.creditUsed || '', o.rebateAwarded ? 1 : 0,
+       o.rebateReversed ? 1 : 0, (o.discount && o.discount.amount) || '',
+       (o.items || []).map(i => `${i.qty}:${i.flavor || i.name || ''}:${i.price || 0}:${i.free ? 1 : 0}`).join('|')
+      ].join(':')
+    ).join('\u0001');
+    if(renderKey === lastOrdersRenderKey) return;
+
     if(entries.length === 0){
       wrap.innerHTML = `<div class="empty-state">${currentSearch ? 'No orders match your search.' : 'No orders here yet.'}</div>`;
+      lastOrdersRenderKey = renderKey;
       return;
     }
 
@@ -1014,6 +1060,7 @@
         </div>
       `;
     }).join('');
+    lastOrdersRenderKey = renderKey;
 
     wrap.querySelectorAll('.act-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -1194,14 +1241,13 @@
   }
 
   // ========== MULTI-ADMIN ==========
-  let teamMembers = {};
+  // The team list is held in a single place (`dbTeamMembers`, declared next to
+  // findTeamMemberByPassword) and kept in sync by one always-on `admin_team`
+  // listener before login. That one listener feeds both the login lookup and the
+  // Team tab, so there is no second copy of the data and no second subscription.
   let pendingApprovals = {};
 
   function loadTeamData(){
-    db.ref('admin_team').on('value', snap => {
-      teamMembers = snap.val() || {};
-      renderTeam();
-    });
     db.ref('pending_approvals').on('value', snap => {
       pendingApprovals = snap.val() || {};
       renderApprovals();
@@ -1210,7 +1256,8 @@
 
   function renderTeam(){
     const list = document.getElementById('teamList');
-    const entries = Object.entries(teamMembers);
+    if(!list) return; // listener can fire before the dashboard markup is shown
+    const entries = Object.entries(dbTeamMembers);
     if(entries.length === 0){
       list.innerHTML = '<div class="empty-state" style="padding:20px 0;"><small>No team members yet. You are the main admin.</small></div>';
       return;
