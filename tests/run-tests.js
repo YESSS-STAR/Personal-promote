@@ -804,6 +804,31 @@ test('the dashboard counts volume discounts and rebates as savings', () => {
   assert.ok(/o\.rebateAmount/.test(html), 'rebate not counted');
 });
 
+test('cash on collection instructions are present with zero PayNow references', () => {
+  ['index.html', 'admin.html', 'ref.html'].forEach((page) => {
+    assert.ok(!/paynow/i.test(readPage(page)), `${page} should not contain any PayNow references`);
+  });
+  const index = readPage('index.html');
+  assert.ok(/cashNoticeBox/.test(index), 'cash notice box missing from index.html');
+  assert.ok(/confirmCashTotal/.test(index), 'confirm cash total missing from index.html');
+});
+
+test('buyer 5% referral discount, wheel progress bar, and persistent login are wired', () => {
+  const index = readPage('index.html');
+  assert.ok(/getReferralDiscountAmount/.test(index), 'referral discount arithmetic missing');
+  assert.ok(/sheetRefDiscountRow/.test(index), 'referral discount UI missing');
+  assert.ok(/wheelProgressBox/.test(index), 'wheel spend progress bar missing');
+  assert.ok(/initReferralUserSession/.test(index), 'persistent referral session missing');
+  assert.ok(/referralDiscount:\s*refDiscount/.test(index), 'order.referralDiscount missing from order payload');
+
+  const ref = readPage('ref.html');
+  assert.ok(/waShareBtn/.test(ref), 'WhatsApp share button missing from ref.html');
+  assert.ok(/o\.referralDiscount/.test(ref), 'referral discount not counted in dashboard savings');
+
+  const admin = readPage('admin.html');
+  assert.ok(/o\.referralDiscount/.test(admin), 'referral discount missing from admin order cards');
+});
+
 // ===========================================================================
 
 runAll();

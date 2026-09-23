@@ -1030,11 +1030,17 @@
       if(volumeOff > 0){
         extras.push(`<div class="order-item-line"><span>Volume discount</span><span>-$${volumeOff.toFixed(2)}</span></div>`);
       }
+      if(Number(o.referralDiscount) > 0){
+        extras.push(`<div class="order-item-line"><span>Referral discount (5%${o.referredBy ? ' via ' + escapeHtml(o.referredBy) : ''})</span><span>-$${Number(o.referralDiscount).toFixed(2)}</span></div>`);
+      }
       if(rebateBack > 0){
         extras.push(`<div class="order-item-line"><span>Rebate credit${o.rebateAwarded ? ' (issued)' : ''}${o.rebateReversed ? ' (reversed)' : ''}</span><span style="color:var(--success);">+$${rebateBack.toFixed(2)}</span></div>`);
       }
       if(Number(o.creditUsed) > 0){
         extras.push(`<div class="order-item-line"><span>Store credit used</span><span>-$${Number(o.creditUsed).toFixed(2)}</span></div>`);
+      }
+      if(Number(o.referralRedeemUsed) > 0){
+        extras.push(`<div class="order-item-line"><span>Referral earnings used</span><span>-$${Number(o.referralRedeemUsed).toFixed(2)}</span></div>`);
       }
 
       return `

@@ -608,6 +608,79 @@
   }
   .spin-invite .si-title{font-weight:700; margin-bottom:10px;}
 
+  /* Cash Payment Box */
+  .cash-card{
+    background:var(--surface-2);
+    border:2px dashed var(--success);
+    border-radius:var(--radius);
+    padding:14px;
+    margin:14px 0 16px;
+    text-align:left;
+  }
+  .cash-title{
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--success);
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .cash-amt-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .cash-amt{
+    font-size:19px;
+    color:var(--primary);
+    font-weight:800;
+    font-family:'Poppins',sans-serif;
+  }
+  .cash-desc{
+    margin:0;
+    font-size:11.5px;
+    color:var(--muted);
+    line-height:1.45;
+  }
+
+  /* Wheel Spend Progress Bar */
+  .wheel-progress-box{
+    background:var(--grad-soft);
+    border:1px solid rgba(142,92,217,.32);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    margin-bottom:12px;
+  }
+  .wp-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .wp-icon{font-size:15px;}
+  .wp-bar-track{
+    height:7px;
+    background:rgba(28,20,32,.08);
+    border-radius:var(--radius-pill);
+    overflow:hidden;
+  }
+  html[data-theme="dark"] .wp-bar-track{
+    background:rgba(255,255,255,.14);
+  }
+  .wp-bar-fill{
+    height:100%;
+    width:0%;
+    background:var(--grad-reward);
+    border-radius:var(--radius-pill);
+    transition:width .3s ease;
+  }
+
   /* ============================================================
      Footer
      ============================================================ */
@@ -817,9 +890,24 @@
       </div>
     </div>
 
+    <div class="wheel-progress-box" id="wheelProgressBox" style="display:none;">
+      <div class="wp-head">
+        <span class="wp-icon">🎡</span>
+        <span class="wp-text" id="wheelProgressText">Add $5.00 more to unlock Lucky Wheel spin!</span>
+      </div>
+      <div class="wp-bar-track">
+        <div class="wp-bar-fill" id="wheelProgressBarFill" style="width:0%;"></div>
+      </div>
+    </div>
+
     <div class="cart-total-row">
       <span>Subtotal</span>
       <span id="sheetSubtotal">$0.00</span>
+    </div>
+
+    <div class="cart-total-row" id="sheetRefDiscountRow" style="display:none;color:var(--success);font-weight:700;">
+      <span id="sheetRefDiscountLabel">Referral discount (5% off)</span>
+      <span id="sheetRefDiscountAmt">-$0.00</span>
     </div>
 
     <div class="cart-total-row" id="sheetVolumeRow" style="display:none;">
@@ -831,6 +919,15 @@
     <div class="panel" id="rebateBanner" style="display:none;">
       <div class="panel-title">💸 Rebate credit</div>
       <div class="panel-hint" id="rebateText"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">👥 Friend's referral code (5% off)</div>
+      <div class="panel-row">
+        <input type="text" id="referralCodeInput" placeholder="Enter referral code" maxlength="20" style="flex:1;">
+        <button class="btn-inline" type="button" onclick="applyReferralCodeInput()">Apply</button>
+      </div>
+      <div class="field-result" id="referralCodeResult"></div>
     </div>
 
     <div class="panel">
@@ -852,20 +949,25 @@
       <div class="field-result" id="creditResult"></div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="refRedeemPanel">
       <div class="panel-title">🎁 Redeem your referral earnings</div>
-      <div id="refRedeemForm">
+      <div id="refLoggedOutView">
+        <p class="panel-hint" style="margin-top:0;">Sign in to your referral account to spend your earnings in 1 tap without typing password each time.</p>
         <div class="panel-row" style="margin-bottom:8px;">
-          <input type="text" id="refRedeemCode" placeholder="Your referral code" maxlength="20" style="flex:1;">
+          <input type="text" id="refRedeemCode" placeholder="Referral code or name" maxlength="30" style="flex:1;">
           <input type="password" id="refRedeemPassword" placeholder="Password" maxlength="20" style="flex:1;">
         </div>
-        <button class="btn-inline ghost" onclick="lookupReferralEarnings()">Check my balance</button>
+        <button class="btn-inline ghost" type="button" onclick="loginReferralAccount()">Sign in &amp; Remember me</button>
       </div>
-      <div id="refRedeemBalanceRow" style="display:none;margin-top:10px;">
-        <div class="panel-hint">Available to spend: <strong id="refRedeemAvailable">$0.00</strong></div>
+      <div id="refLoggedInView" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span class="panel-hint" style="margin:0;">Signed in: <strong id="refLoggedInName">-</strong> (<code id="refLoggedInCode">-</code>)</span>
+          <button type="button" onclick="logoutReferralAccount()" style="background:none;border:none;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;padding:0;">Sign out</button>
+        </div>
+        <div class="panel-hint">Available earnings: <strong id="refRedeemAvailable">$0.00</strong></div>
         <div class="panel-row">
           <input type="number" id="refRedeemAmount" min="0" step="0.01" placeholder="$0.00" style="flex:1;">
-          <button class="btn-inline success" onclick="applyReferralRedeem()">Apply</button>
+          <button class="btn-inline success" type="button" onclick="applyReferralRedeem()">Apply</button>
         </div>
       </div>
       <div class="field-result" id="refRedeemResult"></div>
@@ -896,6 +998,16 @@
     <div class="confirm-icon">&#10003;</div>
     <p class="confirm-title" id="confirmOverlayTitle">Order placed!</p>
     <p class="confirm-sub" id="confirmSub">We've saved your pre-order.</p>
+
+    <div class="cash-card" id="cashNoticeBox">
+      <div class="cash-title">💵 Payment: Cash on Collection</div>
+      <div class="cash-amt-row">
+        <span>Exact cash to bring:</span>
+        <strong class="cash-amt" id="confirmCashTotal">$0.00</strong>
+      </div>
+      <p class="cash-desc">Please prepare exact cash to pay in class upon collection. Tap below to send your order slip on WhatsApp so we can prepare your Airheads!</p>
+    </div>
+
     <a class="wa-btn" id="waLink" href="#" target="_blank" rel="noopener">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.04 3.7c-4.9 0-8.9 3.99-8.9 8.9 0 1.57.41 3.1 1.19 4.44L3 21.3l4.4-1.26a8.9 8.9 0 0 0 4.63 1.28h.01c4.9 0 8.9-3.99 8.9-8.9 0-2.38-.93-4.62-2.34-6.1zM12.04 19.9h-.01a7.35 7.35 0 0 1-3.75-1.03l-.27-.16-2.79.8.75-2.72-.18-.28a7.36 7.36 0 0 1-1.13-3.91c0-4.07 3.31-7.38 7.4-7.38a7.34 7.34 0 0 1 7.38 7.4c0 4.07-3.32 7.38-7.4 7.38zm4.05-5.53c-.22-.11-1.3-.64-1.5-.72-.2-.07-.35-.11-.5.11-.15.22-.57.72-.7.87-.13.15-.26.16-.48.05a6.05 6.05 0 0 1-1.78-1.1 6.66 6.66 0 0 1-1.23-1.53c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.68-1.65-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.6.28-.2.22-.79.77-.79 1.87 0 1.1.81 2.17.92 2.32.11.15 1.6 2.44 3.87 3.42.54.23.96.37 1.29.48.54.17 1.03.15 1.42.09.43-.06 1.3-.53 1.49-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.15-.42-.26z"/></svg>
       Message us on WhatsApp
@@ -1246,10 +1358,17 @@
 
     // Check referral from URL
     const urlParams = new URLSearchParams(window.location.search);
-    referralCode = urlParams.get('ref');
-    if(referralCode){
-      showToast(`✓ Referral: ${referralCode}`);
+    const urlRef = urlParams.get('ref');
+    if(urlRef){
+      referralCode = urlRef.trim().toUpperCase();
+      showToast(`✓ Referral code ${referralCode} applied (5% off)!`);
+      const refInput = document.getElementById('referralCodeInput');
+      if(refInput) refInput.value = referralCode;
+      const refResult = document.getElementById('referralCodeResult');
+      if(refResult) refResult.textContent = `✓ 5% discount applied with code ${referralCode}`;
     }
+
+    initReferralUserSession();
   }
 
   function applyMaintenanceState(){
@@ -1996,50 +2115,143 @@
     showToast('Credits applied!');
   }
 
-  async function lookupReferralEarnings(){
-    const code = document.getElementById('refRedeemCode').value.trim();
+  function getReferralDiscountAmount(subtotal){
+    if(!referralCode || subtotal <= 0) return 0;
+    return Strategy.round2(subtotal * 0.05);
+  }
+
+  async function applyReferralCodeInput(){
+    const input = document.getElementById('referralCodeInput').value.trim().toUpperCase();
+    const resultEl = document.getElementById('referralCodeResult');
+    if(!input){
+      referralCode = null;
+      resultEl.textContent = '';
+      renderCartLines();
+      showToast('Referral code removed');
+      return;
+    }
+    // Prevent self-referral if logged into referral account
+    if(referralRedeemAccount && referralRedeemAccount.code && referralRedeemAccount.code.toUpperCase() === input){
+      resultEl.textContent = '❌ You cannot use your own referral code';
+      return;
+    }
+    resultEl.textContent = 'Verifying...';
+    try {
+      if(firebaseReady){
+        const snap = await db.ref('referrals').once('value');
+        const all = snap.val() || {};
+        const match = Object.values(all).find(u => u && u.code && u.code.toUpperCase() === input);
+        if(!match){
+          resultEl.textContent = '❌ Referral code not found';
+          return;
+        }
+      }
+      referralCode = input;
+      resultEl.textContent = `✓ 5% discount applied with code ${referralCode}!`;
+      renderCartLines();
+      showToast(`Referral code ${referralCode} applied (5% off)!`);
+    } catch(err){
+      console.error(err);
+      referralCode = input;
+      resultEl.textContent = `✓ 5% discount applied with code ${referralCode}!`;
+      renderCartLines();
+    }
+  }
+
+  // ---------- Persistent Referral Account Session ----------
+  async function initReferralUserSession(){
+    const savedUserId = localStorage.getItem('ref-user');
+    if(savedUserId && firebaseReady){
+      await loadReferralSessionById(savedUserId);
+    }
+  }
+
+  async function loadReferralSessionById(userId){
+    if(!firebaseReady || !userId) return;
+    try {
+      const snap = await db.ref(`referrals/${userId}`).once('value');
+      const user = snap.val();
+      if(!user){
+        localStorage.removeItem('ref-user');
+        return;
+      }
+      referralRedeemAccount = { id: userId, code: user.code, name: user.name, earnings: Number(user.earnings) || 0 };
+      const nameEl = document.getElementById('refLoggedInName');
+      const codeEl = document.getElementById('refLoggedInCode');
+      const availEl = document.getElementById('refRedeemAvailable');
+      if(nameEl) nameEl.textContent = user.name || 'User';
+      if(codeEl) codeEl.textContent = user.code || '';
+      if(availEl) availEl.textContent = '$' + referralRedeemAccount.earnings.toFixed(2);
+      const outView = document.getElementById('refLoggedOutView');
+      const inView = document.getElementById('refLoggedInView');
+      if(outView) outView.style.display = 'none';
+      if(inView) inView.style.display = 'block';
+      const resultEl = document.getElementById('refRedeemResult');
+      if(resultEl) resultEl.textContent = '';
+      renderCartLines();
+    } catch(err){
+      console.error('Referral session load error:', err);
+    }
+  }
+
+  async function loginReferralAccount(){
+    const inputVal = document.getElementById('refRedeemCode').value.trim();
     const pw = document.getElementById('refRedeemPassword').value;
     const resultEl = document.getElementById('refRedeemResult');
-
-    if(!code || !pw){
-      resultEl.textContent = 'Enter your referral code and password';
+    if(!inputVal || !pw){
+      resultEl.textContent = 'Enter your referral code/name and password';
       return;
     }
     if(!firebaseReady){
-      resultEl.textContent = 'Not connected, try again in a moment';
+      resultEl.textContent = 'Connecting... try again in a moment';
       return;
     }
-
-    resultEl.textContent = 'Checking...';
+    resultEl.textContent = 'Signing in...';
     try {
       const snap = await db.ref('referrals').once('value');
       const all = snap.val() || {};
-      const entry = Object.entries(all).find(([id, u]) => u.code === code);
-
-      if(!entry || entry[1].password !== pw){
-        resultEl.textContent = '❌ Code or password incorrect';
-        referralRedeemAccount = null;
-        document.getElementById('refRedeemBalanceRow').style.display = 'none';
+      const inputUpper = inputVal.toUpperCase();
+      const inputLower = inputVal.toLowerCase();
+      const entry = Object.entries(all).find(([id, u]) =>
+        u && ((u.code && u.code.toUpperCase() === inputUpper) || (u.name && u.name.toLowerCase() === inputLower)) && u.password === pw
+      );
+      if(!entry){
+        resultEl.textContent = '❌ Code/name or password incorrect';
         return;
       }
-
-      const [id, data] = entry;
-      const available = data.earnings || 0;
-      referralRedeemAccount = { id, code: data.code, earnings: available };
-
-      document.getElementById('refRedeemAvailable').textContent = '$' + available.toFixed(2);
-      document.getElementById('refRedeemBalanceRow').style.display = 'block';
-      resultEl.textContent = available > 0 ? '✓ Balance loaded' : 'No earnings available yet';
+      const [userId, user] = entry;
+      localStorage.setItem('ref-user', userId);
+      await loadReferralSessionById(userId);
+      showToast(`✓ Welcome back, ${user.name || user.code}!`);
     } catch(err){
-      console.error('Referral redeem lookup error:', err);
-      resultEl.textContent = 'Error checking balance';
+      console.error('Referral login error:', err);
+      resultEl.textContent = 'Error logging in. Please try again.';
     }
   }
+
+  function logoutReferralAccount(){
+    localStorage.removeItem('ref-user');
+    referralRedeemAccount = null;
+    appliedReferralRedeem = 0;
+    const outView = document.getElementById('refLoggedOutView');
+    const inView = document.getElementById('refLoggedInView');
+    if(outView) outView.style.display = 'block';
+    if(inView) inView.style.display = 'none';
+    const pwInput = document.getElementById('refRedeemPassword');
+    if(pwInput) pwInput.value = '';
+    const resultEl = document.getElementById('refRedeemResult');
+    if(resultEl) resultEl.textContent = '';
+    renderCartLines();
+    showToast('Signed out of referral account');
+  }
+
+  // Backwards-compatible alias if invoked anywhere
+  const lookupReferralEarnings = loginReferralAccount;
 
   function applyReferralRedeem(){
     const resultEl = document.getElementById('refRedeemResult');
     if(!referralRedeemAccount){
-      resultEl.textContent = 'Check your balance first';
+      resultEl.textContent = 'Sign in first to use earnings';
       return;
     }
     const toUse = parseFloat(document.getElementById('refRedeemAmount').value) || 0;
@@ -2055,7 +2267,7 @@
     }
 
     appliedReferralRedeem = toUse;
-    resultEl.textContent = `✓ $${toUse.toFixed(2)} applied — rest stays as cash-out earnings`;
+    resultEl.textContent = `✓ $${toUse.toFixed(2)} applied — rest stays in your account`;
     renderCartLines();
     showToast('Referral earnings applied!');
   }
@@ -2121,7 +2333,8 @@
     const subtotal = cartTotal();
     const discount = getDiscountAmount(subtotal);
     const volume = getVolumeDiscount();
-    const afterDiscount = Math.max(0, subtotal - discount - volume.amount);
+    const refDiscount = getReferralDiscountAmount(subtotal);
+    const afterDiscount = Math.max(0, subtotal - discount - volume.amount - refDiscount);
     // The rebate is *earned* store credit, not a price cut, so it never reduces
     // the total - it is credited after the order is placed.
     const rebate = getRebate(afterDiscount);
@@ -2129,6 +2342,40 @@
 
     document.getElementById('sheetSubtotal').textContent = `$${subtotal.toFixed(2)}`;
     document.getElementById('sheetTotal').textContent = `$${final.toFixed(2)}`;
+
+    // Wheel progress bar (Spend $5+ to unlock)
+    const wheelBox = document.getElementById('wheelProgressBox');
+    const wheelText = document.getElementById('wheelProgressText');
+    const wheelFill = document.getElementById('wheelProgressBarFill');
+    if(wheelBox && wheelText && wheelFill){
+      if(subtotal <= 0){
+        wheelBox.style.display = 'none';
+      } else {
+        wheelBox.style.display = 'block';
+        const pct = Math.min(100, (subtotal / SPIN_MIN_SPEND) * 100);
+        wheelFill.style.width = pct + '%';
+        if(subtotal >= SPIN_MIN_SPEND){
+          wheelText.textContent = `🎉 Lucky Wheel spin unlocked for this order!`;
+          wheelFill.style.background = 'var(--success)';
+        } else {
+          const remaining = (SPIN_MIN_SPEND - subtotal).toFixed(2);
+          wheelText.textContent = `Add $${remaining} more to unlock a Lucky Wheel spin! 🎡`;
+          wheelFill.style.background = 'var(--grad-reward)';
+        }
+      }
+    }
+
+    // Referral 5% discount row
+    const refDiscountRow = document.getElementById('sheetRefDiscountRow');
+    if(refDiscountRow){
+      if(refDiscount > 0){
+        refDiscountRow.style.display = '';
+        document.getElementById('sheetRefDiscountLabel').textContent = `Referral discount (5% off with ${referralCode})`;
+        document.getElementById('sheetRefDiscountAmt').textContent = `-$${refDiscount.toFixed(2)}`;
+      } else {
+        refDiscountRow.style.display = 'none';
+      }
+    }
 
     // Volume discount row + the goal-gradient nudge towards the next tier
     const volumeRow = document.getElementById('sheetVolumeRow');
@@ -2403,7 +2650,8 @@
       const subtotal = items.reduce((s,i)=> s + i.price*i.qty, 0);
       const discount = getDiscountAmount(subtotal);
       const volume = getVolumeDiscount();
-      const afterDiscount = Math.max(0, subtotal - discount - volume.amount);
+      const refDiscount = getReferralDiscountAmount(subtotal);
+      const afterDiscount = Math.max(0, subtotal - discount - volume.amount - refDiscount);
       const rebate = getRebate(afterDiscount);
       const final = Math.max(0, afterDiscount - appliedCredit - appliedReferralRedeem);
 
@@ -2413,6 +2661,7 @@
         items,
         subtotal,
         discount: discount > 0 ? {amount: discount, coupon: appliedCouponCode || null} : null,
+        referralDiscount: refDiscount > 0 ? refDiscount : null,
         // Marketing strategies, recorded so staff can see why the total is below
         // the sum of the lines and so a cancellation can claw the rebate back.
         volumeDiscount: volume.amount > 0 ? volume.amount : null,
@@ -2423,6 +2672,7 @@
         studentInfo: currentStudent ? { name: currentStudent.name, class: currentStudent.class } : null,
         referredBy: referralCode || null,
         status: "pending",
+        paymentMethod: "cash",
         creditAwarded: false, // Flag to track if referrer got credit
         createdAt: firebase.database.ServerValue.TIMESTAMP
       };
@@ -2466,9 +2716,11 @@
 
       lastOrderSummary = items.map(i => i.bundle ? `${i.qty}x ${i.name} (bundle)` : `${i.qty}x ${i.flavor}`).join(', ');
       const waText = encodeURIComponent(
-        `Hi! I just placed an Airheads pre-order.\nName: ${order.name}\nClass: ${order.className}\nItems: ${lastOrderSummary}\nTotal: $${final.toFixed(2)}\nOrder ID: ${newRef.key}`
+        `Hi! I just placed an Airheads pre-order.\nName: ${order.name}\nClass: ${order.className}\nItems: ${lastOrderSummary}\nTotal: $${final.toFixed(2)} (Cash in class)\nOrder ID: ${newRef.key}`
       );
       document.getElementById('waLink').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
+      const cashTotalEl = document.getElementById('confirmCashTotal');
+      if(cashTotalEl) cashTotalEl.textContent = `$${final.toFixed(2)}`;
       document.getElementById('confirmSub').textContent =
         `${lastOrderSummary} · $${final.toFixed(2)}` +
         (rebate.amount > 0 ? ` (+$${rebate.amount.toFixed(2)} rebate credit)` : '');
@@ -2481,7 +2733,7 @@
       appliedCouponCode = null;
       appliedCredit = 0;
       appliedReferralRedeem = 0;
-      referralRedeemAccount = null;
+      // Do not wipe referralRedeemAccount so persistent login remains active
       referralCode = null;
       buyerName.value = "";
       buyerClass.value = "";
@@ -2489,9 +2741,16 @@
       document.getElementById('couponResult').textContent = "";
       document.getElementById('creditToUse').value = "";
       document.getElementById('creditResult').textContent = "";
+      const refCodeInputEl = document.getElementById('referralCodeInput');
+      if(refCodeInputEl) refCodeInputEl.value = "";
+      const refCodeResEl = document.getElementById('referralCodeResult');
+      if(refCodeResEl) refCodeResEl.textContent = "";
+      const refAmtEl = document.getElementById('refRedeemAmount');
+      if(refAmtEl) refAmtEl.value = "";
       cartOverlay.classList.remove('open');
       confirmOverlay.classList.add('open');
       if(currentStudent) loadStudentCredits();
+      if(referralRedeemAccount) loadReferralSessionById(referralRedeemAccount.id);
       renderGrid();
       // $5+ spent unlocks one spin; offerSpin persists it so a refresh can't lose it.
       offerSpin(final, newRef.key);

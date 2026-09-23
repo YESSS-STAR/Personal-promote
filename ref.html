@@ -202,7 +202,7 @@
 
       <!-- No referral session -->
       <div class="card" id="refEmptyCard">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Earn 15¢ for every $1 your friends spend. Create a referral account to get your own code and share link.</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Earn 15¢ for every $1 your friends spend, and <strong>your friends get 5% off</strong> their entire order! Create a referral account to get your own code and share link.</div>
         <button class="primary-btn" onclick="switchToSignup()">Create referral account</button>
         <button onclick="switchToLogin()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--primary);font-weight:600;font-size:13px;cursor:pointer;">Already have an account? Sign in</button>
       </div>
@@ -212,7 +212,7 @@
         <div class="ref-code-display">
           <div class="label">Your referral code</div>
           <div class="code" id="refCodeDisplay">LOAD...</div>
-          <div class="hint">Share this code with friends</div>
+          <div class="hint">Share this code with friends — they get 5% off!</div>
           <button class="copy-btn" id="copyRefBtn">📋 Copy code</button>
         </div>
 
@@ -227,9 +227,15 @@
         </div>
 
         <div class="card">
-          <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;"><strong>Share your link:</strong></div>
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;"><strong>Share your link (friends get 5% off):</strong></div>
           <div class="share-link" id="shareLink"></div>
-          <button onclick="copyShareLink()" style="width:100%;padding:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;margin-top:8px;">📋 Copy link</button>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button onclick="copyShareLink()" style="flex:1;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-weight:600;font-size:12px;cursor:pointer;color:var(--text);">📋 Copy link</button>
+            <a id="waShareBtn" href="#" target="_blank" rel="noopener" style="flex:1.2;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#25D366;color:#fff;border-radius:10px;font-weight:700;font-size:12px;text-decoration:none;box-shadow:0 3px 10px rgba(37,211,102,.25);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.04 3.7c-4.9 0-8.9 3.99-8.9 8.9 0 1.57.41 3.1 1.19 4.44L3 21.3l4.4-1.26a8.9 8.9 0 0 0 4.63 1.28h.01c4.9 0 8.9-3.99 8.9-8.9 0-2.38-.93-4.62-2.34-6.1zM12.04 19.9h-.01a7.35 7.35 0 0 1-3.75-1.03l-.27-.16-2.79.8.75-2.72-.18-.28a7.36 7.36 0 0 1-1.13-3.91c0-4.07 3.31-7.38 7.4-7.38a7.34 7.34 0 0 1 7.38 7.4c0 4.07-3.32 7.38-7.4 7.38zm4.05-5.53c-.22-.11-1.3-.64-1.5-.72-.2-.07-.35-.11-.5.11-.15.22-.57.72-.7.87-.13.15-.26.16-.48.05a6.05 6.05 0 0 1-1.78-1.1 6.66 6.66 0 0 1-1.23-1.53c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.68-1.65-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.6.28-.2.22-.79.77-.79 1.87 0 1.1.81 2.17.92 2.32.11.15 1.6 2.44 3.87 3.42.54.23.96.37 1.29.48.54.17 1.03.15 1.42.09.43-.06 1.3-.53 1.49-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.15-.42-.26z"/></svg>
+              Share on WhatsApp
+            </a>
+          </div>
         </div>
 
         <div class="referral-list">
@@ -419,6 +425,7 @@
         totalSpent += Number(o.total) || 0;
         if(o.discount) totalSaved += Number(o.discount.amount) || 0;
         totalSaved += Number(o.volumeDiscount) || 0;
+        totalSaved += Number(o.referralDiscount) || 0;
         totalSaved += Number(o.creditUsed) || 0;
         totalSaved += Number(o.referralRedeemUsed) || 0;
         totalRebated += Number(o.rebateAmount) || 0;
@@ -572,7 +579,13 @@
     document.getElementById('refCodeDisplay').textContent = user.code || '';
     document.getElementById('earningsDisplay').textContent = `$${(Number(user.earnings)||0).toFixed(2)}`;
     document.getElementById('pendingDisplay').textContent = `$${(Number(user.pendingCredits)||0).toFixed(2)}`;
-    document.getElementById('shareLink').textContent = `${window.location.origin}?ref=${user.code}`;
+    const shareUrl = `${window.location.origin}?ref=${user.code}`;
+    document.getElementById('shareLink').textContent = shareUrl;
+    const waShare = document.getElementById('waShareBtn');
+    if(waShare){
+      const waMsg = encodeURIComponent(`Hey! Get 5% off Airheads candy pre-orders using my link: ${shareUrl} 🍬 Pick your flavors & pay cash in class!`);
+      waShare.href = `https://wa.me/?text=${waMsg}`;
+    }
 
     renderReferralSection(true);
     showScreen('dashboardScreen');
