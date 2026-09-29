@@ -682,6 +682,55 @@
   }
 
   /* ============================================================
+     Weekly Order Streaks & Retention
+     ============================================================ */
+  .streak-banner{
+    position:relative;
+    padding:12px 15px;
+    border-radius:var(--radius);
+    background:var(--surface);
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+    margin-bottom:14px;
+    transition:all .2s ease;
+  }
+  .sb-header{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:6px;
+  }
+  .sb-badge{
+    font-size:12px; font-weight:800; font-family:'Poppins',sans-serif;
+    color:var(--primary);
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .sb-meta{
+    font-size:11px; font-weight:600; color:var(--muted);
+  }
+  .sb-text{
+    font-size:12px; line-height:1.45; color:var(--text); margin-bottom:7px;
+  }
+  .sb-track{
+    height:5px; width:100%; border-radius:var(--radius-pill); background:var(--surface-3); overflow:hidden;
+  }
+  .sb-fill{
+    height:100%; width:0%; border-radius:var(--radius-pill); background:var(--grad); transition:width .3s ease;
+  }
+
+  .streak-cart-box{
+    margin:10px 0 12px;
+    padding:10px 12px;
+    border-radius:var(--radius-sm);
+    background:rgba(255,79,129,.07);
+    border:1px solid rgba(255,79,129,.2);
+  }
+  .sc-head{
+    display:flex; align-items:center; gap:7px; margin-bottom:6px; font-size:12px; font-weight:700;
+  }
+  .sc-icon{font-size:14px;}
+  .sc-bar-fill{
+    height:100%; width:0%; border-radius:var(--radius-pill); background:var(--grad); transition:width .3s ease;
+  }
+
+  /* ============================================================
      Footer
      ============================================================ */
   .footer-link{
@@ -839,6 +888,16 @@
 </div>
 
 <main>
+  <!-- Weekly Order Streak Banner -->
+  <div class="streak-banner" id="streakBanner" style="display:none;">
+    <div class="sb-header">
+      <span class="sb-badge" id="streakBadge">🔥 Weekly Streak</span>
+      <span class="sb-meta" id="streakMeta">Next: Free Bar at Week 3</span>
+    </div>
+    <div class="sb-text" id="streakText">Order $2.50+ weekly to unlock free rewards!</div>
+    <div class="sb-track"><div class="sb-fill" id="streakFill" style="width:0%;"></div></div>
+  </div>
+
   <section class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
     <p class="hero-eyebrow"><span class="live-dot" aria-hidden="true"></span>Live stock</p>
@@ -897,6 +956,17 @@
       </div>
       <div class="wp-bar-track">
         <div class="wp-bar-fill" id="wheelProgressBarFill" style="width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- Streak Qualification Nudge in Cart Sheet -->
+    <div class="streak-cart-box" id="sheetStreakBox" style="display:none;">
+      <div class="sc-head">
+        <span class="sc-icon">🔥</span>
+        <span class="sc-text" id="sheetStreakText">Add $2.50 to qualify for your weekly streak!</span>
+      </div>
+      <div class="wp-bar-track">
+        <div class="sc-bar-fill" id="sheetStreakBarFill" style="width:0%;"></div>
       </div>
     </div>
 
@@ -1008,6 +1078,12 @@
       <p class="cash-desc">Please prepare exact cash to pay in class upon collection. Tap below to send your order slip on WhatsApp so we can prepare your Airheads!</p>
     </div>
 
+    <div class="streak-reward-card" id="confirmStreakCard" style="display:none;margin:12px 0;padding:12px 14px;border-radius:var(--radius);background:var(--grad-soft);border:1px solid rgba(255,79,129,.35);text-align:center;">
+      <div style="font-size:22px;margin-bottom:4px;">🎉</div>
+      <div style="font-weight:800;font-size:14px;color:var(--primary);" id="confirmStreakTitle">Milestone Unlocked!</div>
+      <div style="font-size:12.5px;color:var(--text);margin-top:2px;" id="confirmStreakDesc"></div>
+    </div>
+
     <a class="wa-btn" id="waLink" href="#" target="_blank" rel="noopener">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.04 3.7c-4.9 0-8.9 3.99-8.9 8.9 0 1.57.41 3.1 1.19 4.44L3 21.3l4.4-1.26a8.9 8.9 0 0 0 4.63 1.28h.01c4.9 0 8.9-3.99 8.9-8.9 0-2.38-.93-4.62-2.34-6.1zM12.04 19.9h-.01a7.35 7.35 0 0 1-3.75-1.03l-.27-.16-2.79.8.75-2.72-.18-.28a7.36 7.36 0 0 1-1.13-3.91c0-4.07 3.31-7.38 7.4-7.38a7.34 7.34 0 0 1 7.38 7.4c0 4.07-3.32 7.38-7.4 7.38zm4.05-5.53c-.22-.11-1.3-.64-1.5-.72-.2-.07-.35-.11-.5.11-.15.22-.57.72-.7.87-.13.15-.26.16-.48.05a6.05 6.05 0 0 1-1.78-1.1 6.66 6.66 0 0 1-1.23-1.53c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.68-1.65-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.6.28-.2.22-.79.77-.79 1.87 0 1.1.81 2.17.92 2.32.11.15 1.6 2.44 3.87 3.42.54.23.96.37 1.29.48.54.17 1.03.15 1.42.09.43-.06 1.3-.53 1.49-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.15-.42-.26z"/></svg>
       Message us on WhatsApp
@@ -1050,6 +1126,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <!-- Psychological pricing + rebate strategy engine (calibrated on a $0.61 Airheads bar) -->
 <script src="pricing-strategies.js"></script>
+<!-- Retention streaks & milestone rewards engine -->
+<script src="streak-utils.js"></script>
+
 <script>
   let db;
   let firebaseReady = false;
@@ -1211,6 +1290,17 @@
     enabled: Object.assign({}, DEFAULT_ENABLED_TACTICS)
   };
 
+  // Retention streaks & milestone rewards (streak-utils.js)
+  const Streak = (typeof StreakUtils !== 'undefined') ? StreakUtils : {
+    DEFAULT_CONFIG: { enabled: true, mode: 'calendar_grace', minSpend: 2.50, cycleLength: 5, milestones: [] },
+    computeStreak: () => ({ currentStreak: 0, hasOrderedThisPeriod: false, graceActive: false, nextMilestone: null }),
+    evaluateMilestoneReward: () => null,
+    getStreakMessaging: () => ({ bannerBadge: '🔥 Start a Streak', bannerText: 'Order $2.50+ weekly to unlock rewards!', cartQualified: false, cartNudge: '', minSpend: 2.50 })
+  };
+
+  let streakSettings = Object.assign({}, Streak.DEFAULT_CONFIG);
+  let allOrders = {};
+
   // Bars sold today, for the social-proof badge.
   let todayUnitsSold = 0;
 
@@ -1343,11 +1433,24 @@
       renderSocialProof();
     });
 
+    // Load retention streak settings
+    db.ref('settings/streak').on('value', snap => {
+      const data = snap.val();
+      if(data && typeof data === 'object'){
+        streakSettings = Object.assign({}, Streak.DEFAULT_CONFIG, data);
+        console.log('✓ Streak settings loaded:', streakSettings);
+      }
+      renderStreakUI();
+      renderCartLines();
+    });
+
     // Today's sales, powering the social-proof badge. Only used for display -
     // nothing in the ordering path depends on it.
     db.ref('orders').on('value', snap => {
-      todayUnitsSold = countTodayUnits(snap.val());
+      allOrders = snap.val() || {};
+      todayUnitsSold = countTodayUnits(allOrders);
       renderSocialProof();
+      renderStreakUI();
     });
 
     // Maintenance mode - blocks ordering when admin pauses the storefront
@@ -1380,6 +1483,60 @@
       cartOverlay.classList.remove('open');
     }
     updateCartBar();
+  }
+
+  function getActiveStudentIdentity(){
+    if(currentStudent && currentStudent.name && currentStudent.class){
+      return { name: currentStudent.name.trim(), class: currentStudent.class.trim() };
+    }
+    const bName = document.getElementById('buyerName');
+    const bClass = document.getElementById('buyerClass');
+    if(bName && bClass && bName.value.trim() && bClass.value.trim()){
+      return { name: bName.value.trim(), class: bClass.value.trim() };
+    }
+    return null;
+  }
+
+  function getStudentOrderHistory(identity){
+    if(!identity || !identity.name || !identity.class) return [];
+    return Object.values(allOrders || {}).filter(o => {
+      if(!o || o.status === 'cancelled') return false;
+      if(o.studentInfo && o.studentInfo.name === identity.name && o.studentInfo.class === identity.class) return true;
+      return o.name === identity.name && o.className === identity.class;
+    });
+  }
+
+  function renderStreakUI(){
+    const banner = document.getElementById('streakBanner');
+    if(!banner) return;
+    if(!streakSettings || streakSettings.enabled === false){
+      banner.style.display = 'none';
+      return;
+    }
+    banner.style.display = 'block';
+
+    const identity = getActiveStudentIdentity();
+    const orders = getStudentOrderHistory(identity);
+    const streakInfo = Streak.computeStreak(orders, { config: streakSettings });
+    const messaging = Streak.getStreakMessaging(streakInfo, cartTotal(), streakSettings);
+
+    const badgeEl = document.getElementById('streakBadge');
+    const textEl = document.getElementById('streakText');
+    const metaEl = document.getElementById('streakMeta');
+    const fillEl = document.getElementById('streakFill');
+
+    if(badgeEl) badgeEl.textContent = messaging.bannerBadge;
+    if(textEl) textEl.textContent = messaging.bannerText;
+    if(metaEl && streakInfo.nextMilestone){
+      metaEl.textContent = `Next: ${streakInfo.nextMilestone.label} at W${streakInfo.nextMilestone.targetStreak}`;
+    }
+    if(fillEl){
+      const cycle = streakSettings.cycleLength || 5;
+      const progressInCycle = streakInfo.currentStreak > 0
+        ? (((streakInfo.currentStreak - 1) % cycle) + 1) / cycle
+        : 0;
+      fillEl.style.width = Math.round(progressInCycle * 100) + '%';
+    }
   }
 
   function renderGrid(){
@@ -2365,6 +2522,31 @@
       }
     }
 
+    // Streak qualification progress bar in cart sheet
+    const streakBox = document.getElementById('sheetStreakBox');
+    const streakText = document.getElementById('sheetStreakText');
+    const streakFill = document.getElementById('sheetStreakBarFill');
+    if(streakBox && streakText && streakFill){
+      if(!streakSettings || streakSettings.enabled === false || subtotal <= 0){
+        streakBox.style.display = 'none';
+      } else {
+        streakBox.style.display = 'block';
+        const identity = getActiveStudentIdentity();
+        const orders = getStudentOrderHistory(identity);
+        const streakInfo = Streak.computeStreak(orders, { config: streakSettings });
+        const messaging = Streak.getStreakMessaging(streakInfo, subtotal, streakSettings);
+
+        streakText.textContent = messaging.cartNudge;
+        const pct = Math.min(100, (subtotal / streakSettings.minSpend) * 100);
+        streakFill.style.width = pct + '%';
+        if(messaging.cartQualified){
+          streakFill.style.background = 'var(--grad)';
+        } else {
+          streakFill.style.background = 'var(--primary)';
+        }
+      }
+    }
+
     // Referral 5% discount row
     const refDiscountRow = document.getElementById('sheetRefDiscountRow');
     if(refDiscountRow){
@@ -2459,6 +2641,7 @@
   function validateOrderBtn(){
     const ok = cartCount() > 0 && buyerName.value.trim() && buyerClass.value.trim();
     placeOrderBtn.disabled = !ok;
+    renderStreakUI();
   }
 
   placeOrderBtn.addEventListener('click', async () => {
@@ -2677,8 +2860,37 @@
         createdAt: firebase.database.ServerValue.TIMESTAMP
       };
 
+      // Calculate streak status and milestone rewards
+      let streakRewardAwarded = null;
+      if(streakSettings && streakSettings.enabled !== false){
+        const identity = { name: order.name, class: order.className };
+        const priorOrders = getStudentOrderHistory(identity);
+        const prevStreakInfo = Streak.computeStreak(priorOrders, { config: streakSettings });
+        const prospectiveOrder = Object.assign({}, order, { createdAt: Date.now() });
+        const updatedOrders = priorOrders.concat([prospectiveOrder]);
+        const newStreakInfo = Streak.computeStreak(updatedOrders, { config: streakSettings });
+
+        order.streakWeek = newStreakInfo.currentStreak;
+        const reward = Streak.evaluateMilestoneReward(prevStreakInfo.currentStreak, newStreakInfo.currentStreak, streakSettings);
+        if(reward && reward.unlocked){
+          streakRewardAwarded = reward;
+          order.streakReward = reward;
+          order.streakMilestoneAwarded = true;
+        }
+      }
+
       const newRef = db.ref('orders').push();
       await newRef.set(order);
+
+      // Award streak milestone reward if achieved
+      if(streakRewardAwarded){
+        const sKey = `students/${order.name}/${order.className}`;
+        if(streakRewardAwarded.type === 'free_bar'){
+          await db.ref(`${sKey}/freeItems`).transaction(c => (Number(c) || 0) + (streakRewardAwarded.qty || 1));
+        } else if(streakRewardAwarded.type === 'credit'){
+          await db.ref(`${sKey}/credit`).transaction(c => Strategy.round2((Number(c) || 0) + (streakRewardAwarded.amount || 0)));
+        }
+      }
 
       // Rebate: spend-more-earn-more store credit, paid straight into the
       // signed-in student's balance. Guests still get the amount recorded on the
@@ -2747,6 +2959,24 @@
       if(refCodeResEl) refCodeResEl.textContent = "";
       const refAmtEl = document.getElementById('refRedeemAmount');
       if(refAmtEl) refAmtEl.value = "";
+
+      const streakCard = document.getElementById('confirmStreakCard');
+      const streakTitle = document.getElementById('confirmStreakTitle');
+      const streakDesc = document.getElementById('confirmStreakDesc');
+      if(streakCard){
+        if(streakRewardAwarded){
+          streakCard.style.display = 'block';
+          streakTitle.textContent = `🎉 Week ${streakRewardAwarded.streak} Milestone Unlocked!`;
+          streakDesc.textContent = `You earned: ${streakRewardAwarded.label}! Saved to your account for future pre-orders.`;
+        } else if(order.streakWeek && order.streakWeek > 0){
+          streakCard.style.display = 'block';
+          streakTitle.textContent = `🔥 Week ${order.streakWeek} Streak Active!`;
+          streakDesc.textContent = `Your pre-order qualified to keep your weekly streak alive!`;
+        } else {
+          streakCard.style.display = 'none';
+        }
+      }
+
       cartOverlay.classList.remove('open');
       confirmOverlay.classList.add('open');
       if(currentStudent) loadStudentCredits();

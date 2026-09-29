@@ -22,6 +22,7 @@ const vm = require('vm');
 
 const OrderUtils = require(path.join(__dirname, '..', 'order-utils.js'));
 const Pricing = require(path.join(__dirname, '..', 'pricing-strategies.js'));
+const StreakUtils = require(path.join(__dirname, '..', 'streak-utils.js'));
 
 let passed = 0;
 let failed = 0;
@@ -830,5 +831,243 @@ test('buyer 5% referral discount, wheel progress bar, and persistent login are w
 });
 
 // ===========================================================================
+// Change 3: Order streaks & retention milestone rewards
+// ===========================================================================
+
+group('Change 3: order streaks & retention milestone rewards');
+
+test('streak config defaults to calendar_grace mode and $2.50 min spend', () => {
+  assert.strictEqual(StreakUtils.DEFAULT_CONFIG.mode, 'calendar_grace');
+  assert.strictEqual(StreakUtils.DEFAULT_CONFIG.minSpend, 2.50);
+  assert.strictEqual(StreakUtils.DEFAULT_CONFIG.cycleLength, 5);
+});
+
+test('week calculations correctly identify start of week and week difference', () => {
+  // 2026-09-28 is a Monday; 2026-10-04 is Sunday of the same week
+  const mon = new Date('2026-09-28T10:00:00Z').getTime();
+  const sun = new Date('2026-10-04T22:00:00Z').getTime();
+  const nextMon = new Date('2026-10-05T09:00:00Z').getTime();
+
+  assert.strictEqual(StreakUtils.getWeeksDifference(mon, sun), 0);
+  assert.strictEqual(StreakUtils.getWeeksDifference(mon, nextMon), 1);
+});
+
+test('orders under minimum spend do not count toward streaks', () => {
+  const now = new Date('2026-09-28T12:00:00Z').getTime();
+  const smallOrders = [
+    { total: 1.25, createdAt: new Date('2026-09-28T10:00:00Z').toISOString() }
+  ];
+  const res = StreakUtils.computeStreak(smallOrders, { now });
+  assert.strictEqual(res.currentStreak, 0);
+  assert.strictEqual(res.qualifyingOrdersCount, 0);
+});
+
+test('cancelled orders are ignored and do not count toward streaks', () => {
+  const now = new Date('2026-09-28T12:00:00Z').getTime();
+  const orders = [
+    { total: 5.00, status: 'cancelled', createdAt: new Date('2026-09-28T10:00:00Z').toISOString() }
+  ];
+  const res = StreakUtils.computeStreak(orders, { now });
+  assert.strictEqual(res.currentStreak, 0);
+});
+
+test('consecutive weekly qualifying orders build streak to Week 3 and unlock Free Bar', () => {
+  const w1 = new Date('2026-09-14T10:00:00Z').toISOString();
+  const w2 = new Date('2026-09-21T10:00:00Z').toISOString();
+  const w3 = new Date('2026-09-28T10:00:00Z').toISOString();
+  const now = new Date('2026-09-28T12:00:00Z').getTime();
+
+  const orders = [
+    { total: 3.75, createdAt: w1 },
+    { total: 2.50, createdAt: w2 },
+    { total: 4.00, createdAt: w3 }
+  ];
+  const res = StreakUtils.computeStreak(orders, { now });
+  assert.strictEqual(res.currentStreak, 3);
+  assert.strictEqual(res.hasOrderedThisPeriod, true);
+
+  const reward = StreakUtils.evaluateMilestoneReward(2, 3);
+  assert.ok(reward, 'reward should be unlocked at week 3');
+  assert.strictEqual(reward.type, 'free_bar');
+  assert.strictEqual(reward.qty, 1);
+});
+
+test('reaching Week 5 unlocks $1.50 store credit', () => {
+  const reward = StreakUtils.evaluateMilestoneReward(4, 5);
+  assert.ok(reward, 'reward should be unlocked at week 5');
+  assert.strictEqual(reward.type, 'credit');
+  assert.strictEqual(reward.amount, 1.50);
+});
+
+test('5-week repeating cycle continues into Week 8 (free bar) and Week 10 (credit)', () => {
+  const w8 = StreakUtils.evaluateMilestoneReward(7, 8);
+  assert.ok(w8, 'week 8 should award reward');
+  assert.strictEqual(w8.type, 'free_bar');
+
+  const w10 = StreakUtils.evaluateMilestoneReward(9, 10);
+  assert.ok(w10, 'week 10 should award reward');
+  assert.strictEqual(w10.type, 'credit');
+  assert.strictEqual(w10.amount, 1.50);
+});
+
+test('grace week mode preserves streak when 1 week is missed', () => {
+  const w1 = new Date('2026-09-07T10:00:00Z').toISOString();
+  // Skipped week of 2026-09-14
+  const w3 = new Date('2026-09-21T10:00:00Z').toISOString();
+  const now = new Date('2026-09-28T12:00:00Z').getTime(); // week 4
+
+  const orders = [
+    { total: 3.00, createdAt: w1 },
+    { total: 3.00, createdAt: w3 }
+  ];
+  const res = StreakUtils.computeStreak(orders, { now, config: { mode: 'calendar_grace' } });
+  // w1 to w3 had 1 week gap -> grace allowed it to continue to streak = 2
+  // now is week 4 (1 week after w3), so streak is still active waiting for order this week!
+  assert.strictEqual(res.currentStreak, 2);
+  assert.strictEqual(res.hasOrderedThisPeriod, false);
+});
+
+test('strict mode resets streak when 1 week is missed', () => {
+  const w1 = new Date('2026-09-07T10:00:00Z').toISOString();
+  const w3 = new Date('2026-09-21T10:00:00Z').toISOString();
+  const now = new Date('2026-09-28T12:00:00Z').getTime();
+
+  const orders = [
+    { total: 3.00, createdAt: w1 },
+    { total: 3.00, createdAt: w3 }
+  ];
+  const res = StreakUtils.computeStreak(orders, { now, config: { mode: 'strict_calendar' } });
+  // In strict mode, gap resets streak back to 1
+  assert.strictEqual(res.currentStreak, 1);
+});
+
+test('streak messaging formats copy for banner and cart nudge', () => {
+  const msg1 = StreakUtils.getStreakMessaging({ currentStreak: 0 }, 1.50);
+  assert.ok(msg1.bannerBadge.includes('Start a Streak'));
+  assert.strictEqual(msg1.cartQualified, false);
+  assert.ok(msg1.cartNudge.includes('Add $1.00 more'));
+
+  const msg2 = StreakUtils.getStreakMessaging({ currentStreak: 2, hasOrderedThisPeriod: false }, 3.00);
+  assert.strictEqual(msg2.cartQualified, true);
+  assert.ok(msg2.cartNudge.includes('qualifies'));
+});
+
+test('collectStreakReversal generates reversal for free bar and store credit', () => {
+  const barOrder = {
+    name: 'Aisyah',
+    className: 'Sec 2A',
+    streakReward: { type: 'free_bar', qty: 1, label: 'Free Airheads Bar' }
+  };
+  const barRev = StreakUtils.collectStreakReversal(barOrder);
+  assert.ok(barRev);
+  assert.strictEqual(barRev.type, 'free_bar');
+  assert.strictEqual(barRev.qty, 1);
+  assert.strictEqual(barRev.path, 'students/Aisyah/Sec 2A/freeItems');
+
+  const creditOrder = {
+    studentInfo: { name: 'Adam', class: 'Sec 3B' },
+    streakReward: { type: 'credit', amount: 1.50, label: '$1.50 Store Credit' }
+  };
+  const creditRev = StreakUtils.collectStreakReversal(creditOrder);
+  assert.ok(creditRev);
+  assert.strictEqual(creditRev.type, 'credit');
+  assert.strictEqual(creditRev.amount, 1.50);
+  assert.strictEqual(creditRev.path, 'students/Adam/Sec 3B/credit');
+
+  // Already reversed returns null
+  assert.strictEqual(StreakUtils.collectStreakReversal({ streakReward: { type: 'free_bar' }, streakReversed: true }), null);
+});
+
+test('drop cycles mode computes streak based on distinct drop events', () => {
+  const orders = [
+    { total: 3.00, dropId: 'drop-1' },
+    { total: 4.00, dropId: 'drop-1' }, // same drop
+    { total: 5.00, dropId: 'drop-2' }
+  ];
+  const res = StreakUtils.computeStreak(orders, { config: { mode: 'drop_cycles' } });
+  assert.strictEqual(res.currentStreak, 2);
+  assert.strictEqual(res.qualifyingOrdersCount, 3);
+});
+
+test('getStreakStatusMessage formats motivational micro-copy', () => {
+  const msg = StreakUtils.getStreakStatusMessage({ currentStreak: 2, hasOrderedThisPeriod: false });
+  assert.ok(msg.includes('2-Week Streak!'));
+  assert.ok(msg.includes('Order $2.50+'));
+});
+
+test('cancelling an order that achieved a streak milestone claws back the reward safely and idempotently', async () => {
+  const db = makeFakeDb({
+    inventory: { Orange: { stock: 10 } },
+    bundles: {},
+    students: {
+      Aisyah: {
+        'Sec 2 Amanah': { credit: 3.50, freeItems: 2 }
+      }
+    },
+    orders: {
+      streakOrderW3: {
+        name: 'Aisyah',
+        className: 'Sec 2 Amanah',
+        studentInfo: { name: 'Aisyah', class: 'Sec 2 Amanah' },
+        total: 5.00,
+        items: [{ flavor: 'Orange', qty: 4, price: 1.25 }],
+        streakMilestoneAwarded: true,
+        streakReward: { type: 'free_bar', qty: 1, label: 'Free Airheads Bar' }
+      },
+      streakOrderW5: {
+        name: 'Aisyah',
+        className: 'Sec 2 Amanah',
+        studentInfo: { name: 'Aisyah', class: 'Sec 2 Amanah' },
+        total: 5.00,
+        items: [{ flavor: 'Orange', qty: 4, price: 1.25 }],
+        streakMilestoneAwarded: true,
+        streakReward: { type: 'credit', amount: 1.50, label: '$1.50 Store Credit' }
+      }
+    }
+  });
+
+  // Cancel Week 3 order: free bar token is clawed back
+  const res1 = await OrderUtils.restockOrder('streakOrderW3', db._data.orders.streakOrderW3, db);
+  assert.strictEqual(res1.restored, true);
+  assert.strictEqual(res1.streakRewardReversed, true);
+  assert.strictEqual(db._data.students.Aisyah['Sec 2 Amanah'].freeItems, 1);
+  assert.strictEqual(db._data.orders.streakOrderW3.streakRewardReversed, true);
+
+  // Cancel Week 5 order: store credit is clawed back
+  const res2 = await OrderUtils.restockOrder('streakOrderW5', db._data.orders.streakOrderW5, db);
+  assert.strictEqual(res2.restored, true);
+  assert.strictEqual(res2.streakRewardReversed, true);
+  assert.strictEqual(db._data.students.Aisyah['Sec 2 Amanah'].credit, 2.00);
+  assert.strictEqual(db._data.orders.streakOrderW5.streakRewardReversed, true);
+
+  // Idempotency: cancelling again does not claw back extra credit or tokens
+  const repeat = await OrderUtils.restockOrder('streakOrderW5', db._data.orders.streakOrderW5, db);
+  assert.strictEqual(repeat.restored, false);
+  assert.strictEqual(db._data.students.Aisyah['Sec 2 Amanah'].credit, 2.00);
+});
+
+test('wiring: storefront and admin load streak-utils and expose streak UI and customer retention list', () => {
+  const index = readPage('index.html');
+  assert.ok(/src="streak-utils\.js"/.test(index), 'index.html does not load streak-utils.js');
+  assert.ok(/id="streakBanner"/.test(index), 'streak banner missing from index.html');
+  assert.ok(/id="sheetStreakBox"/.test(index), 'cart streak nudge box missing from index.html');
+  assert.ok(/id="confirmStreakCard"/.test(index), 'confirmation streak card missing from index.html');
+  assert.ok(/order\.streakWeek/.test(index), 'streakWeek missing from order creation in index.html');
+
+  const admin = readPage('admin.html');
+  assert.ok(/src="streak-utils\.js"/.test(admin), 'admin.html does not load streak-utils.js');
+  assert.ok(/id="mktStreakEnabled"/.test(admin), 'streak enabled toggle missing from admin.html');
+  assert.ok(/id="mktStreakMode"/.test(admin), 'streak mode dropdown missing from admin.html');
+  assert.ok(/id="mktStreakMinSpend"/.test(admin), 'streak min spend input missing from admin.html');
+  assert.ok(/collectStreakReversal/.test(admin), 'streak cancellation reversal missing from admin.html');
+  assert.ok(/id="customerSearch"/.test(admin), 'customerSearch input missing from admin.html');
+  assert.ok(/id="customerListWrap"/.test(admin), 'customerListWrap missing from admin.html');
+  assert.ok(/function renderCustomerList\(/.test(admin), 'renderCustomerList missing from admin.html');
+  assert.ok(/function listenStudents\(/.test(admin), 'listenStudents missing from admin.html');
+});
+
+// ===========================================================================
 
 runAll();
+
+

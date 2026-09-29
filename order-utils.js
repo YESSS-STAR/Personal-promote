@@ -175,6 +175,38 @@
   }
 
   /**
+   * Streak milestone rewards (free bar tokens or store credit) awarded on order
+   * placement must be reversed if the qualifying order is cancelled.
+   *
+   * @returns {?{type:string, amount?:number, qty?:number, path:string}}
+   */
+  function collectStreakRewardReversal(order) {
+    if (!order || order.streakMilestoneAwarded !== true || order.streakRewardReversed === true) return null;
+    var reward = order.streakReward;
+    if (!reward || typeof reward !== 'object') return null;
+    var to = order.studentInfo || { name: order.name, class: order.className };
+    if (!to || !to.name || !to.class) return null;
+
+    var basePath = 'students/' + to.name + '/' + to.class;
+    if (reward.type === 'free_bar') {
+      var qty = Math.max(0, Number(reward.qty) || 1);
+      return {
+        type: 'free_bar',
+        qty: qty,
+        path: basePath + '/freeItems'
+      };
+    } else if (reward.type === 'credit') {
+      var amount = Math.max(0, Number(reward.amount) || 0);
+      return {
+        type: 'credit',
+        amount: Math.round(amount * 100) / 100,
+        path: basePath + '/credit'
+      };
+    }
+    return null;
+  }
+
+  /**
    * The whole restock, driven through a Firebase-shaped adapter (`db` in the
    * page, an in-memory fake in the tests) so the exact code that runs in
    * production is the code under test.
@@ -184,11 +216,12 @@
    *   2. Add each flavour's units back to inventory.
    *   3. Release the bundle sold-count slots the order claimed.
    *   4. Claw back any rebate store credit the order was paid.
+   *   5. Claw back any streak milestone reward (free bar or credit) awarded.
    *
    * @param {string} orderId
    * @param {object} order the order as stored in the database
    * @param {object} db    Firebase-compatible adapter: ref(path).{once,set,transaction}
-   * @returns {Promise<{restored:boolean, reason?:string, units?:number, flavors?:object, rebateReversed?:boolean}>}
+   * @returns {Promise<{restored:boolean, reason?:string, units?:number, flavors?:object, rebateReversed?:boolean, streakRewardReversed?:boolean}>}
    */
   async function restockOrder(orderId, order, db) {
     if (isRestored(order)) return { restored: false, reason: 'already-restored' };
@@ -227,11 +260,26 @@
         await db.ref('orders/' + orderId + '/rebateReversed').set(true);
       }
 
+      const streakReversal = collectStreakRewardReversal(order);
+      if (streakReversal) {
+        if (streakReversal.type === 'credit') {
+          await db.ref(streakReversal.path).transaction(function (current) {
+            return Math.max(0, roundMoney((Number(current) || 0) - streakReversal.amount));
+          });
+        } else if (streakReversal.type === 'free_bar') {
+          await db.ref(streakReversal.path).transaction(function (current) {
+            return Math.max(0, (Number(current) || 0) - streakReversal.qty);
+          });
+        }
+        await db.ref('orders/' + orderId + '/streakRewardReversed').set(true);
+      }
+
       return {
         restored: true,
         units: totalRestoredUnits(restoration),
         flavors: restoration,
-        rebateReversed: !!rebate
+        rebateReversed: !!rebate,
+        streakRewardReversed: !!streakReversal
       };
     } catch (err) {
       // Hand the claim back so a retry can still restock.
@@ -249,6 +297,7 @@
     totalRestoredUnits: totalRestoredUnits,
     isRestored: isRestored,
     collectRebateReversal: collectRebateReversal,
+    collectStreakRewardReversal: collectStreakRewardReversal,
     restockOrder: restockOrder
   };
 });

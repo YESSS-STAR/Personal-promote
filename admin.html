@@ -545,12 +545,43 @@
         </div>
       </div>
 
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <h4 style="margin:0;font-size:13px;">🔥 Weekly Order Streaks &amp; Retention</h4>
+          <input type="checkbox" id="mktStreakEnabled" checked style="width:auto;margin:0;">
+        </div>
+        <p style="color:var(--muted);font-size:11.5px;margin:0 0 10px;">Incentivize recurring orders. Repeating 5-week ladder: Free Bar at Week 3, $1.50 Store Credit at Week 5.</p>
+        <div class="calc-group" style="margin-bottom:10px;">
+          <label>Streak Calculation Mode</label>
+          <select id="mktStreakMode" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="calendar_grace">Calendar Week (Mon–Sun) + 1 Grace Week (Default)</option>
+            <option value="strict_calendar">Strict Calendar Week (Reset immediately on missed week)</option>
+            <option value="drop_cycles">Admin Restock Drop Cycles</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div class="calc-group" style="flex:1;">
+            <label>Min qualifying spend ($)</label>
+            <input type="number" id="mktStreakMinSpend" min="0.50" step="0.25" value="2.50">
+          </div>
+          <div class="calc-group" style="flex:1;">
+            <label>Week 5 Credit Reward ($)</label>
+            <input type="number" id="mktStreakW5Credit" min="0.25" step="0.25" value="1.50">
+          </div>
+        </div>
+      </div>
+
       <button onclick="saveMarketingSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Save marketing settings</button>
       <div id="marketingStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
 
       <div style="background:var(--accent);opacity:0.1;border-radius:var(--radius);padding:12px;margin-top:12px;">
         <p style="margin:0;font-size:12px;color:var(--text);"><strong>Live preview:</strong> <span id="marketingPreview">-</span></p>
       </div>
+
+      <h3 style="margin-top:24px;">Customer Retention &amp; Streaks</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Shows each student's current active streak count alongside their order count and store credit.</p>
+      <input type="text" id="customerSearch" placeholder="Search students by name or class..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;" oninput="renderCustomerList()">
+      <div id="customerListWrap"><div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Loading students...</div></div>
 
       <h3 style="margin-top:24px;">Strategy playbook</h3>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">What each tactic is, why it works, and how it is wired into this shop.</p>
@@ -588,6 +619,9 @@
 <!-- Shared logic: restock maths (order-utils) and the pricing/rebate strategy engine -->
 <script src="order-utils.js"></script>
 <script src="pricing-strategies.js"></script>
+<!-- Retention streaks & milestone rewards engine -->
+<script src="streak-utils.js"></script>
+
 <script>
   let db;
   let firebaseReady = false;
@@ -842,6 +876,7 @@
     loadReferralSettings();
     loadReferrers();
     loadMarketingSettings();
+    listenStudents();
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
@@ -931,6 +966,7 @@
       console.log('✓ Orders loaded:', Object.keys(currentOrders).length, 'orders');
       renderOrders();
       renderStats();
+      renderCustomerList();
     }, err => {
       clearTimeout(loadTimeout);
       hasLoaded = true;
@@ -1042,6 +1078,9 @@
       if(Number(o.referralRedeemUsed) > 0){
         extras.push(`<div class="order-item-line"><span>Referral earnings used</span><span>-$${Number(o.referralRedeemUsed).toFixed(2)}</span></div>`);
       }
+      if(o.streakWeek){
+        extras.push(`<div class="order-item-line"><span>🔥 Streak</span><span style="font-weight:700;color:var(--primary);">Week ${o.streakWeek}${o.streakReward ? ' (' + escapeHtml(o.streakReward.label) + ')' : ''}${o.streakReversed ? ' <small style="color:var(--danger);">(reversed)</small>' : ''}</span></div>`);
+      }
 
       return `
         <div class="card order-card">
@@ -1136,6 +1175,17 @@
     // "sold", so every cancellation quietly shrank the shelf. Put them back.
     if(order && newStatus === 'cancelled'){
       await restockCancelledOrder(orderId, order);
+      if(order.streakReward && !order.streakReversed && typeof StreakUtils !== 'undefined'){
+        const streakRev = StreakUtils.collectStreakReversal(order);
+        if(streakRev){
+          if(streakRev.type === 'free_bar'){
+            await db.ref(streakRev.path).transaction(current => Math.max(0, (Number(current) || 0) - streakRev.qty));
+          } else if(streakRev.type === 'credit'){
+            await db.ref(streakRev.path).transaction(current => Math.max(0, OrderUtils.roundMoney((Number(current) || 0) - streakRev.amount)));
+          }
+          await db.ref(`orders/${orderId}/streakReversed`).set(true);
+        }
+      }
     }
 
     await db.ref(`orders/${orderId}/status`).set(newStatus);
@@ -1674,6 +1724,10 @@
     enabled: { charm:true, anchor:true, volume:true, rebate:true, scarcity:true, socialProof:true }
   };
 
+  let streakSettings = (typeof StreakUtils !== 'undefined')
+    ? Object.assign({}, StreakUtils.DEFAULT_CONFIG)
+    : { enabled:true, mode:'calendar_grace', minSpend:2.50, cycleLength:5 };
+
   function renderMarketingToggles(){
     document.getElementById('marketingToggles').innerHTML = MARKETING_TACTICS.map(t => `
       <label style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;">
@@ -1896,6 +1950,25 @@
     document.getElementById('mktSocialFloor').value = marketingSettings.socialProofFloor;
     document.getElementById('mktRebateCap').value = marketingSettings.rebateCap;
 
+    try {
+      const streakSnap = await db.ref('settings/streak').once('value');
+      const streakData = streakSnap.val();
+      if(streakData && typeof streakData === 'object'){
+        streakSettings = Object.assign({}, StreakUtils.DEFAULT_CONFIG, streakData);
+      }
+      const stEnabled = document.getElementById('mktStreakEnabled');
+      if(stEnabled) stEnabled.checked = streakSettings.enabled !== false;
+      const stMode = document.getElementById('mktStreakMode');
+      if(stMode) stMode.value = streakSettings.mode || 'calendar_grace';
+      const stMin = document.getElementById('mktStreakMinSpend');
+      if(stMin) stMin.value = streakSettings.minSpend || 2.50;
+      const w5Milestone = (streakSettings.milestones || []).find(m => m.step === 5);
+      const stCredit = document.getElementById('mktStreakW5Credit');
+      if(stCredit) stCredit.value = (w5Milestone && w5Milestone.amount) || 1.50;
+    } catch(err){
+      console.error('Streak settings load error:', err);
+    }
+
     renderMarketingToggles();
     renderVolumeRows();
     renderRebateRows();
@@ -1914,11 +1987,31 @@
     try {
       marketingSettings = result.settings;
       await db.ref('settings/marketing').set(marketingSettings);
+
+      const stEnabled = document.getElementById('mktStreakEnabled');
+      const stMode = document.getElementById('mktStreakMode');
+      const stMin = document.getElementById('mktStreakMinSpend');
+      const stCredit = document.getElementById('mktStreakW5Credit');
+      const sMinSpend = (stMin && parseFloat(stMin.value)) || 2.50;
+      const sW5Credit = (stCredit && parseFloat(stCredit.value)) || 1.50;
+      const newStreakConfig = {
+        enabled: stEnabled ? stEnabled.checked : true,
+        mode: (stMode && stMode.value) || 'calendar_grace',
+        minSpend: sMinSpend,
+        cycleLength: 5,
+        milestones: [
+          { step: 3, type: 'free_bar', qty: 1, label: 'Free Airheads Bar' },
+          { step: 5, type: 'credit', amount: sW5Credit, label: `$${sW5Credit.toFixed(2)} Store Credit` }
+        ]
+      };
+      await db.ref('settings/streak').set(newStreakConfig);
+      streakSettings = newStreakConfig;
+
       renderPriceLadder();
       const status = document.getElementById('marketingStatus');
       status.textContent = '✓ Saved! The storefront picks this up live.';
       setTimeout(() => { status.textContent = ''; }, 3000);
-      showToast('Marketing settings saved');
+      showToast('Marketing & streak settings saved');
     } catch(err){
       console.error('Marketing settings save error:', err);
       showToast('Error: ' + err.message);
@@ -2008,6 +2101,130 @@
       console.error('Referrer balance save error:', err);
       showToast('Error: ' + err.message);
     }
+  }
+
+  // ---------- Student Streaks & Retention Management ----------
+  let currentStudents = {};
+
+  function listenStudents(){
+    db.ref('students').on('value', snap => {
+      currentStudents = snap.val() || {};
+      renderCustomerList();
+    }, err => {
+      console.error('❌ Students listen error:', err);
+    });
+  }
+
+  function renderCustomerList(){
+    const wrap = document.getElementById('customerListWrap');
+    if(!wrap) return;
+
+    const customerMap = {};
+
+    // 1. From database students
+    if(currentStudents && typeof currentStudents === 'object'){
+      Object.keys(currentStudents).forEach(name => {
+        const classes = currentStudents[name];
+        if(classes && typeof classes === 'object'){
+          Object.keys(classes).forEach(cls => {
+            const key = (name + '___' + cls).toLowerCase();
+            const info = classes[cls] || {};
+            customerMap[key] = {
+              name: name,
+              className: cls,
+              credit: Number(info.credit) || 0,
+              freeItems: Number(info.freeItems) || 0,
+              orders: []
+            };
+          });
+        }
+      });
+    }
+
+    // 2. From orders
+    Object.values(currentOrders || {}).forEach(o => {
+      if(!o) return;
+      const name = ((o.studentInfo && o.studentInfo.name) || o.name || '').trim();
+      const cls = ((o.studentInfo && o.studentInfo.class) || o.className || '').trim();
+      if(!name || !cls) return;
+      const key = (name + '___' + cls).toLowerCase();
+      if(!customerMap[key]){
+        customerMap[key] = {
+          name: name,
+          className: cls,
+          credit: 0,
+          freeItems: 0,
+          orders: []
+        };
+      }
+      customerMap[key].orders.push(o);
+    });
+
+    let list = Object.values(customerMap);
+
+    const searchInput = document.getElementById('customerSearch');
+    const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    if(term){
+      list = list.filter(c => c.name.toLowerCase().includes(term) || c.className.toLowerCase().includes(term));
+    }
+
+    // Compute streak and stats for each student
+    const studentRows = list.map(c => {
+      const validOrders = c.orders.filter(o => o.status !== 'cancelled');
+      const streakInfo = (typeof StreakUtils !== 'undefined')
+        ? StreakUtils.computeStreak(c.orders, { config: streakSettings })
+        : { currentStreak: 0, graceActive: false };
+
+      return {
+        name: c.name,
+        className: c.className,
+        credit: c.credit,
+        freeItems: c.freeItems,
+        orderCount: validOrders.length,
+        streak: streakInfo.currentStreak,
+        graceActive: streakInfo.graceActive,
+        hasOrderedThisPeriod: streakInfo.hasOrderedThisPeriod,
+        nextMilestone: streakInfo.nextMilestone
+      };
+    });
+
+    // Sort by streak desc, then orderCount desc, then name asc
+    studentRows.sort((a,b) => b.streak - a.streak || b.orderCount - a.orderCount || a.name.localeCompare(b.name));
+
+    if(studentRows.length === 0){
+      wrap.innerHTML = `<div class="empty-state" style="padding:20px 0;"><small>${term ? 'No students match your search.' : 'No customer records yet.'}</small></div>`;
+      return;
+    }
+
+    wrap.innerHTML = studentRows.map(s => {
+      const streakBadge = s.streak > 0
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:var(--radius-pill);background:var(--grad-soft);color:var(--primary);font-weight:700;font-size:12px;">🔥 Week ${s.streak}${s.graceActive ? ' <small style="color:var(--warn);">(Grace)</small>' : ''}</span>`
+        : `<span style="display:inline-flex;padding:4px 9px;border-radius:var(--radius-pill);background:var(--surface-3);color:var(--muted);font-size:12px;">0 weeks</span>`;
+
+      return `
+        <div class="card" style="margin-bottom:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--text);">${escapeHtml(s.name)}</div>
+            <div style="font-size:12px;color:var(--muted);">${escapeHtml(s.className)} · ${s.orderCount} order${s.orderCount === 1 ? '' : 's'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:var(--muted);">Streak</div>
+              <div>${streakBadge}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:var(--muted);">Store Credit</div>
+              <div style="font-weight:700;color:var(--success);font-size:13px;">$${s.credit.toFixed(2)}</div>
+            </div>
+            ${s.freeItems > 0 ? `
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:var(--muted);">Free Bars</div>
+              <div style="font-weight:700;color:var(--accent);font-size:13px;">${s.freeItems} token</div>
+            </div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
 </script>
