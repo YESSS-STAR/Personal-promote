@@ -506,7 +506,7 @@ async function storefrontScenario(session) {
   equal('a volume discount row appears', sheet.volumeVisible, true);
   equal('the row names the applied tier', sheet.volumeLabel, 'Volume discount (10% off)');
   equal('the row shows the money off', sheet.volumeAmt, '-$0.50');
-  equal('the nudge pushes the next tier', sheet.nudge, '10% off applied. Add 2 more for 20% off');
+  equal('the nudge pushes the next tier', sheet.nudge, '10% off applied. Add 2 more bars for 20% off');
   equal('the rebate panel appears', sheet.rebateVisible, true);
   equal('the rebate is 20% of the post-discount subtotal', sheet.rebate, 'You earn $0.90 store credit on this order');
   equal('the total has the volume discount off but not the rebate', sheet.total, '$4.50');
