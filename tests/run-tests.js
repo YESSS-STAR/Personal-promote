@@ -371,15 +371,15 @@ test('volume discounts apply at the tier boundary, not one bar early', () => {
 test('volume nudge copy tells the shopper exactly how far the next tier is', () => {
   assert.strictEqual(
     Pricing.volumeNudge(Pricing.volumeDiscount(2, 2.5)),
-    'Add 1 more bar to unlock 5% off'
+    'Add 1 more to unlock 5% off'
   );
   assert.strictEqual(
     Pricing.volumeNudge(Pricing.volumeDiscount(3, 3.75)),
-    '5% off applied. Add 2 more bars for 10% off'
+    '5% off applied. Add 2 more for 10% off'
   );
   assert.strictEqual(
     Pricing.volumeNudge(Pricing.volumeDiscount(10, 12.5)),
-    'Best volume price unlocked — 15% off'
+    'Best volume price unlocked - 15% off'
   );
 });
 

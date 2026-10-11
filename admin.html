@@ -5,72 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Airheads Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Same tokens as the storefront and the dashboard, so staff and students are
-       looking at the same product. Hue is reserved for flavour and for money. */
-    --paper:#FFFFFF; --paper-2:#F1F1F4; --paper-3:#E7E7EC;
-    --line:#E3E3E8; --line-2:#CBCBD3;
-    --ink:#000000; --ink-2:#5F5F66; --ink-3:#8C8C94;
-    --money:#0B7A45; --warn:#8A5A00; --danger:#B3141B;
-    --r:4px; --r-sm:3px; --r-pill:999px;
-    --font:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
-    --font-display:'Archivo Black','Archivo',system-ui,sans-serif;
-
-    /* Aliases: the rules below were written against these names, so pointing them
-       at the new palette re-skins the whole panel without touching 1800 lines. */
-    --bg:var(--paper-2);
-    --surface:var(--paper);
-    --text:var(--ink);
-    --muted:var(--ink-2);
-    --border:var(--line);
-    --primary:var(--ink);
-    --primary-dark:var(--ink);
-    --accent:var(--ink-2);
-    --success:var(--money);
-    --shadow:none;
-    --radius:var(--r);
-    color-scheme:light;
+    --bg:#FFF9FB;
+    --surface:#FFFFFF;
+    --text:#1C1420;
+    --muted:#8A7C87;
+    --border:#F1DDE5;
+    --primary:#FF4F81;
+    --primary-dark:#E23E6C;
+    --accent:#8E5CD9;
+    --success:#2FAE66;
+    --warn:#C97C0A;
+    --danger:#E14A4A;
+    --shadow: 0 2px 10px rgba(28,20,32,0.06);
+    --radius:14px;
   }
   html[data-theme="dark"]{
-    --paper:#0A0A0C; --paper-2:#16161A; --paper-3:#1F1F24;
-    --line:#2A2A31; --line-2:#3A3A43;
-    --ink:#FFFFFF; --ink-2:#A6A6B0; --ink-3:#7C7C86;
-    --money:#3ED07E; --warn:#E0A458; --danger:#FF6B6B;
-    color-scheme:dark;
+    --bg:#17111A;
+    --surface:#221A26;
+    --text:#F5EEF2;
+    --muted:#B39EAC;
+    --border:#33262E;
+    --primary:#FF6B93;
+    --primary-dark:#FF4F81;
+    --accent:#B085F5;
+    --warn:#FFB55C;
+    --shadow: 0 2px 14px rgba(0,0,0,0.35);
   }
   *{box-sizing:border-box;}
-  :focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
-  body{margin:0; background:var(--bg); color:var(--text); font-family:var(--font); transition:background .25s, color .25s; min-height:100vh;}
-  h1,h2,h3{font-family:var(--font);}
-  /* Money gets the display face and tabular figures so columns line up. */
-  .money,.stat-num,.stat-value,.ladder-price,.price-cell{
-    font-family:var(--font-display); font-variant-numeric:tabular-nums;
-  }
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; transition:background .25s, color .25s; min-height:100vh;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
 
   /* Login */
   .login-wrap{
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
   }
   .login-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
     padding:32px 26px; width:100%; max-width:340px; box-shadow:var(--shadow); text-align:center;
   }
   .login-mark{
-    width:46px;height:46px;border-radius:var(--r); margin:0 auto 14px;
-    background:var(--ink);
+    width:46px;height:46px;border-radius:50%; margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
   }
   .login-card h2{margin:0 0 4px; font-size:19px;}
   .login-card p{margin:0 0 18px; color:var(--muted); font-size:13px;}
   input[type=password], input[type=text], input[type=number]{
-    width:100%; padding:12px 14px; border-radius:var(--r); border:1px solid var(--border);
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
     background:var(--bg); color:var(--text); font-size:14.5px;
   }
   input:focus{outline:2px solid var(--primary); outline-offset:1px;}
   .login-btn, .primary-btn{
-    width:100%; margin-top:14px; padding:13px; border:none; border-radius:var(--r);
-    background:var(--ink);color:var(--paper); font-weight:700; font-size:14.5px; cursor:pointer;
+    width:100%; margin-top:14px; padding:13px; border:none; border-radius:12px;
+    background:var(--primary); color:#fff; font-weight:700; font-size:14.5px; cursor:pointer;
   }
   .error-msg{color:var(--danger); font-size:12.5px; margin-top:10px; min-height:16px;}
 
@@ -82,7 +71,7 @@
     display:flex; align-items:center; justify-content:space-between; backdrop-filter:blur(6px);
   }
   .brand{display:flex; align-items:center; gap:10px;}
-  .brand-mark{width:32px;height:32px;border-radius:var(--r-sm); background:var(--ink); flex-shrink:0;}
+  .brand-mark{width:32px;height:32px;border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); flex-shrink:0;}
   .brand-text h1{font-size:16px; margin:0;}
   .brand-text span{font-size:11px; color:var(--muted); font-weight:500;}
   .header-actions{display:flex; gap:8px;}
@@ -91,20 +80,20 @@
     display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text);
   }
   .icon-btn svg{width:17px;height:17px;}
-  .icon-btn.active{background:var(--ink);color:var(--paper);border-color:var(--primary);}
+  .icon-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
   .logout-btn{
     border:1px solid var(--border); background:var(--surface); color:var(--text);
-    padding:0 14px; height:36px; border-radius:var(--r); font-size:12.5px; font-weight:600; cursor:pointer;
+    padding:0 14px; height:36px; border-radius:20px; font-size:12.5px; font-weight:600; cursor:pointer;
   }
 
   main{max-width:640px; margin:0 auto; padding:18px 16px 60px;}
 
-  .tabs{display:flex; gap:6px; margin-bottom:16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:4px;}
+  .tabs{display:flex; gap:6px; margin-bottom:16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:4px;}
   .tab-btn{
     flex:1; padding:9px 0; text-align:center; border:none; background:none; color:var(--muted);
-    font-weight:600; font-size:13px; border-radius:var(--r-sm); cursor:pointer;
+    font-weight:600; font-size:13px; border-radius:10px; cursor:pointer;
   }
-  .tab-btn.active{background:var(--ink);color:var(--paper);}
+  .tab-btn.active{background:var(--primary); color:#fff;}
 
   .section{display:none;}
   .section.active{display:block;}
@@ -121,7 +110,7 @@
   .inv-fields{display:flex; gap:8px;}
   .field-group{display:flex; flex-direction:column; gap:3px;}
   .field-group label{font-size:10.5px; color:var(--muted); font-weight:600;}
-  .field-group input{width:78px; padding:7px 8px; font-size:13.5px; border-radius:var(--r-sm);}
+  .field-group input{width:78px; padding:7px 8px; font-size:13.5px; border-radius:8px;}
   .save-badge{
     font-size:11px; color:var(--success); font-weight:600; opacity:0; transition:opacity .3s ease;
     margin-top:6px; text-align:right;
@@ -135,20 +124,20 @@
   .order-class{font-size:12px; color:var(--muted);}
   .order-time{font-size:11px; color:var(--muted);}
   .status-pill{
-    font-size:11px; font-weight:700; padding:4px 10px; border-radius:var(--r); text-transform:capitalize; white-space:nowrap;
+    font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; text-transform:capitalize; white-space:nowrap;
   }
   .status-pending{background:rgba(201,124,10,0.15); color:var(--warn);}
   .status-paid{background:rgba(94,124,226,0.15); color:#5E7CE2;}
   .status-fulfilled{background:rgba(47,174,102,0.15); color:var(--success);}
   .status-cancelled{background:rgba(225,74,74,0.12); color:var(--danger); text-decoration:line-through;}
 
-  .order-items{font-size:13px; color:var(--text); margin:8px 0; padding:8px 10px; background:var(--bg); border-radius:var(--r-sm);}
+  .order-items{font-size:13px; color:var(--text); margin:8px 0; padding:8px 10px; background:var(--bg); border-radius:10px;}
   .order-item-line{display:flex; justify-content:space-between; padding:2px 0;}
   .order-total{display:flex; justify-content:space-between; font-weight:700; font-size:13.5px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);}
 
   .order-actions{display:flex; gap:7px; margin-top:10px; flex-wrap:wrap;}
   .act-btn{
-    flex:1; min-width:90px; padding:9px 0; border-radius:var(--r-sm); border:1px solid var(--border);
+    flex:1; min-width:90px; padding:9px 0; border-radius:10px; border:1px solid var(--border);
     background:var(--bg); color:var(--text); font-size:12.5px; font-weight:600; cursor:pointer;
   }
   .act-btn.paid{border-color:#5E7CE2; color:#5E7CE2;}
@@ -160,30 +149,30 @@
 
   .calc-group{margin-bottom:10px;}
   .calc-group label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;}
-  .calc-group input{width:100%;padding:9px 11px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
+  .calc-group input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
   
-  select{border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
+  select{border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;}
   
   .calc-result{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
   .calc-result:last-child{border-bottom:none;}
   .calc-result .label{font-weight:600;}
   .calc-result .value{font-weight:700;color:var(--primary);}
 
-  .team-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .team-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
   .team-info .name{font-weight:700;font-size:13px;}
   .team-info .role{font-size:11px;color:var(--muted);}
-  .remove-admin{background:none;border:1px solid var(--danger);color:var(--danger);padding:6px 10px;border-radius:var(--r-sm);font-size:11px;font-weight:600;cursor:pointer;}
+  .remove-admin{background:none;border:1px solid var(--danger);color:var(--danger);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;}
 
-  .approval-card{background:var(--bg);border:2px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:10px;}
+  .approval-card{background:var(--bg);border:2px solid var(--accent);border-radius:12px;padding:12px;margin-bottom:10px;}
   .approval-action{font-size:12px;margin:6px 0;padding:6px 0;border-bottom:1px solid var(--border);}
   .approval-action:last-child{border-bottom:none;}
   .approval-btns{display:flex;gap:8px;margin-top:10px;}
-  .approve-btn{flex:1;padding:8px;border:none;border-radius:var(--r-sm);background:var(--money);color:var(--paper);font-weight:600;font-size:11.5px;cursor:pointer;}
-  .reject-btn{flex:1;padding:8px;border:none;border-radius:var(--r-sm);background:var(--alert);color:var(--paper);font-weight:600;font-size:11.5px;cursor:pointer;}
+  .approve-btn{flex:1;padding:8px;border:none;border-radius:8px;background:var(--success);color:#fff;font-weight:600;font-size:11.5px;cursor:pointer;}
+  .reject-btn{flex:1;padding:8px;border:none;border-radius:8px;background:var(--danger);color:#fff;font-weight:600;font-size:11.5px;cursor:pointer;}
 
   .toast{
     position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-10px);
-    background:var(--text); color:var(--bg); padding:10px 18px; border-radius:var(--r);
+    background:var(--text); color:var(--bg); padding:10px 18px; border-radius:20px;
     font-size:13px; font-weight:600; opacity:0; pointer-events:none;
     transition:all .25s ease; z-index:60; white-space:nowrap;
   }
@@ -191,17 +180,17 @@
 
   .filter-row{display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px;}
   .filter-chip{
-    flex-shrink:0; padding:6px 13px; border-radius:var(--r); border:1px solid var(--border);
+    flex-shrink:0; padding:6px 13px; border-radius:20px; border:1px solid var(--border);
     background:var(--surface); color:var(--muted); font-size:12px; font-weight:600; cursor:pointer;
   }
   .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text);}
 
   .stats-row{display:flex; gap:10px; margin-bottom:16px;}
   .stat-box{
-    flex:1; background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+    flex:1; background:var(--surface); border:1px solid var(--border); border-radius:14px;
     padding:12px; text-align:center;
   }
-  .stat-box .num{font-size:19px; font-weight:800; font-family:var(--font-display); color:var(--primary);}
+  .stat-box .num{font-size:19px; font-weight:800; font-family:'Poppins',sans-serif; color:var(--primary);}
   .stat-box .lbl{font-size:10.5px; color:var(--muted); font-weight:600; margin-top:2px;}
 </style>
 </head>
@@ -256,7 +245,7 @@
     </div>
 
     <div class="section active" id="ordersSection">
-      <input type="text" id="orderSearch" placeholder="Search by name or class..." style="width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;">
+      <input type="text" id="orderSearch" placeholder="Search by name or class..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;">
       <div class="filter-row" id="filterRow">
         <button class="filter-chip active" data-status="all">All</button>
         <button class="filter-chip" data-status="pending">Pending</button>
@@ -286,7 +275,7 @@
         <div style="display:flex;gap:10px;margin-bottom:10px;">
           <div style="flex:1;">
             <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Type</label>
-            <select id="newCouponType" style="width:100%;padding:9px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+            <select id="newCouponType" style="width:100%;padding:9px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
               <option value="percentage">Percentage off</option>
               <option value="fixed">Fixed amount off</option>
             </select>
@@ -301,7 +290,7 @@
           <input type="number" id="newCouponMaxUses" placeholder="e.g. 50" min="1" step="1">
         </div>
 
-        <button onclick="createCoupon()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;">Create Coupon</button>
+        <button onclick="createCoupon()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;">Create Coupon</button>
       </div>
 
       <div>
@@ -330,7 +319,7 @@
         <div style="margin-bottom:10px;">
           <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;">Contains</label>
           <div id="bundleComponentRows"></div>
-          <button type="button" onclick="addBundleComponentRow()" style="margin-top:6px;padding:6px 10px;font-size:12px;border:1px dashed var(--border);background:transparent;color:var(--text);border-radius:var(--r-sm);cursor:pointer;">+ Add flavor</button>
+          <button type="button" onclick="addBundleComponentRow()" style="margin-top:6px;padding:6px 10px;font-size:12px;border:1px dashed var(--border);background:transparent;color:var(--text);border-radius:8px;cursor:pointer;">+ Add flavor</button>
         </div>
 
         <div style="margin-top:8px;">
@@ -338,7 +327,7 @@
           <input type="number" id="newBundleMaxSold" placeholder="e.g. 20" min="1" step="1">
         </div>
 
-        <button onclick="createBundle()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;">Create Bundle</button>
+        <button onclick="createBundle()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;">Create Bundle</button>
       </div>
 
       <div>
@@ -365,7 +354,7 @@
             <label>Selling Price ($)</label>
             <input type="number" id="sellingPrice" min="0" step="0.01" placeholder="e.g. 1.50">
           </div>
-          <button onclick="calculateBaseline()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
+          <button onclick="calculateBaseline()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
           <div id="baselineResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
         </div>
 
@@ -383,7 +372,7 @@
             <label>Unit Cost ($)</label>
             <input type="number" id="calcUnitCost" min="0" step="0.01" placeholder="Auto-calculated above">
           </div>
-          <button onclick="calculateRisk()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
+          <button onclick="calculateRisk()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
           <div id="riskResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
         </div>
 
@@ -405,7 +394,7 @@
             <label>Weeks (Term Length)</label>
             <input type="number" id="termWeeks" min="1" step="1" placeholder="e.g. 12">
           </div>
-          <button onclick="calculatePromo()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
+          <button onclick="calculatePromo()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:10px;">Calculate</button>
           <div id="promoResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
         </div>
       </div>
@@ -419,8 +408,8 @@
         <div class="calc-group">
           <label>Minimum Cart Total (threshold)</label>
           <div style="display:flex;gap:8px;">
-            <span style="padding:10px;background:var(--bg);border-radius:var(--r-sm);flex:1;">$</span>
-            <input type="number" id="upsaleThreshold" min="0" step="0.01" placeholder="1.20" style="flex:3;padding:10px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <span style="padding:10px;background:var(--bg);border-radius:10px;flex:1;">$</span>
+            <input type="number" id="upsaleThreshold" min="0" step="0.01" placeholder="1.20" style="flex:3;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
           </div>
           <small style="color:var(--muted);font-size:11px;margin-top:4px;">When cart total exceeds this, show upsale offer</small>
         </div>
@@ -428,15 +417,15 @@
         <div class="calc-group">
           <label>Upsale Price (discount)</label>
           <div style="display:flex;gap:8px;">
-            <span style="padding:10px;background:var(--bg);border-radius:var(--r-sm);flex:1;">$</span>
-            <input type="number" id="upsalePrice" min="0" step="0.01" placeholder="0.90" style="flex:3;padding:10px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <span style="padding:10px;background:var(--bg);border-radius:10px;flex:1;">$</span>
+            <input type="number" id="upsalePrice" min="0" step="0.01" placeholder="0.90" style="flex:3;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
           </div>
           <small style="color:var(--muted);font-size:11px;margin-top:4px;">Price to offer for the upsale flavor</small>
         </div>
 
         <div class="calc-group">
           <label>Upsale Flavor</label>
-          <select id="upsaleFlavor" style="width:100%;padding:10px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+          <select id="upsaleFlavor" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
             <option value="Orange">Orange</option>
             <option value="Blue Raspberry">Blue Raspberry</option>
             <option value="Grape">Grape</option>
@@ -447,7 +436,7 @@
           <small style="color:var(--muted);font-size:11px;margin-top:4px;">Which flavor to upsell</small>
         </div>
 
-        <button onclick="saveUpsaleSettings()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:12px;">Save Upsale Settings</button>
+        <button onclick="saveUpsaleSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:12px;">Save Upsale Settings</button>
         <div id="upsaleStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
       </div>
 
@@ -464,13 +453,13 @@
         <div class="calc-group">
           <label>Referral Rate (cents per $1 spent)</label>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input type="number" id="referralRatePercent" min="0" max="100" step="1" placeholder="15" style="flex:3;padding:10px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);">
-            <span style="padding:10px;background:var(--bg);border-radius:var(--r-sm);flex:1;text-align:center;">%</span>
+            <input type="number" id="referralRatePercent" min="0" max="100" step="1" placeholder="15" style="flex:3;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <span style="padding:10px;background:var(--bg);border-radius:10px;flex:1;text-align:center;">%</span>
           </div>
           <small style="color:var(--muted);font-size:11px;margin-top:4px;">e.g. 15 means referrer earns $0.15 for every $1 their friend spends</small>
         </div>
 
-        <button onclick="saveReferralSettings()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:12px;">Save Referral Settings</button>
+        <button onclick="saveReferralSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:12px;">Save Referral Settings</button>
         <div id="referralStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
       </div>
 
@@ -484,7 +473,7 @@
 
       <h3 style="margin-top:24px;">Referrer Balances</h3>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Manually adjust any referrer's earned or pending credit — e.g. to correct a mistake or pay them out in cash.</p>
-      <input type="text" id="referrerSearch" placeholder="Search by name or code..." style="width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;">
+      <input type="text" id="referrerSearch" placeholder="Search by name or code..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;">
       <div id="referrerListWrap"><div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Loading referrers...</div></div>
     </div>
 
@@ -510,10 +499,10 @@
           </div>
         </div>
 
-        <button onclick="renderPriceLadder()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:6px;">Recalculate strategy plan</button>
+        <button onclick="renderPriceLadder()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:6px;">Recalculate strategy plan</button>
         <div id="priceLadderResults" style="margin-top:12px;font-size:12.5px;color:var(--muted);"></div>
 
-        <button onclick="applyShelfPriceToInventory()" style="width:100%;padding:10px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);font-weight:600;cursor:pointer;margin-top:12px;">Apply recommended shelf price to all flavours</button>
+        <button onclick="applyShelfPriceToInventory()" style="width:100%;padding:10px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;font-weight:600;cursor:pointer;margin-top:12px;">Apply recommended shelf price to all flavours</button>
       </div>
 
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
@@ -564,7 +553,7 @@
         <p style="color:var(--muted);font-size:11.5px;margin:0 0 10px;">Incentivize recurring orders. Repeating 5-week ladder: Free Bar at Week 3, $1.50 Store Credit at Week 5.</p>
         <div class="calc-group" style="margin-bottom:10px;">
           <label>Streak Calculation Mode</label>
-          <select id="mktStreakMode" style="width:100%;padding:10px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+          <select id="mktStreakMode" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
             <option value="calendar_grace">Calendar Week (Mon–Sun) + 1 Grace Week (Default)</option>
             <option value="strict_calendar">Strict Calendar Week (Reset immediately on missed week)</option>
             <option value="drop_cycles">Admin Restock Drop Cycles</option>
@@ -582,7 +571,7 @@
         </div>
       </div>
 
-      <button onclick="saveMarketingSettings()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;">Save marketing settings</button>
+      <button onclick="saveMarketingSettings()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Save marketing settings</button>
       <div id="marketingStatus" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;"></div>
 
       <div style="background:var(--accent);opacity:0.1;border-radius:var(--radius);padding:12px;margin-top:12px;">
@@ -591,7 +580,7 @@
 
       <h3 style="margin-top:24px;">Customer Retention &amp; Streaks</h3>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Shows each student's current active streak count alongside their order count and store credit.</p>
-      <input type="text" id="customerSearch" placeholder="Search students by name or class..." style="width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;" oninput="renderCustomerList()">
+      <input type="text" id="customerSearch" placeholder="Search students by name or class..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;margin-bottom:10px;" oninput="renderCustomerList()">
       <div id="customerListWrap"><div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Loading students...</div></div>
 
       <h3 style="margin-top:24px;">Strategy playbook</h3>
@@ -605,9 +594,9 @@
       
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;">
         <label style="font-weight:600;color:var(--text);display:block;margin-bottom:8px;">Add New Team Member</label>
-        <input type="text" id="newAdminName" placeholder="Name (e.g. Fadil)" maxlength="30" style="width:100%;padding:10px;margin-bottom:8px;border-radius:var(--r-sm);">
-        <input type="password" id="newAdminPassword" placeholder="Set password" maxlength="20" style="width:100%;padding:10px;margin-bottom:10px;border-radius:var(--r-sm);">
-        <button onclick="addTeamMember()" style="width:100%;padding:10px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;cursor:pointer;">Add to Team</button>
+        <input type="text" id="newAdminName" placeholder="Name (e.g. Fadil)" maxlength="30" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;">
+        <input type="password" id="newAdminPassword" placeholder="Set password" maxlength="20" style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;">
+        <button onclick="addTeamMember()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Add to Team</button>
       </div>
 
       <div style="margin-top:16px;">
@@ -982,7 +971,7 @@
       clearTimeout(loadTimeout);
       hasLoaded = true;
       console.error('❌ Orders listen error:', err);
-      setOrdersListMessage(`<div class="empty-state" style="padding:20px;">⚠️ Error loading orders<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--ink);color:var(--paper);cursor:pointer;font-weight:600;">Retry</button></div>`);
+      setOrdersListMessage(`<div class="empty-state" style="padding:20px;">⚠️ Error loading orders<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">${err.message || 'Firebase connection issue'}</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`);
     });
     
     // Timeout after 8 seconds if no response (increased for mobile)
@@ -990,7 +979,7 @@
       if(!hasLoaded){
         console.warn('⏱️ Orders load timeout after 8s');
         hasLoaded = true;
-        setOrdersListMessage(`<div class="empty-state" style="padding:20px;">⏱️ Taking too long to load<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">This might be a slow connection. Check your internet or Firebase rules.</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--ink);color:var(--paper);cursor:pointer;font-weight:600;">Retry</button></div>`);
+        setOrdersListMessage(`<div class="empty-state" style="padding:20px;">⏱️ Taking too long to load<br><small style="color:var(--muted);font-size:12px;margin:8px 0;display:block;">This might be a slow connection. Check your internet or Firebase rules.</small><br><button onclick="location.reload()" style="margin-top:10px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:white;cursor:pointer;font-weight:600;">Retry</button></div>`);
       }
     }, 8000);
   }
@@ -1415,7 +1404,7 @@
       const limitReached = limit != null && used >= limit;
       const usageText = limit != null ? `${used}/${limit} used` : `${used} used (unlimited)`;
       return `
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <div style="font-weight:700;font-size:14px;">${escapeHtml(code)}</div>
           <div style="font-size:12px;color:${coupon.type === 'percentage' ? 'var(--primary)' : 'var(--accent)'};">${coupon.type === 'percentage' ? coupon.value + '%' : '$' + coupon.value.toFixed(2)}</div>
@@ -1423,8 +1412,8 @@
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Type: ${coupon.type === 'percentage' ? 'Percentage off' : 'Fixed amount off'}</div>
         <div style="font-size:11px;color:${limitReached ? 'var(--danger)' : 'var(--muted)'};margin-bottom:8px;">${usageText}${limitReached ? ' — limit reached' : ''}</div>
         <div style="display:flex;gap:6px;">
-          <button onclick="toggleCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-sm);cursor:pointer;font-weight:600;">${coupon.active === false ? 'Enable' : 'Disable'}</button>
-          <button onclick="deleteCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:var(--r-sm);cursor:pointer;font-weight:600;">Delete</button>
+          <button onclick="toggleCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;font-weight:600;">${coupon.active === false ? 'Enable' : 'Disable'}</button>
+          <button onclick="deleteCoupon('${code}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
         </div>
       </div>
     `;
@@ -1493,11 +1482,11 @@
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center;';
     row.innerHTML = `
-      <select class="bundle-comp-flavor" style="flex:2;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+      <select class="bundle-comp-flavor" style="flex:2;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
         ${FLAVOR_ORDER.map(f => `<option value="${f}">${f}</option>`).join('')}
       </select>
-      <input type="number" class="bundle-comp-qty" value="1" min="1" step="1" style="flex:1;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
-      <button type="button" onclick="this.parentElement.remove()" style="padding:8px 10px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:var(--r-sm);cursor:pointer;font-size:12px;">✕</button>
+      <input type="number" class="bundle-comp-qty" value="1" min="1" step="1" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+      <button type="button" onclick="this.parentElement.remove()" style="padding:8px 10px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-size:12px;">✕</button>
     `;
     wrap.appendChild(row);
   }
@@ -1575,7 +1564,7 @@
       const usageText = limit != null ? `${used}/${limit} sold` : `${used} sold (unlimited)`;
       const comps = Object.entries(bundle.components || {}).map(([f,q]) => `${q}x ${f}`).join(' + ');
       return `
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <div style="font-weight:700;font-size:14px;">${escapeHtml(bundle.name)}</div>
           <div style="font-size:12px;color:var(--primary);">$${Number(bundle.price).toFixed(2)}</div>
@@ -1583,8 +1572,8 @@
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Contains: ${escapeHtml(comps)}</div>
         <div style="font-size:11px;color:${limitReached ? 'var(--danger)' : 'var(--muted)'};margin-bottom:8px;">${usageText}${limitReached ? ' — limit reached' : ''}</div>
         <div style="display:flex;gap:6px;">
-          <button onclick="toggleBundle('${id}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-sm);cursor:pointer;font-weight:600;">${bundle.active === false ? 'Enable' : 'Disable'}</button>
-          <button onclick="deleteBundle('${id}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:var(--r-sm);cursor:pointer;font-weight:600;">Delete</button>
+          <button onclick="toggleBundle('${id}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;font-weight:600;">${bundle.active === false ? 'Enable' : 'Disable'}</button>
+          <button onclick="deleteBundle('${id}')" style="flex:1;padding:6px;font-size:11px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:8px;cursor:pointer;font-weight:600;">Delete</button>
         </div>
       </div>
     `;
@@ -1755,9 +1744,9 @@
     document.getElementById('mktVolumeRows').innerHTML = marketingSettings.volumeTiers.map((t, i) => `
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
         <span style="font-size:11.5px;color:var(--muted);width:34px;">Tier ${i + 1}</span>
-        <input type="number" class="mkt-vol-qty" min="1" step="1" value="${t.qty}" style="flex:1;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" placeholder="bars">
+        <input type="number" class="mkt-vol-qty" min="1" step="1" value="${t.qty}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" placeholder="bars">
         <span style="font-size:11.5px;color:var(--muted);">bars &rarr;</span>
-        <input type="number" class="mkt-vol-pct" min="0" max="90" step="1" value="${t.percent}" style="flex:1;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" placeholder="%">
+        <input type="number" class="mkt-vol-pct" min="0" max="90" step="1" value="${t.percent}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" placeholder="%">
         <span style="font-size:11.5px;color:var(--muted);">% off</span>
       </div>
     `).join('');
@@ -1768,9 +1757,9 @@
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
         <span style="font-size:11.5px;color:var(--muted);width:34px;">Tier ${i + 1}</span>
         <span style="font-size:11.5px;color:var(--muted);">spend $</span>
-        <input type="number" class="mkt-reb-min" min="0" step="0.50" value="${t.minSpend}" style="flex:1;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+        <input type="number" class="mkt-reb-min" min="0" step="0.50" value="${t.minSpend}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
         <span style="font-size:11.5px;color:var(--muted);">&rarr;</span>
-        <input type="number" class="mkt-reb-rate" min="0" max="90" step="1" value="${t.rate}" style="flex:1;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+        <input type="number" class="mkt-reb-rate" min="0" max="90" step="1" value="${t.rate}" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
         <span style="font-size:11.5px;color:var(--muted);">% back</span>
       </div>
     `).join('');
@@ -2077,14 +2066,14 @@
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <div style="flex:1;">
             <label style="font-size:11px;color:var(--muted);">Earned (spendable/cash-out)</label>
-            <input type="number" step="0.01" min="0" id="earn-${id}" value="${(r.earnings || 0).toFixed(2)}" style="width:100%;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+            <input type="number" step="0.01" min="0" id="earn-${id}" value="${(r.earnings || 0).toFixed(2)}" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
           </div>
           <div style="flex:1;">
             <label style="font-size:11px;color:var(--muted);">Pending (unpaid orders)</label>
-            <input type="number" step="0.01" min="0" id="pend-${id}" value="${(r.pendingCredits || 0).toFixed(2)}" style="width:100%;padding:8px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
+            <input type="number" step="0.01" min="0" id="pend-${id}" value="${(r.pendingCredits || 0).toFixed(2)}" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;">
           </div>
         </div>
-        <button onclick="saveReferrerBalance('${id}')" style="width:100%;padding:8px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--r-sm);font-weight:600;font-size:12px;cursor:pointer;">Save</button>
+        <button onclick="saveReferrerBalance('${id}')" style="width:100%;padding:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Save</button>
       </div>
     `).join('');
   }

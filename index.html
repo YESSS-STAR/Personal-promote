@@ -3,77 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Airheads Pre-Order — pick your flavours, pay cash in class</title>
-<meta name="description" content="Pre-order Airheads by the bar or by the pack. Stock updates live, pay cash when you collect in class.">
-<meta name="theme-color" content="#FFFFFF">
+<title>Airheads Pre-Order</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
-     Airheads pre-order — "Candy Rack"
-
-     One rule drives the whole page: hue means flavour, or it means
-     money. Nothing else here gets a colour. Structure comes from
-     hairlines and one rack container, not from cards and shadows.
+     Airheads Pre-Order — design tokens
      ============================================================ */
   :root{
-    --paper:#FFFFFF;
-    --paper-2:#F1F1F4;
-    --paper-3:#E7E7EC;
-    --line:#E3E3E8;
-    --line-2:#CBCBD3;
-    --ink:#000000;
-    --ink-2:#5F5F66;
-    --ink-3:#8C8C94;
+    --bg:#FBF7FA;
+    --bg-trans:rgba(251,247,250,.82);
+    --surface:#FFFFFF;
+    --surface-2:#FDF5F9;
+    --surface-3:#F8EDF3;
+    --text:#1C1420;
+    --muted:#8A7C87;
+    --border:#F0DEE6;
+    --primary:#FF4F81;
+    --primary-dark:#E23E6C;
+    --accent:#8E5CD9;
+    --success:#2FAE66;
+    --danger:#E14A4A;
+    --warn:#C97C0A;
 
-    --money:#0B7A45;
-    --alert:#B3141B;
-    --warn:#8A5A00;
+    --shadow:0 2px 10px rgba(28,20,32,.06);
+    --shadow-1:0 1px 2px rgba(28,20,32,.05), 0 4px 14px rgba(28,20,32,.06);
+    --shadow-2:0 12px 34px rgba(28,20,32,.13), 0 2px 8px rgba(28,20,32,.06);
+    --shadow-pop:0 12px 30px rgba(255,79,129,.34);
 
-    /* Inverted blocks: the hero, the selected row, the primary button, the cart
-       bar. In dark mode these become a raised panel, not a slab of white. */
-    --block:#000000;
-    --on-block:#FFFFFF;
+    --radius:16px;
+    --radius-sm:12px;
+    --radius-lg:22px;
+    --radius-pill:999px;
 
-    /* One width for every centred surface, so the notice, the rack, the cart bar
-       and the sheet all share the same edges at every breakpoint. */
-    --shell:620px;
+    --grad:linear-gradient(135deg,#FF4F81 0%,#FF7BA6 48%,#8E5CD9 100%);
+    --grad-soft:linear-gradient(135deg,rgba(255,79,129,.14),rgba(142,92,217,.14));
+    --grad-reward:linear-gradient(135deg,#8E5CD9,#B85CE0);
 
-    /* Radii encode hierarchy: structural surfaces are near-square,
-       only chips are pills. */
-    --r:4px;
-    --r-sm:3px;
-    --r-pill:999px;
-
-    /* Shadows are for things that actually float over the page. */
-    --shadow-float:0 10px 34px rgba(0,0,0,.22);
-
-    --font:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
-    --font-display:'Archivo Black','Archivo',system-ui,sans-serif;
-
-    color-scheme:light;
+    --ring:0 0 0 3px rgba(255,79,129,.30);
   }
   html[data-theme="dark"]{
-    --paper:#0A0A0C;
-    --paper-2:#16161A;
-    --paper-3:#1F1F24;
-    --line:#2A2A31;
-    --line-2:#3A3A43;
-    --ink:#FFFFFF;
-    --ink-2:#A6A6B0;
-    --ink-3:#7C7C86;
+    --bg:#15101A;
+    --bg-trans:rgba(21,16,26,.84);
+    --surface:#211A27;
+    --surface-2:#2A2130;
+    --surface-3:#332838;
+    --text:#F5EEF2;
+    --muted:#B39EAC;
+    --border:#382A3A;
+    --primary:#FF6B93;
+    --primary-dark:#FF4F81;
+    --accent:#B085F5;
+    --warn:#FFB55C;
 
-    --money:#3ED07E;
-    --alert:#FF6B6B;
-    --warn:#E0A458;
+    --shadow:0 2px 14px rgba(0,0,0,.35);
+    --shadow-1:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.35);
+    --shadow-2:0 16px 42px rgba(0,0,0,.55);
+    --shadow-pop:0 12px 34px rgba(255,107,147,.26);
 
-    --block:#26262E;
-    --on-block:#FFFFFF;
+    --grad:linear-gradient(135deg,#FF5C8A 0%,#C179F0 100%);
+    --grad-soft:linear-gradient(135deg,rgba(255,107,147,.14),rgba(176,133,245,.14));
+    --grad-reward:linear-gradient(135deg,#8E5CD9,#E05CC8);
 
-    --shadow-float:0 12px 40px rgba(0,0,0,.62);
-
-    color-scheme:dark;
+    --ring:0 0 0 3px rgba(255,107,147,.34);
   }
 
   /* ============================================================
@@ -81,323 +73,315 @@
      ============================================================ */
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   body{margin:0; padding:0;}
-  body,button,input,select{font-family:var(--font);}
-  h1,h2,h3{font-family:var(--font-display); font-weight:400;}
+  body,button,input,select{font-family:'Inter',system-ui,-apple-system,sans-serif;}
+  h1,h2,h3,.display{font-family:'Poppins',system-ui,sans-serif;}
 
   body{
-    background:var(--paper);
-    color:var(--ink);
-    transition:background .22s ease, color .22s ease;
+    background:var(--bg);
+    color:var(--text);
+    transition:background .25s ease, color .25s ease;
     min-height:100vh;
-    padding-bottom:118px;
+    padding-bottom:120px;
     -webkit-font-smoothing:antialiased;
     line-height:1.45;
   }
-  a{color:inherit;}
-  button{font:inherit;}
-
-  /* Keyboard focus stays unmissable in both themes. */
-  :focus-visible{outline:3px solid var(--ink); outline-offset:2px; border-radius:var(--r-sm);}
-
-  /* Money is set in the display face with tabular figures, so a column
-     of prices lines up digit-for-digit. */
-  .price,.line-total,.amt,.cash-amt,.stat-num,.cart-total-row.grand span:last-child{
-    font-family:var(--font-display);
-    font-variant-numeric:tabular-nums;
-    letter-spacing:-.02em;
+  /* Soft candy glow behind the top of the page.
+     Width is capped to the viewport: a vw-based width overflowed the page. */
+  body::before{
+    content:"";
+    position:fixed; top:-220px; left:50%; transform:translateX(-50%);
+    width:min(680px,100%); height:440px; z-index:0; pointer-events:none;
+    background:radial-gradient(closest-side, rgba(255,79,129,.20), rgba(142,92,217,.10) 60%, transparent 100%);
+    opacity:.9;
   }
+  html[data-theme="dark"] body::before{
+    background:radial-gradient(closest-side, rgba(255,107,147,.16), rgba(176,133,245,.10) 60%, transparent 100%);
+  }
+  a{color:inherit;}
+  :focus-visible{outline:none; box-shadow:var(--ring); border-radius:var(--radius-sm);}
+  button{font:inherit;}
 
   /* ============================================================
      Top bar
      ============================================================ */
   .topbar{
     position:sticky; top:0; z-index:20;
-    background:var(--paper);
-    border-bottom:1px solid var(--line);
-    padding:11px 16px;
+    background:var(--bg-trans);
+    -webkit-backdrop-filter:blur(14px) saturate(1.5);
+    backdrop-filter:blur(14px) saturate(1.5);
+    border-bottom:1px solid var(--border);
+    padding:12px 16px;
     display:flex; align-items:center; justify-content:space-between;
     gap:10px;
   }
-  .brand{display:flex; align-items:center; gap:10px; min-width:0;}
-  /* The mark is a twisted bar-end: a solid slab with a crimp. */
+  .brand{display:flex; align-items:center; gap:11px; min-width:0;}
   .brand-mark{
     position:relative;
-    width:34px; height:34px; flex-shrink:0;
-    background:var(--ink);
-    border-radius:var(--r-sm);
+    width:38px;height:38px;border-radius:50%; flex-shrink:0;
+    background:var(--grad);
+    box-shadow:0 4px 14px rgba(255,79,129,.42), inset 0 -3px 8px rgba(0,0,0,.18);
   }
-  .brand-mark::before,
   .brand-mark::after{
-    content:""; position:absolute; left:0; right:0; height:4px;
-    background:repeating-linear-gradient(90deg,var(--paper) 0 4px,transparent 4px 8px);
+    content:""; position:absolute; left:9px; top:7px;
+    width:11px; height:8px; border-radius:50%;
+    background:rgba(255,255,255,.72); filter:blur(1px);
   }
-  .brand-mark::before{top:6px;}
-  .brand-mark::after{bottom:6px;}
   .brand-text{min-width:0;}
-  .brand-text h1{
-    font-size:16px; margin:0; letter-spacing:-.3px; line-height:1.15; text-transform:uppercase;
-  }
-  .brand-text span{font-size:10.5px; color:var(--ink-2); font-weight:600; letter-spacing:.02em;}
+  .brand-text h1{font-size:16.5px; margin:0; letter-spacing:-.2px; line-height:1.2;}
+  .brand-text span{font-size:11px; color:var(--muted); font-weight:500; letter-spacing:.01em;}
 
   .header-actions{display:flex; gap:8px; align-items:center; flex-shrink:0;}
 
   .icon-btn{
-    width:36px; height:36px; border-radius:var(--r-sm);
-    border:1px solid var(--line-2);
-    background:var(--paper);
-    display:inline-flex; align-items:center; justify-content:center;
-    cursor:pointer; color:var(--ink); text-decoration:none;
-    transition:background .16s ease, color .16s ease, border-color .16s ease;
+    width:38px;height:38px;border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer; color:var(--text); text-decoration:none;
+    box-shadow:var(--shadow-1);
+    transition:transform .14s ease, background .18s ease, border-color .18s ease;
   }
-  .icon-btn:hover{background:var(--block); color:var(--on-block); border-color:var(--block);}
-  .icon-btn:active{transform:scale(.94);}
-  .icon-btn svg{width:17px; height:17px;}
+  .icon-btn:hover{border-color:var(--primary);}
+  .icon-btn:active{transform:scale(.9);}
+  .icon-btn svg{width:18px;height:18px;}
 
   .credit-chip{
     display:none; align-items:center; gap:6px;
-    font-size:12px; font-weight:700; color:var(--money);
-    padding:7px 11px; border-radius:var(--r-pill);
-    border:1px solid var(--money);
+    font-size:12px; font-weight:700; color:var(--primary);
+    padding:7px 13px; border-radius:var(--radius-pill);
+    background:var(--grad-soft);
+    border:1px solid rgba(255,79,129,.3);
     white-space:nowrap;
-    font-variant-numeric:tabular-nums;
   }
 
   /* ============================================================
-     Notices
+     Notices (maintenance)
      ============================================================ */
   .notice{
-    max-width:var(--shell); margin:14px auto 0; padding:13px 15px;
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    border-left:3px solid var(--warn);
-    border-radius:var(--r);
-    color:var(--ink); font-size:13px; text-align:left;
+    max-width:600px; margin:14px auto 0; padding:14px 16px;
+    background:rgba(255,159,28,.14);
+    border:1px solid rgba(201,124,10,.4);
+    border-radius:var(--radius);
+    color:var(--text); font-size:13.5px; text-align:center;
+    box-shadow:var(--shadow-1);
   }
 
   /* ============================================================
-     Main / header block
+     Main / hero
      ============================================================ */
-  main{max-width:var(--shell); margin:0 auto; padding:14px 16px 0; position:relative; z-index:1;}
+  main{max-width:600px; margin:0 auto; padding:18px 16px 0; position:relative; z-index:1;}
 
-  /* The header is a printed black block: wordmark, the claim, and the
-     menu itself as a six-segment colour stripe flooded to the edges. */
   .hero{
     position:relative; overflow:hidden;
-    margin-bottom:16px;
-    padding:22px 20px 0;
-    border-radius:var(--r);
-    background:var(--block);
-    color:var(--on-block);
+    margin-bottom:20px;
+    padding:22px 20px 24px;
+    border-radius:var(--radius-lg);
+    background:var(--grad);
+    color:#fff;
+    box-shadow:var(--shadow-2);
   }
-  .hero h2{
-    font-size:30px; letter-spacing:-1.1px; line-height:1.02;
-    margin:0 0 10px; color:var(--on-block);
+  .hero-glow{
+    position:absolute; right:-48px; bottom:-70px;
+    width:210px; height:210px; pointer-events:none;
+    background:radial-gradient(circle, rgba(255,255,255,.34), transparent 66%);
   }
-  .hero-sub{
-    display:flex; align-items:flex-start; gap:8px;
-    margin:0; font-size:13px; line-height:1.5;
-    color:var(--on-block); opacity:.82; max-width:38ch;
+  .hero-eyebrow{
+    position:relative;
+    display:inline-flex; align-items:center; gap:7px;
+    margin:0 0 12px; padding:4px 11px;
+    font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:rgba(255,255,255,.95);
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:var(--radius-pill);
   }
-  .hero-stripe{display:flex; height:10px; margin:18px -20px 0;}
-  .hero-stripe i{flex:1 1 0; min-width:0;}
-
   .live-dot{
-    width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px;
-    background:#3ED07E;
-    box-shadow:0 0 0 0 rgba(62,208,126,.7);
+    width:6px;height:6px;border-radius:50%;background:#7CFFB2;
+    box-shadow:0 0 0 0 rgba(124,255,178,.7);
     animation:pulse 2.2s ease-out infinite;
   }
   @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(62,208,126,.7);}
-    70%{box-shadow:0 0 0 8px rgba(62,208,126,0);}
-    100%{box-shadow:0 0 0 0 rgba(62,208,126,0);}
+    0%{box-shadow:0 0 0 0 rgba(124,255,178,.65);}
+    70%{box-shadow:0 0 0 9px rgba(124,255,178,0);}
+    100%{box-shadow:0 0 0 0 rgba(124,255,178,0);}
   }
+  .hero h2{
+    position:relative;
+    font-size:25px; font-weight:800; letter-spacing:-.6px;
+    margin:0 0 5px; color:#fff; line-height:1.15;
+  }
+  .hero p{position:relative; margin:0; font-size:13.5px; color:rgba(255,255,255,.88);}
 
-  /* Social proof sits inside the black block, so it stays type-only. */
+  /* Social proof badge - bandwagon copy built from today's real sales */
   .social-proof{
-    display:inline-block; margin:12px 20px 0 0 !important;
-    padding:0; border:0; background:none;
-    font-size:12px !important; font-weight:700; color:var(--on-block) !important;
+    position:relative;
+    display:inline-block; margin-top:9px !important;
+    padding:4px 11px; border-radius:999px;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);
+    font-size:11.5px !important; font-weight:700; color:#fff !important;
+    letter-spacing:.01em;
   }
 
-  /* Anchoring: the struck-through "was" beside the live price. */
+  /* Anchoring: struck-through "was" price next to the live price */
   .price-was{
-    font-size:11.5px; font-weight:600; color:var(--ink-3);
-    text-decoration:line-through; margin-left:5px;
+    font-size:11.5px; font-weight:600; color:var(--muted);
+    text-decoration:line-through; margin-left:4px;
   }
   .price-save{
-    display:block; font-size:11px; font-weight:700; color:var(--money);
-    margin-top:2px;
+    display:block; font-size:10.5px; font-weight:700; color:var(--success);
+    margin-top:1px;
   }
 
   .section-head{
-    display:flex; align-items:baseline; gap:8px;
-    font-family:var(--font); font-size:13px; font-weight:700; letter-spacing:0;
-    text-transform:none; color:var(--ink);
-    margin:22px 0 9px;
+    display:flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 10px 4px;
   }
-  .section-head .count{font-weight:600; color:var(--ink-3); font-size:12px;}
 
   /* ============================================================
-     The rack — one bordered container, hairline-separated rows,
-     each row carrying its flavour as a full-height spine.
+     Cards (flavors + bundles)
      ============================================================ */
-  .flavor-grid{
-    display:block; background:var(--paper);
-    border:1px solid var(--line); border-radius:var(--r);
-    overflow:hidden;
-  }
+  .flavor-grid{display:flex; flex-direction:column; gap:11px;}
 
   .flavor-card{
     position:relative;
-    display:flex; align-items:stretch;
-    padding:0 14px 0 0;
-    background:var(--paper);
-    border-bottom:1px solid var(--line);
-    transition:background .16s ease, color .16s ease;
+    display:flex; align-items:center; gap:13px;
+    padding:14px 15px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-1);
+    overflow:hidden;
+    transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
   }
-  .flavor-card:last-child{border-bottom:0;}
-
-  /* Picked rows invert. Colour still only ever means flavour. */
-  .flavor-card:has(.qty-controls){background:var(--block); color:var(--on-block);}
-  .flavor-card:has(.qty-controls) h3,
-  .flavor-card:has(.qty-controls) .price,
-  .flavor-card:has(.qty-controls) .unit-price{color:var(--on-block);}
-  .flavor-card:has(.qty-controls) .bundle-comps,
-  .flavor-card:has(.qty-controls) .price-was{color:var(--on-block); opacity:.65;}
-  .flavor-card:has(.stock-out){opacity:.55;}
-  .flavor-card:has(.qty-controls):has(.stock-out){opacity:1;}
+  /* In-cart cards get a brand-tinted edge. */
+  .flavor-card:has(.qty-controls){
+    border-color:rgba(255,79,129,.42);
+    box-shadow:var(--shadow-2);
+  }
+  .flavor-card:has(.stock-out){opacity:.6;}
 
   .flavor-dot{
-    width:9px; flex:0 0 9px;
-    align-self:stretch; min-height:58px;
-    box-shadow:inset -1px 0 0 var(--line);
+    width:46px; height:46px; flex-shrink:0;
+    border-radius:15px;
+    box-shadow:inset 0 -7px 12px rgba(0,0,0,.18), inset 0 2px 5px rgba(255,255,255,.42), 0 3px 10px rgba(28,20,32,.14);
   }
-
-  .flavor-info{flex:1; min-width:0; padding:12px 8px 12px 13px; align-self:center;}
+  .flavor-info{flex:1; min-width:0;}
   .flavor-info h3{
-    margin:0 0 4px; font-family:var(--font);
-    font-size:15px; font-weight:700;
+    margin:0 0 5px; font-size:15.5px; font-weight:700;
     letter-spacing:-.2px; line-height:1.25;
   }
   .flavor-meta{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .price{font-weight:400; color:var(--ink); font-size:17px;}
-  .unit-price{font-size:11.5px; color:var(--ink-2); font-weight:600;}
+  .price{font-weight:800; color:var(--text); font-size:14.5px; letter-spacing:-.2px;}
 
   .stock-tag{
-    font-size:10.5px; font-weight:700; letter-spacing:.01em;
-    padding:3px 8px; border-radius:var(--r-pill); white-space:nowrap;
-    border:1px solid transparent;
+    font-size:10.5px; font-weight:700; letter-spacing:.02em;
+    padding:3px 9px; border-radius:var(--radius-pill); white-space:nowrap;
   }
-  .stock-ok{background:var(--paper-2); color:var(--ink-2); border-color:var(--line);}
-  .stock-low{background:transparent; color:var(--warn); border-color:var(--warn);}
-  .stock-out{background:transparent; color:var(--alert); border-color:var(--alert);}
-  .flavor-card:has(.qty-controls) .stock-tag{
-    background:transparent; color:inherit; border-color:currentColor; opacity:.55;
-  }
+  .stock-ok{background:rgba(47,174,102,.13); color:var(--success);}
+  .stock-low{background:rgba(255,159,28,.16); color:var(--warn);}
+  .stock-out{background:rgba(225,74,74,.13); color:var(--danger);}
 
-  .bundle-comps{font-size:11.5px; color:var(--ink-2); margin-top:3px; line-height:1.45;}
+  .bundle-comps{font-size:11px; color:var(--muted); margin-top:4px; line-height:1.4;}
 
   /* Add button + quantity stepper */
   .add-btn{
-    align-self:center; flex-shrink:0;
-    border:1px solid var(--ink); cursor:pointer;
-    background:transparent; color:var(--ink);
-    font-weight:700; font-size:12.5px; letter-spacing:.02em;
-    padding:9px 16px; border-radius:var(--r-sm);
+    border:none; cursor:pointer;
+    background:var(--grad);
+    color:#fff; font-weight:700; font-size:13px;
+    padding:10px 18px; border-radius:var(--radius-pill);
+    box-shadow:0 4px 14px rgba(255,79,129,.32);
     white-space:nowrap;
-    transition:background .16s ease, color .16s ease, transform .12s ease;
+    transition:transform .12s ease, filter .18s ease;
   }
-  .add-btn:hover{background:var(--block); color:var(--on-block);}
+  .add-btn:hover{filter:brightness(1.05);}
   .add-btn:active{transform:scale(.95);}
   .add-btn:disabled{
-    border-color:var(--line); background:transparent; color:var(--ink-3); cursor:not-allowed;
+    background:var(--surface-3); color:var(--muted);
+    box-shadow:none; cursor:not-allowed;
   }
-  .add-btn:disabled:hover{background:transparent; color:var(--ink-3);}
 
   .qty-controls{
-    align-self:center; flex-shrink:0;
-    display:flex; align-items:center; gap:1px;
-    padding:3px; border-radius:var(--r-sm);
-    border:1px solid currentColor;
+    display:flex; align-items:center; gap:2px; flex-shrink:0;
+    padding:4px; border-radius:var(--radius-pill);
+    background:var(--surface-2); border:1px solid var(--border);
   }
   .qty-btn{
-    width:30px; height:30px; border-radius:var(--r-sm);
-    border:none; background:transparent; color:inherit;
-    font-size:16px; font-weight:700; line-height:1;
+    width:32px;height:32px;border-radius:50%;
+    border:none; background:var(--surface);
+    color:var(--text);
+    font-size:17px; font-weight:700; line-height:1;
     display:flex; align-items:center; justify-content:center;
-    cursor:pointer;
+    cursor:pointer; box-shadow:var(--shadow-1);
     transition:transform .12s ease;
   }
-  .qty-btn:hover{background:var(--paper); color:var(--ink);}
-  .qty-btn:active{transform:scale(.86);}
-  .qty-btn:disabled{opacity:.3; cursor:not-allowed;}
-  .qty-val{
-    min-width:26px; text-align:center; font-weight:700; font-size:14px;
-    font-variant-numeric:tabular-nums;
-  }
+  .qty-btn:active{transform:scale(.88);}
+  .qty-btn:disabled{opacity:.32; cursor:not-allowed; box-shadow:none;}
+  .qty-val{min-width:24px; text-align:center; font-weight:700; font-size:14px;}
 
   /* ============================================================
      Buttons
      ============================================================ */
   .primary-btn{
-    width:100%; margin-top:14px; padding:16px;
-    border:1px solid var(--block); border-radius:var(--r);
-    background:var(--block); color:var(--on-block);
-    font-weight:700; font-size:15px; letter-spacing:.01em; cursor:pointer;
-    transition:background .16s ease, color .16s ease, transform .12s ease;
+    width:100%; margin-top:18px; padding:15px;
+    border:none; border-radius:var(--radius);
+    background:var(--grad); color:#fff;
+    font-weight:700; font-size:15px; cursor:pointer;
+    box-shadow:var(--shadow-pop);
+    transition:transform .12s ease, filter .18s ease;
   }
-  .primary-btn:hover{opacity:.86;}
-  .primary-btn:active{transform:scale(.99);}
+  .primary-btn:hover{filter:brightness(1.05);}
+  .primary-btn:active{transform:scale(.985);}
   .primary-btn:disabled{
-    background:var(--paper-3); color:var(--ink-3); border-color:var(--paper-3);
-    cursor:not-allowed;
+    background:var(--surface-3); color:var(--muted);
+    box-shadow:none; cursor:not-allowed;
   }
   .secondary-btn{
-    width:100%; margin-top:9px; padding:14px;
-    border-radius:var(--r);
-    background:transparent; border:1px solid var(--line-2); color:var(--ink);
+    width:100%; margin-top:10px; padding:14px;
+    border-radius:var(--radius);
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
     font-weight:600; font-size:14px; cursor:pointer;
-    transition:border-color .16s ease, transform .12s ease;
+    box-shadow:var(--shadow-1);
+    transition:transform .12s ease, border-color .18s ease;
   }
-  .secondary-btn:hover{border-color:var(--ink);}
-  .secondary-btn:active{transform:scale(.99);}
-  .ghost-note{font-size:12px; color:var(--ink-2); margin-top:11px; text-align:center; line-height:1.5;}
+  .secondary-btn:hover{border-color:var(--primary);}
+  .secondary-btn:active{transform:scale(.985);}
+  .ghost-note{font-size:12px; color:var(--muted); margin-top:11px; text-align:center;}
 
   /* ============================================================
      Cart bar
      ============================================================ */
   .cart-bar{
     position:fixed; left:0; right:0; bottom:0; z-index:30;
-    max-width:var(--shell); margin:0 auto;
-    padding:0 12px calc(env(safe-area-inset-bottom,0px) + 12px);
+    max-width:600px; margin:0 auto;
+    padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
     pointer-events:none;
   }
   .cart-inner{
     pointer-events:auto;
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:16px 18px;
-    border-radius:var(--r);
-    background:var(--block);
-    color:var(--on-block);
+    padding:14px 18px;
+    border-radius:18px;
+    background:var(--grad);
+    color:#fff;
     cursor:pointer;
-    box-shadow:var(--shadow-float);
-    transform:translateY(180%);
+    box-shadow:var(--shadow-pop);
+    transform:translateY(130%);
     transition:transform .34s cubic-bezier(.22,1,.36,1);
   }
   .cart-inner.show{transform:translateY(0);}
   .cart-left{display:flex; align-items:center; gap:10px; min-width:0;}
-  .cart-icon{font-size:15px; line-height:1;}
+  .cart-icon{font-size:17px; line-height:1;}
   .cart-inner .cnt{
     font-size:13px; font-weight:600;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .cart-right{display:flex; align-items:center; gap:10px; flex-shrink:0;}
-  .cart-inner .amt{font-size:18px; color:var(--on-block);}
+  .cart-inner .amt{font-weight:800; font-size:16.5px; letter-spacing:-.2px;}
   .cart-go{
-    display:flex; align-items:center; justify-content:center;
-    width:26px; height:26px; border:1px solid currentColor; border-radius:50%;
-    font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;
+    background:rgba(255,255,255,.22); font-size:14px;
   }
 
   /* ============================================================
@@ -406,185 +390,125 @@
   .overlay{
     position:fixed; inset:0; z-index:50;
     display:none; align-items:flex-end; justify-content:center;
-    background:rgba(0,0,0,.5);
+    background:rgba(20,10,16,.48);
+    -webkit-backdrop-filter:blur(3px);
+    backdrop-filter:blur(3px);
   }
-  .overlay.open{display:flex; animation:fadeIn .18s ease;}
+  .overlay.open{display:flex; animation:fadeIn .2s ease;}
   @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
 
   .sheet{
     position:relative;
-    width:100%; max-width:var(--shell);
-    max-height:92vh; overflow-y:auto;
+    width:100%; max-width:600px;
+    max-height:90vh; overflow-y:auto;
     padding:10px 20px calc(env(safe-area-inset-bottom,0px) + 22px);
-    background:var(--paper);
-    border-top:1px solid var(--line);
-    border-radius:var(--r) var(--r) 0 0;
-    box-shadow:0 -14px 44px rgba(0,0,0,.26);
-    animation:slideUp .28s cubic-bezier(.22,1,.36,1);
+    background:var(--surface);
+    border-radius:26px 26px 0 0;
+    box-shadow:0 -12px 44px rgba(28,20,32,.22);
+    animation:slideUp .3s cubic-bezier(.22,1,.36,1);
     overscroll-behavior:contain;
   }
   @keyframes slideUp{
-    from{transform:translateY(36px); opacity:.5;}
+    from{transform:translateY(40px); opacity:.4;}
     to{transform:translateY(0); opacity:1;}
   }
+  /* Grab handle */
   .sheet::before{
     content:""; display:block;
-    width:38px; height:3px; margin:2px auto 14px;
-    border-radius:var(--r-pill);
-    background:var(--line-2);
+    width:42px; height:4px; margin:2px auto 12px;
+    border-radius:var(--radius-pill);
+    background:var(--border);
   }
   .sheet-head{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     margin-bottom:14px;
   }
-  .sheet-head h3{margin:0; font-size:21px; letter-spacing:-.6px;}
+  .sheet-head h3{margin:0; font-size:19px; font-weight:700; letter-spacing:-.3px;}
   .close-x{
-    cursor:pointer; color:var(--ink-2);
-    font-size:13px; font-weight:700; line-height:1;
-    background:transparent; border:1px solid var(--line-2);
-    border-radius:var(--r-sm);
-    padding:8px 12px;
-    transition:background .16s ease, color .16s ease, border-color .16s ease;
+    cursor:pointer; color:var(--muted);
+    font-size:15px; font-weight:600; line-height:1;
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    padding:7px 13px;
+    transition:color .18s ease, border-color .18s ease;
   }
-  .close-x:hover{background:var(--block); color:var(--on-block); border-color:var(--block);}
+  .close-x:hover{color:var(--text); border-color:var(--primary);}
 
+  /* Grouped panels inside sheets */
   .panel{
     margin-top:12px; padding:13px;
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    border-radius:var(--r);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
   }
   .panel-title{
     display:flex; align-items:center; gap:7px;
     font-size:12.5px; font-weight:700; margin-bottom:9px;
   }
-  .panel-hint{font-size:11.5px; color:var(--ink-2); margin-bottom:9px; line-height:1.5;}
+  .panel-hint{font-size:11.5px; color:var(--muted); margin-bottom:9px;}
   .panel-row{display:flex; gap:8px;}
-
-  /* Progressive disclosure: codes and credits stay out of the main path. */
-  .fold{margin-top:18px; border-top:1px solid var(--line);}
-  .fold > summary{
-    list-style:none; cursor:pointer; padding:15px 0;
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    font-size:13px; font-weight:700;
-  }
-  .fold > summary::-webkit-details-marker{display:none;}
-  .fold > summary::after{content:"+"; font-size:17px; font-weight:700; color:var(--ink-2); line-height:1;}
-  .fold[open] > summary::after{content:"\2212";}
-  .fold > summary:hover::after{color:var(--ink);}
 
   /* ============================================================
      Cart lines
      ============================================================ */
   .cart-line{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:12px 0;
-    border-bottom:1px solid var(--line);
+    padding:11px 0;
+    border-bottom:1px solid var(--border);
     font-size:14px;
   }
   .cart-line:last-of-type{border-bottom:none;}
-  .cart-line .lname{font-weight:700; letter-spacing:-.1px;}
-  .cart-line .lsub{color:var(--ink-2); font-size:11.5px; margin-top:2px;}
+  .cart-line .lname{font-weight:600; letter-spacing:-.1px;}
+  .cart-line .lsub{color:var(--muted); font-size:11.5px; margin-top:2px;}
   .cart-line > div:first-child{min-width:0;}
-  /* Same hue-means-flavour rule as the rack, so a line is scannable at a glance. */
-  .cart-line-main{display:flex; align-items:center; gap:10px; min-width:0;}
-  .line-swatch{width:7px; height:26px; flex:0 0 7px; border-radius:2px;}
   .cart-line-amt{display:flex; align-items:center; gap:12px; flex-shrink:0;}
-  .line-total{font-weight:400;}
-  .line-free{color:var(--money); font-weight:700; font-size:11.5px;}
+  .line-total{font-weight:700;}
+  .line-free{color:var(--success); font-weight:800; font-size:12px; letter-spacing:.04em;}
   .remove-line{
-    background:transparent; border:1px solid var(--line-2); cursor:pointer;
-    color:var(--ink-2); font-size:11.5px; font-weight:700;
-    padding:6px 10px; border-radius:var(--r-sm);
-    transition:color .16s ease, border-color .16s ease;
+    background:none; border:none; cursor:pointer;
+    color:var(--danger); font-size:11.5px; font-weight:700;
+    padding:5px 9px; border-radius:var(--radius-pill);
+    background:rgba(225,74,74,.09);
+    transition:background .18s ease;
   }
-  .remove-line:hover{color:var(--alert); border-color:var(--alert);}
+  .remove-line:hover{background:rgba(225,74,74,.16);}
 
   .empty-cart{
-    text-align:center; color:var(--ink-2); padding:36px 0; font-size:13.5px;
+    text-align:center; color:var(--muted); padding:34px 0; font-size:13.5px;
   }
 
   .cart-total-row{
     display:flex; justify-content:space-between; align-items:center;
-    padding:12px 0 2px;
+    padding:13px 0 4px;
     font-weight:600; font-size:14px;
   }
   .cart-total-row.grand{
-    margin-top:10px; padding-top:14px;
-    border-top:2px solid var(--ink);
-    font-size:15px; font-weight:700;
+    margin-top:12px; padding-top:13px;
+    border-top:2px dashed var(--border);
+    font-size:16.5px; font-weight:800; letter-spacing:-.3px;
   }
-  .cart-total-row.grand span:last-child{font-size:24px;}
-
-  /* The volume-ladder hint: reads as a line of the bill, not a badge. */
-  .nudge{
-    font-size:11.5px; font-weight:600; color:var(--ink-2);
-    text-align:right; margin:-2px 0 10px; line-height:1.45;
-  }
-  .nudge b{color:var(--money); font-family:var(--font-display); font-weight:400;}
-
-  /* Streak milestone card on the confirmation sheet */
-  .cm-card{
-    margin:14px 0; padding:13px 15px;
-    border:1px solid var(--line); border-left:3px solid var(--money);
-    border-radius:var(--r); background:var(--paper-2);
-  }
-  .cm-title{font-size:15px; font-weight:700; letter-spacing:-.3px;}
-  .cm-desc{font-size:12.5px; color:var(--ink-2); margin-top:4px; line-height:1.5;}
-
-  /* ============================================================
-     Cross-sell ("goes well with")
-     ============================================================ */
-  .xsell{margin-top:16px; border-top:1px solid var(--line); padding-top:15px;}
-  .xsell-head{font-size:13.5px; font-weight:700; margin:0 0 3px;}
-  .xsell-sub{font-size:12px; color:var(--ink-2); margin:0 0 6px; line-height:1.5;}
-  .xsell-row{
-    display:flex; align-items:center; gap:11px;
-    padding:10px 0; border-bottom:1px solid var(--line);
-  }
-  .xsell-row:last-child{border-bottom:0; padding-bottom:0;}
-  .xsell-spine{width:7px; height:30px; flex:0 0 7px; border-radius:2px;}
-  .xsell-name{flex:1; min-width:0; font-size:13.5px; font-weight:700;}
-  .xsell-price{font-family:var(--font-display); font-size:13px; font-variant-numeric:tabular-nums;}
-  .xsell-add{
-    flex-shrink:0; border:1px solid var(--ink); background:transparent; color:var(--ink);
-    font-weight:700; font-size:12px; padding:7px 13px; border-radius:var(--r-sm); cursor:pointer;
-    transition:background .16s ease, color .16s ease;
-  }
-  .xsell-add:hover{background:var(--block); color:var(--on-block);}
-  .xsell-add:disabled{border-color:var(--line); color:var(--ink-3); cursor:not-allowed;}
-
-  /* The reward earned by this order, stated next to the CTA. */
-  .cta-note{
-    margin-top:16px; padding:12px 13px;
-    border:1px solid var(--line); border-left:3px solid var(--money);
-    border-radius:var(--r); background:var(--paper-2);
-    font-size:12.5px; line-height:1.55;
-  }
-  .cta-note b{color:var(--money); font-weight:700;}
-  .cta-note .muted{color:var(--ink-2);}
 
   /* ============================================================
      Form fields
      ============================================================ */
   label{
     display:block; margin:14px 0 6px;
-    font-size:12px; font-weight:700; color:var(--ink-2);
+    font-size:12px; font-weight:700; letter-spacing:.02em; color:var(--muted);
   }
   input[type=text],input[type=number],input[type=password],select.select-input{
-    width:100%; padding:13px 14px; border-radius:var(--r-sm);
-    border:1px solid var(--line-2); background:var(--paper); color:var(--ink);
-    font-size:15px; font-family:var(--font);
-    transition:border-color .16s ease;
+    width:100%; padding:12px 14px; border-radius:var(--radius-sm);
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    font-size:14.5px; font-family:'Inter',sans-serif;
+    transition:border-color .18s ease, box-shadow .18s ease;
   }
-  input[type=text]::placeholder,input[type=number]::placeholder,input[type=password]::placeholder{color:var(--ink-3);}
+  input[type=text]::placeholder,input[type=number]::placeholder,input[type=password]::placeholder{color:var(--muted); opacity:.75;}
   input:focus,select.select-input:focus{
-    outline:none; border-color:var(--ink); box-shadow:0 0 0 1px var(--ink);
+    outline:none; border-color:var(--primary); box-shadow:var(--ring);
   }
   select.select-input{
-    flex:1; padding:11px 12px; font-size:13px; cursor:pointer;
+    flex:1; padding:10px 12px; font-size:13px; cursor:pointer;
     appearance:none;
-    background-image:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%),linear-gradient(135deg,var(--ink-2) 50%,transparent 50%);
+    background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
     background-position:calc(100% - 17px) calc(50% + 1px), calc(100% - 12px) calc(50% + 1px);
     background-size:5px 5px, 5px 5px;
     background-repeat:no-repeat;
@@ -592,221 +516,271 @@
   }
   .btn-inline{
     flex-shrink:0;
-    padding:12px 16px; border:1px solid var(--block); border-radius:var(--r-sm);
-    background:var(--block); color:var(--on-block);
+    padding:12px 16px; border:none; border-radius:var(--radius-sm);
+    background:var(--primary); color:#fff;
     font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap;
-    transition:background .16s ease, color .16s ease;
+    transition:transform .12s ease, filter .18s ease;
   }
-  .btn-inline:hover{opacity:.86;}
-  .btn-inline.success{background:var(--money); border-color:var(--money); color:var(--paper);}
-  .btn-inline.success:hover{opacity:.86; background:var(--money); color:var(--paper);}
+  .btn-inline:hover{filter:brightness(1.06);}
+  .btn-inline:active{transform:scale(.96);}
+  .btn-inline.success{background:var(--success);}
   .btn-inline.ghost{
-    width:100%; background:transparent; color:var(--ink);
-    border-color:var(--line-2); font-size:12.5px;
+    width:100%; background:var(--surface); color:var(--text);
+    border:1px solid var(--border); font-size:12.5px;
   }
-  .btn-inline.ghost:hover{border-color:var(--ink); color:var(--ink);}
-  .field-result{font-size:11.5px; color:var(--ink-2); margin-top:7px; min-height:15px; line-height:1.45;}
+  .btn-inline.ghost:hover{border-color:var(--primary); filter:none;}
+  .field-result{font-size:11.5px; color:var(--muted); margin-top:7px; min-height:15px; line-height:1.4;}
 
-  .inline-link{color:var(--ink); font-weight:700; text-decoration:underline; text-underline-offset:2px;}
+  .inline-link{color:var(--primary); font-weight:700; text-decoration:none;}
+  .inline-link:hover{text-decoration:underline;}
 
   /* ============================================================
-     Reward banner / upsell offer
+     Reward banner
      ============================================================ */
   .reward-banner{
-    margin-top:14px; padding:14px;
-    border-radius:var(--r);
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    border-left:3px solid var(--money);
+    margin-top:12px; padding:13px;
+    border-radius:var(--radius);
+    background:var(--grad-soft);
+    border:1px solid rgba(142,92,217,.34);
     font-size:12.5px;
   }
-  .reward-banner .rb-title{font-weight:700; margin-bottom:10px; line-height:1.5;}
+  .reward-banner .rb-title{font-weight:700; margin-bottom:9px; line-height:1.4;}
   .reward-banner .rb-row{display:flex; gap:8px;}
 
+  /* ============================================================
+     Upsale offer
+     ============================================================ */
   .promo{
-    margin:16px 0 2px; padding:15px;
-    border-radius:var(--r);
-    background:var(--block); color:var(--on-block);
+    margin-bottom:12px; padding:14px;
+    border-radius:var(--radius);
+    background:var(--grad-reward); color:#fff;
+    box-shadow:var(--shadow-1);
   }
   .promo-badge{
-    font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-    opacity:.66; margin-bottom:8px;
+    font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    opacity:.92; margin-bottom:7px;
   }
-  .promo-text{font-size:13px; line-height:1.55; margin-bottom:12px;}
-  .promo-text strong{font-weight:700; font-family:var(--font-display);}
-  .promo-text s{opacity:.6;}
+  .promo-text{font-size:12.5px; line-height:1.55; margin-bottom:11px;}
+  .promo-text strong{font-weight:800;}
+  .promo-text s{opacity:.72; text-decoration:line-through;}
   .promo-btn{
-    width:100%; padding:12px;
-    border-radius:var(--r-sm);
-    background:transparent; color:var(--on-block);
-    border:1px solid currentColor;
-    font-weight:700; font-size:12.5px; cursor:pointer;
-    transition:background .16s ease, color .16s ease;
+    width:100%; padding:11px;
+    border-radius:var(--radius-sm);
+    background:rgba(255,255,255,.22);
+    border:1px solid rgba(255,255,255,.44);
+    color:#fff; font-weight:700; font-size:12.5px; cursor:pointer;
+    transition:background .18s ease, transform .12s ease;
   }
-  .promo-btn:hover{background:var(--paper); color:var(--ink);}
+  .promo-btn:hover{background:rgba(255,255,255,.3);}
+  .promo-btn:active{transform:scale(.98);}
 
   /* ============================================================
      Confirmation
      ============================================================ */
   .confirm-icon{
-    width:58px; height:58px;
+    width:66px;height:66px;border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    margin:10px auto 16px; font-size:26px;
-    background:var(--money); color:var(--paper);
-    border-radius:var(--r);
-    animation:pop .38s cubic-bezier(.2,1.5,.5,1);
+    margin:8px auto 16px; font-size:30px;
+    background:linear-gradient(135deg,rgba(47,174,102,.16),rgba(47,174,102,.28));
+    color:var(--success);
+    box-shadow:0 0 0 8px rgba(47,174,102,.08);
+    animation:pop .4s cubic-bezier(.2,1.5,.5,1);
   }
-  @keyframes pop{from{transform:scale(.6); opacity:0;} to{transform:scale(1); opacity:1;}}
-  .confirm-title{text-align:center; font-size:24px; letter-spacing:-.6px; margin:0 0 6px;}
-  .confirm-sub{text-align:center; color:var(--ink-2); font-size:13.5px; margin:0 0 20px; line-height:1.55;}
+  @keyframes pop{from{transform:scale(.5); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .confirm-title{text-align:center; font-size:20px; font-weight:800; letter-spacing:-.3px; margin:0 0 5px;}
+  .confirm-sub{text-align:center; color:var(--muted); font-size:13.5px; margin:0 0 20px; line-height:1.5;}
   .wa-btn{
     display:flex; align-items:center; justify-content:center; gap:9px;
-    width:100%; padding:15px; border-radius:var(--r); border:1px solid #25D366;
+    width:100%; padding:15px; border-radius:var(--radius); border:none;
     background:#25D366; color:#fff; font-weight:700; font-size:15px;
     cursor:pointer; text-decoration:none;
-    transition:filter .16s ease, transform .12s ease;
+    box-shadow:0 8px 22px rgba(37,211,102,.32);
+    transition:transform .12s ease, filter .18s ease;
   }
-  .wa-btn:hover{filter:brightness(1.06);}
-  .wa-btn:active{transform:scale(.99);}
+  .wa-btn:hover{filter:brightness(1.05);}
+  .wa-btn:active{transform:scale(.985);}
 
   .spin-invite{
     display:none; margin-top:12px; padding:14px;
-    border-radius:var(--r); text-align:center; font-size:12.5px;
-    background:var(--paper-2); border:1px solid var(--line);
+    border-radius:var(--radius); text-align:center; font-size:12.5px;
+    background:var(--grad-soft);
+    border:1px solid rgba(142,92,217,.34);
   }
   .spin-invite .si-title{font-weight:700; margin-bottom:10px;}
 
-  /* Cash payment */
+  /* Cash Payment Box */
   .cash-card{
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    border-left:3px solid var(--money);
-    border-radius:var(--r);
-    padding:15px;
-    margin:16px 0;
+    background:var(--surface-2);
+    border:2px dashed var(--success);
+    border-radius:var(--radius);
+    padding:14px;
+    margin:14px 0 16px;
     text-align:left;
   }
   .cash-title{
-    font-weight:700; font-size:13.5px; color:var(--money);
-    margin-bottom:10px;
-    display:flex; align-items:center; gap:7px;
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--success);
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
   }
   .cash-amt-row{
-    display:flex; justify-content:space-between; align-items:baseline;
-    font-size:13.5px; font-weight:600; margin-bottom:7px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:6px;
   }
-  .cash-amt{font-size:23px; color:var(--ink); font-weight:400;}
-  .cash-desc{margin:0; font-size:11.5px; color:var(--ink-2); line-height:1.55;}
+  .cash-amt{
+    font-size:19px;
+    color:var(--primary);
+    font-weight:800;
+    font-family:'Poppins',sans-serif;
+  }
+  .cash-desc{
+    margin:0;
+    font-size:11.5px;
+    color:var(--muted);
+    line-height:1.45;
+  }
 
-  /* Reward ladder (spend threshold) */
+  /* Wheel Spend Progress Bar */
   .wheel-progress-box{
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    border-radius:var(--r);
-    padding:12px 13px;
+    background:var(--grad-soft);
+    border:1px solid rgba(142,92,217,.32);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
     margin-bottom:12px;
   }
   .wp-head{
-    display:flex; align-items:flex-start; gap:8px;
-    font-size:12px; font-weight:700; margin-bottom:8px; line-height:1.45;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:6px;
   }
+  .wp-icon{font-size:15px;}
   .wp-bar-track{
-    height:6px;
-    background:var(--paper-3);
-    border-radius:var(--r-pill);
+    height:7px;
+    background:rgba(28,20,32,.08);
+    border-radius:var(--radius-pill);
     overflow:hidden;
   }
+  html[data-theme="dark"] .wp-bar-track{
+    background:rgba(255,255,255,.14);
+  }
   .wp-bar-fill{
-    height:100%; width:0%;
-    background:var(--ink);
-    border-radius:var(--r-pill);
+    height:100%;
+    width:0%;
+    background:var(--grad-reward);
+    border-radius:var(--radius-pill);
     transition:width .3s ease;
   }
 
   /* ============================================================
-     Weekly order streaks
+     Weekly Order Streaks & Retention
      ============================================================ */
   .streak-banner{
     position:relative;
-    padding:13px 15px;
-    border-radius:var(--r);
-    background:var(--paper);
-    border:1px solid var(--line);
-    border-left:3px solid var(--ink);
+    padding:12px 15px;
+    border-radius:var(--radius);
+    background:var(--surface);
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
     margin-bottom:14px;
+    transition:all .2s ease;
   }
   .sb-header{
-    display:flex; justify-content:space-between; align-items:baseline;
-    margin-bottom:6px; flex-wrap:wrap; gap:6px;
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:6px;
   }
   .sb-badge{
-    font-size:13px; font-weight:700; font-family:var(--font-display);
-    color:var(--ink);
+    font-size:12px; font-weight:800; font-family:'Poppins',sans-serif;
+    color:var(--primary);
+    display:inline-flex; align-items:center; gap:5px;
   }
-  .sb-meta{font-size:11px; font-weight:600; color:var(--ink-2);}
-  .sb-text{font-size:12px; line-height:1.5; color:var(--ink-2); margin-bottom:9px;}
-  .sb-track{height:5px; width:100%; border-radius:var(--r-pill); background:var(--paper-3); overflow:hidden;}
-  .sb-fill{height:100%; width:0%; border-radius:var(--r-pill); background:var(--ink); transition:width .3s ease;}
+  .sb-meta{
+    font-size:11px; font-weight:600; color:var(--muted);
+  }
+  .sb-text{
+    font-size:12px; line-height:1.45; color:var(--text); margin-bottom:7px;
+  }
+  .sb-track{
+    height:5px; width:100%; border-radius:var(--radius-pill); background:var(--surface-3); overflow:hidden;
+  }
+  .sb-fill{
+    height:100%; width:0%; border-radius:var(--radius-pill); background:var(--grad); transition:width .3s ease;
+  }
 
   .streak-cart-box{
     margin:10px 0 12px;
-    padding:11px 12px;
-    border-radius:var(--r);
-    background:var(--paper-2);
-    border:1px solid var(--line);
-    border-left:3px solid var(--ink);
+    padding:10px 12px;
+    border-radius:var(--radius-sm);
+    background:rgba(255,79,129,.07);
+    border:1px solid rgba(255,79,129,.2);
   }
   .sc-head{
-    display:flex; align-items:flex-start; gap:7px; margin-bottom:8px;
-    font-size:12px; font-weight:700; line-height:1.45;
+    display:flex; align-items:center; gap:7px; margin-bottom:6px; font-size:12px; font-weight:700;
   }
-  .sc-icon{font-size:13px; line-height:1.35;}
+  .sc-icon{font-size:14px;}
   .sc-bar-fill{
-    height:100%; width:0%; border-radius:var(--r-pill); background:var(--ink); transition:width .3s ease;
+    height:100%; width:0%; border-radius:var(--radius-pill); background:var(--grad); transition:width .3s ease;
   }
 
   /* ============================================================
-     Footer / toast / skeleton
+     Footer
      ============================================================ */
   .footer-link{
-    text-align:center; margin:32px 0 14px; font-size:12px; color:var(--ink-2);
+    text-align:center; margin:34px 0 12px; font-size:12px; color:var(--muted);
   }
-  .footer-link a{color:var(--ink-2); text-decoration:underline; text-underline-offset:2px; font-weight:600;}
-  .footer-link a:hover{color:var(--ink);}
+  .footer-link a{color:var(--muted); text-decoration:none; font-weight:600;}
+  .footer-link a:hover{color:var(--primary);}
 
+  /* ============================================================
+     Toast
+     ============================================================ */
   .toast{
-    position:fixed; top:72px; left:50%; z-index:60;
+    position:fixed; top:76px; left:50%; z-index:60;
     transform:translateX(-50%) translateY(-12px) scale(.96);
     max-width:calc(100vw - 40px);
-    padding:12px 18px; border-radius:var(--r);
-    background:var(--block);
-    color:var(--on-block); font-size:13px; font-weight:600;
+    padding:11px 19px; border-radius:var(--radius-pill);
+    background:rgba(28,20,32,.94);
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    color:#FBF7FA; font-size:13px; font-weight:600;
     text-align:center;
-    box-shadow:var(--shadow-float);
+    box-shadow:var(--shadow-2);
     opacity:0; pointer-events:none;
-    transition:opacity .22s ease, transform .22s cubic-bezier(.22,1,.36,1);
+    transition:opacity .24s ease, transform .24s cubic-bezier(.22,1,.36,1);
   }
+  html[data-theme="dark"] .toast{background:rgba(245,238,242,.96); color:#1C1420;}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0) scale(1);}
 
+  /* ============================================================
+     Loading skeleton
+     ============================================================ */
   .skeleton{
-    height:58px;
-    background:var(--paper-2);
-    border-bottom:1px solid var(--line);
+    height:76px; border-radius:var(--radius-lg);
+    background:linear-gradient(90deg, var(--surface) 25%, var(--surface-3) 50%, var(--surface) 75%);
+    background-size:200% 100%;
+    border:1px solid var(--border);
     animation:shimmer 1.5s ease-in-out infinite;
   }
-  .skeleton:last-child{border-bottom:0;}
-  @keyframes shimmer{0%,100%{opacity:1;} 50%{opacity:.5;}}
+  @keyframes shimmer{0%{background-position:200% 0;} 100%{background-position:-200% 0;}}
 
   /* ============================================================
      Spin the wheel
      ============================================================ */
   .spin-fab{
-    position:fixed; left:16px; bottom:100px; z-index:40;
+    position:fixed; left:16px; bottom:104px; z-index:40;
     display:none;
-    padding:12px 17px; border:1px solid var(--block); border-radius:var(--r-sm);
-    background:var(--block); color:var(--on-block);
-    font-weight:700; font-size:12.5px; cursor:pointer;
-    box-shadow:var(--shadow-float);
+    padding:12px 18px; border:none; border-radius:var(--radius-pill);
+    background:var(--grad-reward); color:#fff;
+    font-weight:700; font-size:13px; cursor:pointer;
+    box-shadow:0 10px 26px rgba(142,92,217,.42);
     transition:transform .14s ease;
   }
   .spin-fab.show{display:block; animation:fabIn .3s cubic-bezier(.22,1,.36,1);}
@@ -814,35 +788,35 @@
   .spin-fab:active{transform:scale(.94);}
 
   .spin-hero{text-align:center; margin-bottom:8px;}
-  .spin-hero p{margin:0; color:var(--ink-2); font-size:13px; line-height:1.5;}
+  .spin-hero p{margin:0; color:var(--muted); font-size:13px; line-height:1.5;}
 
   .wheel-wrap{position:relative; width:286px; max-width:86vw; height:286px; margin:14px auto 4px;}
   .wheel-pointer{
     position:absolute; top:-9px; left:50%; transform:translateX(-50%);
     width:0; height:0; z-index:3;
-    border-left:10px solid transparent; border-right:10px solid transparent;
-    border-top:20px solid var(--ink);
+    border-left:11px solid transparent; border-right:11px solid transparent;
+    border-top:21px solid var(--primary);
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.28));
   }
-  html[data-theme="dark"] .wheel-pointer{border-top-color:var(--ink);}
   .wheel-disc{
     position:absolute; inset:0; border-radius:50%;
-    border:7px solid var(--paper);
-    box-shadow:0 0 0 1px var(--line), 0 10px 30px rgba(0,0,0,.22);
+    border:7px solid var(--surface);
+    box-shadow:0 10px 30px rgba(28,20,32,.24), inset 0 0 0 3px var(--border);
     transform:rotate(0deg);
   }
   .wheel-label{
     position:absolute; left:50%; top:50%;
     font-weight:700; line-height:1.15; text-align:center;
-    color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.45);
+    color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.4);
     pointer-events:none;
   }
   .wheel-hub{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:54px; height:54px; border-radius:50%;
-    background:var(--paper); border:1px solid var(--line);
+    width:56px; height:56px; border-radius:50%;
+    background:var(--surface); border:3px solid var(--border);
     display:flex; align-items:center; justify-content:center;
-    font-size:22px; z-index:2;
-    box-shadow:var(--shadow-float);
+    font-size:23px; z-index:2;
+    box-shadow:var(--shadow-2);
   }
   .spin-result{
     text-align:center; font-weight:700; font-size:15.5px;
@@ -850,31 +824,12 @@
   }
   .spin-prize-list{
     display:flex; flex-wrap:wrap; gap:6px; justify-content:center;
-    margin-top:14px; font-size:11.5px; color:var(--ink-2);
+    margin-top:12px; font-size:11.5px; color:var(--muted);
   }
   .spin-prize-list span{
-    padding:4px 10px; border-radius:var(--r-pill);
-    background:transparent; border:1px solid var(--line);
+    padding:4px 10px; border-radius:var(--radius-pill);
+    background:var(--surface-2); border:1px solid var(--border);
     white-space:nowrap;
-  }
-
-  /* ============================================================
-     Wider screens
-     ============================================================ */
-  /* The rack stays one container - it just gets more room per row. Splitting it
-     into columns would break the single-rack read that the whole layout rests on. */
-  @media (min-width:760px){
-    :root{--shell:720px;}
-    main{padding:20px 24px 0;}
-    .hero{padding:28px 26px 0;}
-    .hero-stripe{margin:22px -26px 0; height:12px;}
-    .hero h2{font-size:44px;}
-    .flavor-card{padding-right:20px;}
-    .flavor-dot{min-height:66px;}
-  }
-  @media (min-width:1100px){
-    :root{--shell:880px;}
-    .hero h2{font-size:52px;}
   }
 
   /* ============================================================
@@ -901,12 +856,12 @@
   </div>
   <div class="header-actions">
     <div class="credit-chip" id="creditDisplay" style="display:none;">
-      <span id="creditAmount">$0</span> credit
+      <span aria-hidden="true">💰</span><span id="creditAmount">$0</span>
     </div>
-    <button class="icon-btn" id="themeToggle" aria-label="Switch between light and dark" title="Switch theme">
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
       <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
     </button>
-    <a class="icon-btn" href="/ref" title="Your dashboard and referral rewards" aria-label="Your dashboard and referral rewards">
+    <a class="icon-btn" href="/ref" title="Referral rewards" aria-label="Referral rewards" style="color:var(--primary);">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
     </a>
   </div>
@@ -944,20 +899,19 @@
   </div>
 
   <section class="hero">
-    <h2>Pick your flavours</h2>
-    <p class="hero-sub"><span class="live-dot" aria-hidden="true"></span><span>Stock updates live. Pay cash when you collect in class.</span></p>
+    <div class="hero-glow" aria-hidden="true"></div>
+    <p class="hero-eyebrow"><span class="live-dot" aria-hidden="true"></span>Live stock</p>
+    <h2>Pick your flavors</h2>
+    <p>Stock updates live. Order now, pay &amp; collect in class.</p>
     <p class="social-proof" id="socialProofBadge" style="display:none;"></p>
-    <!-- The menu, as a stripe. Filled from FLAVOR_ORDER so it can never drift. -->
-    <div class="hero-stripe" id="heroStripe" aria-hidden="true"></div>
   </section>
 
-  <section id="bundlesSection" style="display:none;">
-    <h3 class="section-head">Bundles <span class="count" id="bundlesCount"></span></h3>
+  <section id="bundlesSection" style="display:none;margin-bottom:20px;">
+    <h3 class="section-head">🎁 Bundles</h3>
     <div class="flavor-grid" id="bundlesGrid"></div>
   </section>
 
-  <h3 class="section-head">Flavours <span class="count" id="flavoursCount"></span></h3>
-  <div class="flavor-grid" id="flavorGrid" aria-busy="true">
+  <div class="flavor-grid" id="flavorGrid">
     <div class="skeleton"></div>
     <div class="skeleton"></div>
     <div class="skeleton"></div>
@@ -987,57 +941,106 @@
       <button class="close-x" id="closeCart" aria-label="Close">&times;</button>
     </div>
     <div id="cartLines"></div>
-
     <div class="reward-banner" id="rewardBanner" style="display:none;">
-      <div class="rb-title">You have <span id="rewardFreeCount">0</span> free Airheads to use</div>
+      <div class="rb-title">🎁 You have <span id="rewardFreeCount">0</span> free Airheads from the wheel</div>
       <div class="rb-row">
-        <select class="select-input" id="freeFlavorSelect" aria-label="Choose your free Airheads flavour"></select>
+        <select class="select-input" id="freeFlavorSelect" aria-label="Choose your free Airheads flavor"></select>
         <button class="add-btn" id="addFreeBtn">Add free</button>
       </div>
     </div>
 
-    <!-- Cross-sell rack. Built from live stock; kept out of #cartLines so it
-         cannot be wiped by the innerHTML rewrite in renderCartLines(). -->
-    <div class="xsell" id="xsellBox" style="display:none;"></div>
-
-    <div class="cart-total-row">
-      <span>Subtotal</span>
-      <span id="sheetSubtotal">$0.00</span>
-    </div>
-
-    <div class="cart-total-row" id="sheetRefDiscountRow" style="display:none;color:var(--money);">
-      <span id="sheetRefDiscountLabel">Referral discount (5% off)</span>
-      <span id="sheetRefDiscountAmt">-$0.00</span>
-    </div>
-
-    <div class="cart-total-row" id="sheetVolumeRow" style="display:none;color:var(--money);">
-      <span id="sheetVolumeLabel">Volume discount</span>
-      <span id="sheetVolumeAmt">-$0.00</span>
-    </div>
-    <div class="nudge" id="volumeNudge" style="display:none;"></div>
-
-    <div class="panel" id="rebateBanner" style="display:none;">
-      <div class="panel-title">Earned on this order</div>
-      <div class="panel-hint" id="rebateText"></div>
-    </div>
-
-    <!-- Goal-gradient nudges, sitting right where the decision gets made. -->
     <div class="wheel-progress-box" id="wheelProgressBox" style="display:none;">
       <div class="wp-head">
-        <span class="wp-text" id="wheelProgressText">Add $5.00 more to unlock a spin of the wheel</span>
+        <span class="wp-icon">🎡</span>
+        <span class="wp-text" id="wheelProgressText">Add $5.00 more to unlock Lucky Wheel spin!</span>
       </div>
       <div class="wp-bar-track">
         <div class="wp-bar-fill" id="wheelProgressBarFill" style="width:0%;"></div>
       </div>
     </div>
 
+    <!-- Streak Qualification Nudge in Cart Sheet -->
     <div class="streak-cart-box" id="sheetStreakBox" style="display:none;">
       <div class="sc-head">
-        <span class="sc-text" id="sheetStreakText">Add $2.50 to qualify for your weekly streak</span>
+        <span class="sc-icon">🔥</span>
+        <span class="sc-text" id="sheetStreakText">Add $2.50 to qualify for your weekly streak!</span>
       </div>
       <div class="wp-bar-track">
         <div class="sc-bar-fill" id="sheetStreakBarFill" style="width:0%;"></div>
       </div>
+    </div>
+
+    <div class="cart-total-row">
+      <span>Subtotal</span>
+      <span id="sheetSubtotal">$0.00</span>
+    </div>
+
+    <div class="cart-total-row" id="sheetRefDiscountRow" style="display:none;color:var(--success);font-weight:700;">
+      <span id="sheetRefDiscountLabel">Referral discount (5% off)</span>
+      <span id="sheetRefDiscountAmt">-$0.00</span>
+    </div>
+
+    <div class="cart-total-row" id="sheetVolumeRow" style="display:none;">
+      <span id="sheetVolumeLabel">Volume discount</span>
+      <span id="sheetVolumeAmt">-$0.00</span>
+    </div>
+    <div id="volumeNudge" style="display:none;font-size:11.5px;font-weight:600;color:var(--accent);margin:-4px 0 10px;text-align:right;"></div>
+
+    <div class="panel" id="rebateBanner" style="display:none;">
+      <div class="panel-title">💸 Rebate credit</div>
+      <div class="panel-hint" id="rebateText"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">👥 Friend's referral code (5% off)</div>
+      <div class="panel-row">
+        <input type="text" id="referralCodeInput" placeholder="Enter referral code" maxlength="20" style="flex:1;">
+        <button class="btn-inline" type="button" onclick="applyReferralCodeInput()">Apply</button>
+      </div>
+      <div class="field-result" id="referralCodeResult"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🎟️ Coupon code</div>
+      <div class="panel-row">
+        <input type="text" id="couponCode" placeholder="Enter code" maxlength="20" style="flex:1;">
+        <button class="btn-inline" onclick="applyCoupon()">Apply</button>
+      </div>
+      <div class="field-result" id="couponResult"></div>
+    </div>
+
+    <div class="panel" id="creditSection" style="display:none;">
+      <div class="panel-title">💰 Use referral credits</div>
+      <div class="panel-hint">Available: <strong id="availableCredit">$0.00</strong></div>
+      <div class="panel-row">
+        <input type="number" id="creditToUse" min="0" step="0.01" placeholder="$0.00" style="flex:1;">
+        <button class="btn-inline success" onclick="applyCredit()">Apply</button>
+      </div>
+      <div class="field-result" id="creditResult"></div>
+    </div>
+
+    <div class="panel" id="refRedeemPanel">
+      <div class="panel-title">🎁 Redeem your referral earnings</div>
+      <div id="refLoggedOutView">
+        <p class="panel-hint" style="margin-top:0;">Sign in to your referral account to spend your earnings in 1 tap without typing password each time.</p>
+        <div class="panel-row" style="margin-bottom:8px;">
+          <input type="text" id="refRedeemCode" placeholder="Referral code or name" maxlength="30" style="flex:1;">
+          <input type="password" id="refRedeemPassword" placeholder="Password" maxlength="20" style="flex:1;">
+        </div>
+        <button class="btn-inline ghost" type="button" onclick="loginReferralAccount()">Sign in &amp; Remember me</button>
+      </div>
+      <div id="refLoggedInView" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span class="panel-hint" style="margin:0;">Signed in: <strong id="refLoggedInName">-</strong> (<code id="refLoggedInCode">-</code>)</span>
+          <button type="button" onclick="logoutReferralAccount()" style="background:none;border:none;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;padding:0;">Sign out</button>
+        </div>
+        <div class="panel-hint">Available earnings: <strong id="refRedeemAvailable">$0.00</strong></div>
+        <div class="panel-row">
+          <input type="number" id="refRedeemAmount" min="0" step="0.01" placeholder="$0.00" style="flex:1;">
+          <button class="btn-inline success" type="button" onclick="applyReferralRedeem()">Apply</button>
+        </div>
+      </div>
+      <div class="field-result" id="refRedeemResult"></div>
     </div>
 
     <div class="cart-total-row grand">
@@ -1045,76 +1048,17 @@
       <span id="sheetTotal">$0.00</span>
     </div>
 
-    <!-- Codes and credits stay collapsed: the primary path is lines -> total -> pay. -->
-    <details class="fold" id="codesFold">
-      <summary>Have a code or credit?</summary>
-
-      <div class="panel">
-        <div class="panel-title">Friend's referral code (5% off)</div>
-        <div class="panel-row">
-          <input type="text" id="referralCodeInput" placeholder="Enter referral code" maxlength="20" style="flex:1;">
-          <button class="btn-inline" type="button" onclick="applyReferralCodeInput()">Apply</button>
-        </div>
-        <div class="field-result" id="referralCodeResult"></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title">Coupon code</div>
-        <div class="panel-row">
-          <input type="text" id="couponCode" placeholder="Enter code" maxlength="20" style="flex:1;">
-          <button class="btn-inline" onclick="applyCoupon()">Apply</button>
-        </div>
-        <div class="field-result" id="couponResult"></div>
-      </div>
-
-      <div class="panel" id="creditSection" style="display:none;">
-        <div class="panel-title">Use your store credit</div>
-        <div class="panel-hint">Available: <strong id="availableCredit">$0.00</strong></div>
-        <div class="panel-row">
-          <input type="number" id="creditToUse" min="0" step="0.01" placeholder="$0.00" style="flex:1;">
-          <button class="btn-inline success" onclick="applyCredit()">Apply</button>
-        </div>
-        <div class="field-result" id="creditResult"></div>
-      </div>
-
-      <div class="panel" id="refRedeemPanel">
-        <div class="panel-title">Redeem your referral earnings</div>
-        <div id="refLoggedOutView">
-          <p class="panel-hint" style="margin-top:0;">Sign in to spend your earnings in one tap without retyping your password every time.</p>
-          <div class="panel-row" style="margin-bottom:8px;">
-            <input type="text" id="refRedeemCode" placeholder="Referral code or name" maxlength="30" style="flex:1;">
-            <input type="password" id="refRedeemPassword" placeholder="Password" maxlength="20" style="flex:1;">
-          </div>
-          <button class="btn-inline ghost" type="button" onclick="loginReferralAccount()">Sign in and remember me</button>
-        </div>
-        <div id="refLoggedInView" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span class="panel-hint" style="margin:0;">Signed in as <strong id="refLoggedInName">-</strong> (<code id="refLoggedInCode">-</code>)</span>
-            <button type="button" onclick="logoutReferralAccount()" style="background:none;border:none;color:var(--alert);font-size:11px;font-weight:700;cursor:pointer;padding:0;">Sign out</button>
-          </div>
-          <div class="panel-hint">Available earnings: <strong id="refRedeemAvailable">$0.00</strong></div>
-          <div class="panel-row">
-            <input type="number" id="refRedeemAmount" min="0" step="0.01" placeholder="$0.00" style="flex:1;">
-            <button class="btn-inline success" type="button" onclick="applyReferralRedeem()">Apply</button>
-          </div>
-        </div>
-        <div class="field-result" id="refRedeemResult"></div>
-      </div>
-    </details>
-
     <label for="buyerName">Your name</label>
-    <input type="text" id="buyerName" placeholder="e.g. Aisyah Rahman" maxlength="60" autocomplete="name">
+    <input type="text" id="buyerName" placeholder="e.g. Aisyah Rahman" maxlength="60">
     <label for="buyerClass">Class</label>
     <input type="text" id="buyerClass" placeholder="e.g. Sec 2 Amanah" maxlength="30">
-    <p class="ghost-note" style="margin-top:9px;text-align:left;">We use these to find your order at collection.
 
-      Want to track referral credits? <a class="inline-link" href="#" onclick="document.getElementById('loginOverlay').classList.add('open'); return false;">Sign in</a>
-    </p>
-
-    <p class="cta-note" id="ctaRewardNote" style="display:none;"></p>
+    <div class="panel" style="text-align:center;">
+      <p style="margin:0;font-size:12px;color:var(--muted);">Want to track referral credits? <a class="inline-link" href="#" onclick="document.getElementById('loginOverlay').classList.add('open'); return false;">Sign in</a></p>
+    </div>
 
     <button class="primary-btn" id="placeOrderBtn">Place pre-order</button>
-    <div class="ghost-note">Pay cash when you collect in class. We'll confirm on WhatsApp.</div>
+    <div class="ghost-note">You'll confirm payment with us on WhatsApp after ordering.</div>
   </div>
 </div>
 
@@ -1126,7 +1070,7 @@
     <p class="confirm-sub" id="confirmSub">We've saved your pre-order.</p>
 
     <div class="cash-card" id="cashNoticeBox">
-      <div class="cash-title">Payment: cash on collection</div>
+      <div class="cash-title">💵 Payment: Cash on Collection</div>
       <div class="cash-amt-row">
         <span>Exact cash to bring:</span>
         <strong class="cash-amt" id="confirmCashTotal">$0.00</strong>
@@ -1134,9 +1078,10 @@
       <p class="cash-desc">Please prepare exact cash to pay in class upon collection. Tap below to send your order slip on WhatsApp so we can prepare your Airheads!</p>
     </div>
 
-    <div class="cm-card" id="confirmStreakCard" style="display:none;">
-      <div class="cm-title" id="confirmStreakTitle">Milestone unlocked</div>
-      <div class="cm-desc" id="confirmStreakDesc"></div>
+    <div class="streak-reward-card" id="confirmStreakCard" style="display:none;margin:12px 0;padding:12px 14px;border-radius:var(--radius);background:var(--grad-soft);border:1px solid rgba(255,79,129,.35);text-align:center;">
+      <div style="font-size:22px;margin-bottom:4px;">🎉</div>
+      <div style="font-weight:800;font-size:14px;color:var(--primary);" id="confirmStreakTitle">Milestone Unlocked!</div>
+      <div style="font-size:12.5px;color:var(--text);margin-top:2px;" id="confirmStreakDesc"></div>
     </div>
 
     <a class="wa-btn" id="waLink" href="#" target="_blank" rel="noopener">
@@ -1191,7 +1136,7 @@
   // Check if Firebase loaded
   if (typeof firebase === 'undefined') {
     console.error('❌ Firebase SDK failed to load. Check your network connection.');
-    document.getElementById('flavorGrid').innerHTML = '<div class="empty-cart" style="padding:40px 20px;text-align:center;"><strong>⚠️ Connection error</strong><p style="margin-top:8px;font-size:13px;color:var(--ink-2);">Unable to load from database. Please refresh the page.</p></div>';
+    document.getElementById('flavorGrid').innerHTML = '<div class="empty-cart" style="padding:40px 20px;text-align:center;"><strong>⚠️ Connection error</strong><p style="margin-top:8px;font-size:13px;color:var(--muted);">Unable to load from database. Please refresh the page.</p></div>';
   } else {
     try {
       const firebaseConfig = {
@@ -1203,7 +1148,7 @@
       console.log('✓ Firebase initialized');
     } catch (err) {
       console.error('❌ Firebase init error:', err);
-      document.getElementById('flavorGrid').innerHTML = '<div class="empty-cart" style="padding:40px 20px;text-align:center;"><strong>⚠️ Setup error</strong><p style="margin-top:8px;font-size:13px;color:var(--ink-2);">Firebase configuration issue. Contact support.</p></div>';
+      document.getElementById('flavorGrid').innerHTML = '<div class="empty-cart" style="padding:40px 20px;text-align:center;"><strong>⚠️ Setup error</strong><p style="margin-top:8px;font-size:13px;color:var(--muted);">Firebase configuration issue. Contact support.</p></div>';
     }
   }
 
@@ -1219,11 +1164,6 @@
     "White Mystery": "#E8E2ED"
   };
   const FLAVOR_ORDER = ["Orange","Blue Raspberry","Grape","Watermelon","Cherry","White Mystery"];
-
-  // The hero stripe is the menu: one band per flavour, in rack order, driven off
-  // FLAVOR_ORDER so it can never drift out of sync with the grid below it.
-  document.getElementById('heroStripe').innerHTML =
-    FLAVOR_ORDER.map(f => `<i style="background:${FLAVOR_COLORS[f]}"></i>`).join('');
 
   let inventory = {};
   let cart = {}; // flavor -> qty
@@ -1445,7 +1385,7 @@
       renderGrid();
     }, err => {
       console.error('❌ Inventory load error:', err);
-      grid.innerHTML = '<div class="empty-cart" style="padding:40px 20px;text-align:center;"><strong>⚠️ Database error</strong><p style="margin-top:8px;font-size:13px;color:var(--ink-2);">Could not load inventory. Try refreshing.</p></div>';
+      grid.innerHTML = '<div class="empty-cart" style="padding:40px 20px;text-align:center;"><strong>⚠️ Database error</strong><p style="margin-top:8px;font-size:13px;color:var(--muted);">Could not load inventory. Try refreshing.</p></div>';
     });
 
     // Load coupons
@@ -1664,8 +1604,6 @@
       `;
       grid.appendChild(card);
     });
-    const inStock = FLAVOR_ORDER.filter(f => (Number((inventory[f]||{}).stock) || 0) > 0).length;
-    document.getElementById('flavoursCount').textContent = `${inStock} in stock`;
     updateCartBar();
     renderBundles();
   }
@@ -1718,7 +1656,6 @@
       return;
     }
     section.style.display = 'block';
-    document.getElementById('bundlesCount').textContent = `${activeBundles.length} available`;
     bundleGrid.innerHTML = '';
 
     activeBundles.forEach(([id, bundle]) => {
@@ -1726,32 +1663,14 @@
       const qty = cartBundles[id] || 0;
       const comps = Object.entries(bundle.components || {}).map(([f,q]) => `${q}x ${f}`).join(' + ');
 
-      // What the same bars cost bought singly, so the pack can prove its own
-      // discount. Shown only when it really is cheaper - never a fake anchor.
-      const bars = Object.values(bundle.components || {}).reduce((s,q) => s + (Number(q)||0), 0);
-      const singleTotal = Object.entries(bundle.components || {})
-        .reduce((s,[f,q]) => s + (Number((inventory[f]||{}).price)||0) * (Number(q)||0), 0);
-      const save = singleTotal - Number(bundle.price);
-      const unitPrice = bars > 0 ? Number(bundle.price) / bars : 0;
-
-      // The spine is the recipe: one hard-edged band per component flavour, so
-      // the pack reads as "these bars together" instead of a decorative gradient.
-      const compColors = Object.keys(bundle.components || {}).map(f => FLAVOR_COLORS[f]).filter(Boolean);
-      const spine = compColors.length
-        ? `linear-gradient(180deg, ${compColors.map((c,i) =>
-            `${c} ${(i / compColors.length * 100).toFixed(2)}% ${((i + 1) / compColors.length * 100).toFixed(2)}%`).join(', ')})`
-        : 'var(--ink)';
-
       const card = document.createElement('div');
       card.className = 'flavor-card';
       card.innerHTML = `
-        <div class="flavor-dot" style="background:${spine}"></div>
+        <div class="flavor-dot" style="background:linear-gradient(135deg,#FF8A3D,#8E5CD9)"></div>
         <div class="flavor-info">
           <h3>${bundle.name}</h3>
           <div class="flavor-meta">
             <span class="price">$${Number(bundle.price).toFixed(2)}</span>
-            ${save > 0.01 ? `<span class="price-save">Save $${save.toFixed(2)}</span>` : ''}
-            ${unitPrice > 0 ? `<span class="unit-price">$${unitPrice.toFixed(2)} a bar</span>` : ''}
             <span class="stock-tag ${available <= 0 ? 'stock-out' : available <= 3 ? 'stock-low' : 'stock-ok'}">${available <= 0 ? 'Sold out' : available + ' left'}</span>
           </div>
           <div class="bundle-comps">${comps}</div>
@@ -1951,7 +1870,7 @@
       const promoPrice = Number(upsaleSettings.price) || 0;
       const promoHtml = `
         <div class="promo">
-          <div class="promo-badge">Today's offer</div>
+          <div class="promo-badge">🎉 Today's offer</div>
           <div class="promo-text">Add <strong>${flavor}</strong> for just <strong>$${promoPrice.toFixed(2)}</strong> <s>$${normalPrice.toFixed(2)}</s></div>
           <button class="promo-btn" onclick="addPromoFlavor()">Add to order</button>
         </div>
@@ -1975,82 +1894,6 @@
     renderGrid();
     renderCartLines();
     showToast(`${flavor} added at $${promoPrice.toFixed(2)}!`);
-  }
-
-  // ---------- Cross-sell: "goes well with your order" ----------
-  // Every bar costs the same to buy in, so the highest shelf price is also the
-  // highest margin. Ranking by price therefore raises both order size and profit
-  // at once. The stock floor of 3 keeps a suggestion sellable once it's accepted.
-  function renderCrossSell(){
-    const box = document.getElementById('xsellBox');
-    if(!box) return;
-    // Nothing to go "with" yet - the flavour rack above already covers browsing.
-    if(cartCount() === 0){
-      box.style.display = 'none';
-      box.innerHTML = '';
-      return;
-    }
-    const picks = FLAVOR_ORDER
-      .filter(f => !(cart[f] > 0) && !(cartFree[f] > 0))
-      .map(f => ({
-        flavor: f,
-        price: Number((inventory[f]||{}).price) || 0,
-        stock: Math.max(0, (Number((inventory[f]||{}).stock) || 0) - (cartFree[f] || 0))
-      }))
-      .filter(p => p.price > 0 && p.stock >= 3)
-      .sort((a, b) => b.price - a.price)
-      .slice(0, 3);
-
-    if(picks.length === 0){
-      box.style.display = 'none';
-      box.innerHTML = '';
-      return;
-    }
-    box.style.display = 'block';
-    box.innerHTML = `
-      <p class="xsell-head">Goes well with your order</p>
-      <p class="xsell-sub">Same collection, so no extra trip.</p>
-      ${picks.map(p => `
-        <div class="xsell-row">
-          <span class="xsell-spine" style="background:${FLAVOR_COLORS[p.flavor]}"></span>
-          <span class="xsell-name">${p.flavor}</span>
-          <span class="xsell-price">$${p.price.toFixed(2)}</span>
-          <button class="xsell-add" data-xsell="${p.flavor}">Add</button>
-        </div>
-      `).join('')}
-    `;
-  }
-
-  document.getElementById('xsellBox').addEventListener('click', e => {
-    const btn = e.target.closest('button[data-xsell]');
-    if(!btn) return;
-    const flavor = btn.dataset.xsell;
-    const stock = Number((inventory[flavor]||{}).stock) || 0;
-    if((cart[flavor] || 0) + (cartFree[flavor] || 0) >= stock){
-      showToast(`${flavor} just went out of stock`);
-      renderCrossSell();
-      return;
-    }
-    cart[flavor] = (cart[flavor] || 0) + 1;
-    renderGrid();
-    renderCartLines();
-  });
-
-  // The last thing read before the button. Says what to bring and what comes
-  // back, so nobody has to guess what happens after they tap.
-  function renderCtaNote(final, rebate){
-    const note = document.getElementById('ctaRewardNote');
-    if(!note) return;
-    if(cartCount() === 0 || final <= 0){
-      note.style.display = 'none';
-      note.innerHTML = '';
-      return;
-    }
-    const credit = rebate > 0
-      ? ` <span class="muted">$${rebate.toFixed(2)} store credit is added once you collect.</span>`
-      : '';
-    note.style.display = 'block';
-    note.innerHTML = `Bring <b>$${final.toFixed(2)}</b> in cash to class.${credit}`;
   }
 
   function applyCoupon(){
@@ -2231,13 +2074,11 @@
   // ---------- Spin the wheel ----------
   // Weights are the published odds and total 100. The sectors are sized by weight
   // rather than being equal slices, so the wheel shows the real distribution.
-  // The dial is deliberately near-monochrome: green is the only colour a prize
-  // can earn, so the one slice that pays cash is the one slice that stands out.
   const SPIN_PRIZES = [
-    { key:'credit_small', type:'credit',   value:0.20, weight:60, label:'$0.20 off',     color:'#5F5F66' },
-    { key:'free_item',    type:'freeItem', value:1,    weight:10, label:'Free Airheads', color:'#E0203C' },
-    { key:'credit_big',   type:'credit',   value:1.50, weight:5,  label:'$1.50 off',     color:'#0B7A45' },
-    { key:'nothing',      type:'nothing',  value:0,    weight:25, label:'Nothing',       color:'#2A2A31' }
+    { key:'credit_small', type:'credit',   value:0.20, weight:60, label:'$0.20 off',     color:'#FF4F81' },
+    { key:'free_item',    type:'freeItem', value:1,    weight:10, label:'Free Airheads', color:'#8E5CD9' },
+    { key:'credit_big',   type:'credit',   value:1.50, weight:5,  label:'$1.50 off',     color:'#2FAE66' },
+    { key:'nothing',      type:'nothing',  value:0,    weight:25, label:'Nothing',       color:'#6B5A66' }
   ];
 
   function spinSectors(){
@@ -2287,7 +2128,7 @@
     const fab = document.getElementById('spinFab');
     if(!fab) return;
     fab.classList.toggle('show', !!pendingSpin);
-    fab.textContent = currentStudent ? 'Spin and win' : 'Sign in to spin';
+    fab.textContent = currentStudent ? '🎡 Spin & Win' : '🎡 Sign in to spin';
   }
 
   function openSpin(){
@@ -2601,12 +2442,9 @@
         const price = Number(bundle.price) || 0;
         return `
           <div class="cart-line" data-bundle="${id}">
-            <div class="cart-line-main">
-              <span class="line-swatch" style="background:var(--ink)"></span>
-              <div>
-                <div class="lname">${bundle.name}</div>
-                <div class="lsub">${qty} x $${price.toFixed(2)}</div>
-              </div>
+            <div>
+              <div class="lname">🎁 ${bundle.name}</div>
+              <div class="lsub">${qty} x $${price.toFixed(2)}</div>
             </div>
             <div class="cart-line-amt">
               <span class="line-total">$${(price*qty).toFixed(2)}</span>
@@ -2624,12 +2462,9 @@
           : `${qty} x $${price.toFixed(2)}`;
         return `
           <div class="cart-line" data-flavor="${flavor}">
-            <div class="cart-line-main">
-              <span class="line-swatch" style="background:${FLAVOR_COLORS[flavor] || 'var(--ink-3)'}"></span>
-              <div>
-                <div class="lname">${flavor}</div>
-                <div class="lsub">${sub}</div>
-              </div>
+            <div>
+              <div class="lname">${flavor}</div>
+              <div class="lsub">${sub}</div>
             </div>
             <div class="cart-line-amt">
               <span class="line-total">$${lineTotal.toFixed(2)}</span>
@@ -2640,12 +2475,9 @@
       }).join('');
       const freeHtml = freeEntries.map(([flavor,qty]) => `
           <div class="cart-line" data-free="${flavor}">
-            <div class="cart-line-main">
-              <span class="line-swatch" style="background:${FLAVOR_COLORS[flavor] || 'var(--ink-3)'}"></span>
-              <div>
-                <div class="lname">${flavor}</div>
-                <div class="lsub">${qty} x free Airheads reward</div>
-              </div>
+            <div>
+              <div class="lname">🎁 ${flavor}</div>
+              <div class="lsub">${qty} x free Airheads reward</div>
             </div>
             <div class="cart-line-amt">
               <span class="line-free">FREE</span>
@@ -2680,12 +2512,12 @@
         const pct = Math.min(100, (subtotal / SPIN_MIN_SPEND) * 100);
         wheelFill.style.width = pct + '%';
         if(subtotal >= SPIN_MIN_SPEND){
-          wheelText.textContent = `Spin unlocked on this order.`;
-          wheelFill.style.background = 'var(--money)';
+          wheelText.textContent = `🎉 Lucky Wheel spin unlocked for this order!`;
+          wheelFill.style.background = 'var(--success)';
         } else {
           const remaining = (SPIN_MIN_SPEND - subtotal).toFixed(2);
-          wheelText.textContent = `Add $${remaining} more to unlock a spin of the wheel.`;
-          wheelFill.style.background = 'var(--ink-2)';
+          wheelText.textContent = `Add $${remaining} more to unlock a Lucky Wheel spin! 🎡`;
+          wheelFill.style.background = 'var(--grad-reward)';
         }
       }
     }
@@ -2695,23 +2527,23 @@
     const streakText = document.getElementById('sheetStreakText');
     const streakFill = document.getElementById('sheetStreakBarFill');
     if(streakBox && streakText && streakFill){
-      // Only a streak holder has something to lose here, so only they get a nudge
-      // in the cart. New shoppers already get the pitch from the banner up top,
-      // and saying it twice just stacks two progress bars above the total.
-      const streakInfo = streakSettings
-        ? Streak.computeStreak(getStudentOrderHistory(getActiveStudentIdentity()), { config: streakSettings })
-        : null;
-      const streakAtStake = !!streakInfo && (streakInfo.currentStreak > 0 || streakInfo.graceActive);
-      if(!streakSettings || streakSettings.enabled === false || subtotal <= 0 || !streakAtStake){
+      if(!streakSettings || streakSettings.enabled === false || subtotal <= 0){
         streakBox.style.display = 'none';
       } else {
         streakBox.style.display = 'block';
+        const identity = getActiveStudentIdentity();
+        const orders = getStudentOrderHistory(identity);
+        const streakInfo = Streak.computeStreak(orders, { config: streakSettings });
         const messaging = Streak.getStreakMessaging(streakInfo, subtotal, streakSettings);
 
         streakText.textContent = messaging.cartNudge;
         const pct = Math.min(100, (subtotal / streakSettings.minSpend) * 100);
         streakFill.style.width = pct + '%';
-        streakFill.style.background = messaging.cartQualified ? 'var(--money)' : 'var(--ink-2)';
+        if(messaging.cartQualified){
+          streakFill.style.background = 'var(--grad)';
+        } else {
+          streakFill.style.background = 'var(--primary)';
+        }
       }
     }
 
@@ -2747,8 +2579,7 @@
 
     // Rebate panel - what this order earns back as store credit
     const rebateBanner = document.getElementById('rebateBanner');
-    const rebateCopy = (marketingSettings.enabled.rebate && cartCount() > 0)
-      ? Strategy.rebateNudge(rebate) : null;
+    const rebateCopy = marketingSettings.enabled.rebate ? Strategy.rebateNudge(rebate) : null;
     if(rebateCopy){
       document.getElementById('rebateText').textContent = rebateCopy;
       rebateBanner.style.display = '';
@@ -2766,12 +2597,9 @@
     
     validateOrderBtn();
     renderRewardBanner();
-    renderCrossSell();
     // Must run after the lines are rebuilt, otherwise the offer banner is wiped
     // out by the innerHTML assignment above and never comes back.
     showPromoOffer();
-    // Last: the CTA note reads the final total, after every discount has landed.
-    renderCtaNote(final, rebate);
     persistCart();
   }
 
@@ -2808,28 +2636,7 @@
   const buyerName = document.getElementById('buyerName');
   const buyerClass = document.getElementById('buyerClass');
   const placeOrderBtn = document.getElementById('placeOrderBtn');
-
-  // Remember who ordered. The second order is then two taps instead of two
-  // fields, which is the cheapest checkout friction there is to remove.
-  try {
-    const saved = JSON.parse(localStorage.getItem('airheads-buyer') || 'null');
-    if(saved && typeof saved === 'object'){
-      buyerName.value = typeof saved.name === 'string' ? saved.name : '';
-      buyerClass.value = typeof saved.class === 'string' ? saved.class : '';
-    }
-  } catch(err){
-    console.warn('Ignoring unreadable saved buyer:', err);
-  }
-  [buyerName, buyerClass].forEach(inp => inp.addEventListener('input', () => {
-    validateOrderBtn();
-    try {
-      localStorage.setItem('airheads-buyer', JSON.stringify({
-        name: buyerName.value.trim(),
-        class: buyerClass.value.trim()
-      }));
-    } catch(err){ /* private browsing - the fields just won't prefill next time */ }
-  }));
-  validateOrderBtn();
+  [buyerName, buyerClass].forEach(inp => inp.addEventListener('input', validateOrderBtn));
 
   function validateOrderBtn(){
     const ok = cartCount() > 0 && buyerName.value.trim() && buyerClass.value.trim();

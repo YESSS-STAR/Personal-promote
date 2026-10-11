@@ -5,55 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Airheads Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Same tokens as the storefront. The dashboard is the same product as the
-       shop, so it uses the same paper, the same ink, and the same money green. */
-    --paper:#FFFFFF; --paper-2:#F1F1F4; --paper-3:#E7E7EC;
-    --line:#E3E3E8; --line-2:#CBCBD3;
-    --ink:#000000; --ink-2:#5F5F66; --ink-3:#8C8C94;
-    --money:#0B7A45; --alert:#B3141B; --warn:#8A5A00;
-    --r:4px; --r-sm:3px; --r-pill:999px;
-    --font:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
-    --font-display:'Archivo Black','Archivo',system-ui,sans-serif;
-
-    /* Aliases. Every rule below was written against these names; pointing them at
-       the new palette re-skins the page without rewriting 600 lines of CSS. */
-    --bg:var(--paper-2);
-    --surface:var(--paper);
-    --text:var(--ink);
-    --muted:var(--ink-2);
-    --border:var(--line);
-    --primary:var(--ink);
-    --primary-dark:var(--ink);
-    --accent:var(--ink-2);
-    --success:var(--money);
-    --shadow:none;
-    --radius:var(--r);
-    color-scheme:light;
+    --bg:#FFF9FB;
+    --surface:#FFFFFF;
+    --text:#1C1420;
+    --muted:#8A7C87;
+    --border:#F1DDE5;
+    --primary:#FF4F81;
+    --primary-dark:#E23E6C;
+    --accent:#8E5CD9;
+    --success:#2FAE66;
+    --shadow: 0 2px 10px rgba(28,20,32,0.06);
+    --radius:16px;
   }
   html[data-theme="dark"]{
-    --paper:#0A0A0C; --paper-2:#16161A; --paper-3:#1F1F24;
-    --line:#2A2A31; --line-2:#3A3A43;
-    --ink:#FFFFFF; --ink-2:#A6A6B0; --ink-3:#7C7C86;
-    --money:#3ED07E; --alert:#FF6B6B; --warn:#E0A458;
-    color-scheme:dark;
+    --bg:#17111A;
+    --surface:#221A26;
+    --text:#F5EEF2;
+    --muted:#B39EAC;
+    --border:#33262E;
+    --primary:#FF6B93;
+    --accent:#B085F5;
+    --success:#2FAE66;
+    --shadow: 0 2px 14px rgba(0,0,0,0.35);
   }
   *{box-sizing:border-box;}
-  :focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
-  body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);transition:background .25s,color .25s;min-height:100vh;}
-  h1,h2,h3{font-family:var(--font);}
-  /* Numbers that are money get the display face and tabular figures. */
-  .stat-box .num,.reward-row strong,.ref-code-display .code,.flavor-item .spent,
-  .referral-item .earned,.money{font-family:var(--font-display); font-variant-numeric:tabular-nums;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;transition:background .25s,color .25s;min-height:100vh;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
 
   .topbar{
     position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);
     padding:14px 18px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(6px);
   }
   .brand{display:flex;align-items:center;gap:10px;}
-  .brand-mark{width:34px;height:34px;border-radius:var(--r-sm);background:var(--ink);flex-shrink:0;}
+  .brand-mark{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));flex-shrink:0;}
   .brand-text h1{font-size:17px;margin:0;letter-spacing:.2px;}
   .brand-text span{font-size:11px;color:var(--muted);font-weight:500;}
   .icon-btn{
@@ -75,22 +62,22 @@
   .hero p{margin:0;color:var(--muted);font-size:13.5px;}
 
   input[type=text], input[type=password]{
-    width:100%;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);
+    width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
     background:var(--bg);color:var(--text);font-size:14.5px;margin-bottom:10px;
   }
-  input:focus{outline:3px solid var(--ink);outline-offset:1px;}
+  input:focus{outline:2px solid var(--primary);outline-offset:1px;}
 
   .primary-btn{
-    width:100%;padding:14px;border:none;border-radius:var(--r);background:var(--ink);color:var(--paper);
+    width:100%;padding:14px;border:none;border-radius:14px;background:var(--primary);color:#fff;
     font-weight:700;font-size:15px;cursor:pointer;transition:background .15s ease;
   }
   .primary-btn:active{transform:scale(0.98);}
   .primary-btn:disabled{background:var(--border);color:var(--muted);}
 
   .stat-box{
-    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:10px;
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px;
   }
-  .stat-box .num{font-size:28px;font-weight:800;font-family:var(--font-display);color:var(--primary);}
+  .stat-box .num{font-size:28px;font-weight:800;font-family:'Poppins',sans-serif;color:var(--primary);}
   .stat-box .lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;}
 
   .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
@@ -98,40 +85,37 @@
 
   .reward-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:9px 0;border-bottom:1px solid var(--border);}
   .reward-row:last-of-type{border-bottom:none;}
-  .reward-row strong{font-family:var(--font-display);font-size:15px;}
+  .reward-row strong{font-family:'Poppins',sans-serif;font-size:15px;}
 
-  .flavor-item{background:var(--bg);padding:10px;border-radius:var(--r);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);}
+  .flavor-item{background:var(--bg);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);}
   .flavor-item .name{font-size:13px;font-weight:600;}
-  .flavor-item .fswatch{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:8px;vertical-align:middle;}
   .flavor-item .qty{font-size:12px;color:var(--muted);font-weight:600;margin-left:8px;}
   .flavor-item .spent{font-size:12px;color:var(--success);font-weight:700;}
 
   .ref-code-display{
-    background:var(--ink);color:var(--paper);
-    border-radius:var(--r);padding:20px;text-align:center;margin:16px 0;
+    background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;
+    border-radius:14px;padding:20px;text-align:center;margin:16px 0;
   }
   .ref-code-display .label{font-size:12px;opacity:0.9;margin-bottom:6px;}
-  .ref-code-display .code{font-size:24px;font-weight:800;font-family:var(--font-display);letter-spacing:2px;margin-bottom:12px;}
+  .ref-code-display .code{font-size:24px;font-weight:800;font-family:'Poppins',sans-serif;letter-spacing:2px;margin-bottom:12px;}
   .ref-code-display .hint{font-size:11px;opacity:0.85;}
 
   .copy-btn{
-    width:100%;padding:10px;background:transparent;border:1px solid currentColor;
-    color:inherit;opacity:0.85;border-radius:var(--r);font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;
-    transition:opacity .15s ease;
+    width:100%;padding:10px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);
+    color:#fff;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;
   }
-  .copy-btn:hover{opacity:1;}
 
   .share-link{
-    background:var(--bg);padding:12px;border-radius:var(--r);border:1px solid var(--border);
+    background:var(--bg);padding:12px;border-radius:10px;border:1px solid var(--border);
     font-size:12px;word-break:break-all;font-family:monospace;color:var(--muted);margin:10px 0;
   }
 
   .referral-list{margin-top:16px;}
-  .referral-item{background:var(--bg);padding:10px;border-radius:var(--r);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);}
+  .referral-item{background:var(--bg);padding:10px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);}
   .referral-item .name{font-size:13px;font-weight:600;}
   .referral-item .earned{font-size:12px;color:var(--success);font-weight:700;}
 
-  .error{color:var(--alert);font-size:12.5px;margin-top:8px;}
+  .error{color:#E14A4A;font-size:12.5px;margin-top:8px;}
   .success{color:var(--success);font-size:12.5px;margin-top:8px;}
 
   .toast{
@@ -188,23 +172,22 @@
           <div class="lbl">Total spent</div>
         </div>
         <div class="stat-box">
-          <div class="num" id="totalSavedDisplay" style="color:var(--money);">$0.00</div>
+          <div class="num" id="totalSavedDisplay" style="color:var(--accent);">$0.00</div>
           <div class="lbl">Total saved</div>
         </div>
       </div>
 
       <div class="card">
-        <h3 style="font-size:14px;margin:0 0 8px;">Rewards</h3>
-        <div class="reward-row"><span>Store credit to spend</span><strong id="studentCreditDisplay">$0.00</strong></div>
-        <div class="reward-row"><span>Credit earned so far</span><strong id="studentRebateDisplay">$0.00</strong></div>
+        <h3 style="font-size:14px;margin:0 0 8px;">⭐ Rewards</h3>
+        <div class="reward-row"><span>Store credit</span><strong id="studentCreditDisplay">$0.00</strong></div>
         <div class="reward-row"><span>Free Airheads</span><strong id="studentFreeDisplay">0</strong></div>
         <div class="reward-row"><span>Spins won</span><strong id="studentSpinDisplay">0</strong></div>
         <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">Free Airheads can be redeemed in the cart on the shop page.</p>
       </div>
 
       <div class="card">
-        <h3 style="font-size:14px;margin:0 0 10px;">Favourite flavours</h3>
-        <div id="favoritesList"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Loading your flavours...</div></div>
+        <h3 style="font-size:14px;margin:0 0 10px;">🍬 Favorite flavors</h3>
+        <div id="favoritesList"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Loading your flavors...</div></div>
       </div>
 
       <div style="font-size:11.5px;color:var(--muted);text-align:center;margin:2px 0 6px;">Lifetime totals — all purchases on record, not just this period.</div>
@@ -221,7 +204,7 @@
       <div class="card" id="refEmptyCard">
         <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Earn 15¢ for every $1 your friends spend, and <strong>your friends get 5% off</strong> their entire order! Create a referral account to get your own code and share link.</div>
         <button class="primary-btn" onclick="switchToSignup()">Create referral account</button>
-        <button onclick="switchToLogin()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--primary);font-weight:600;font-size:13px;cursor:pointer;">Already have an account? Sign in</button>
+        <button onclick="switchToLogin()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--primary);font-weight:600;font-size:13px;cursor:pointer;">Already have an account? Sign in</button>
       </div>
 
       <!-- Active referral session -->
@@ -230,7 +213,7 @@
           <div class="label">Your referral code</div>
           <div class="code" id="refCodeDisplay">LOAD...</div>
           <div class="hint">Share this code with friends — they get 5% off!</div>
-          <button class="copy-btn" id="copyRefBtn">Copy code</button>
+          <button class="copy-btn" id="copyRefBtn">📋 Copy code</button>
         </div>
 
         <div class="stat-box">
@@ -239,7 +222,7 @@
         </div>
 
         <div class="stat-box" style="margin-top:-2px;">
-          <div class="num" id="pendingDisplay" style="color:var(--warn);">$0.00</div>
+          <div class="num" id="pendingDisplay" style="color:var(--accent);">$0.00</div>
           <div class="lbl">Pending (awarded once friend's order is paid)</div>
         </div>
 
@@ -247,8 +230,8 @@
           <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;"><strong>Share your link (friends get 5% off):</strong></div>
           <div class="share-link" id="shareLink"></div>
           <div style="display:flex;gap:8px;margin-top:8px;">
-            <button onclick="copyShareLink()" style="flex:1;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);font-weight:600;font-size:12px;cursor:pointer;color:var(--text);">Copy link</button>
-            <a id="waShareBtn" href="#" target="_blank" rel="noopener" style="flex:1.2;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#25D366;color:#fff;border-radius:var(--r);font-weight:700;font-size:12px;text-decoration:none;box-shadow:0 3px 10px rgba(37,211,102,.25);">
+            <button onclick="copyShareLink()" style="flex:1;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-weight:600;font-size:12px;cursor:pointer;color:var(--text);">📋 Copy link</button>
+            <a id="waShareBtn" href="#" target="_blank" rel="noopener" style="flex:1.2;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#25D366;color:#fff;border-radius:10px;font-weight:700;font-size:12px;text-decoration:none;box-shadow:0 3px 10px rgba(37,211,102,.25);">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.04 3.7c-4.9 0-8.9 3.99-8.9 8.9 0 1.57.41 3.1 1.19 4.44L3 21.3l4.4-1.26a8.9 8.9 0 0 0 4.63 1.28h.01c4.9 0 8.9-3.99 8.9-8.9 0-2.38-.93-4.62-2.34-6.1zM12.04 19.9h-.01a7.35 7.35 0 0 1-3.75-1.03l-.27-.16-2.79.8.75-2.72-.18-.28a7.36 7.36 0 0 1-1.13-3.91c0-4.07 3.31-7.38 7.4-7.38a7.34 7.34 0 0 1 7.38 7.4c0 4.07-3.32 7.38-7.4 7.38zm4.05-5.53c-.22-.11-1.3-.64-1.5-.72-.2-.07-.35-.11-.5.11-.15.22-.57.72-.7.87-.13.15-.26.16-.48.05a6.05 6.05 0 0 1-1.78-1.1 6.66 6.66 0 0 1-1.23-1.53c-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.68-1.65-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.6.28-.2.22-.79.77-.79 1.87 0 1.1.81 2.17.92 2.32.11.15 1.6 2.44 3.87 3.42.54.23.96.37 1.29.48.54.17 1.03.15 1.42.09.43-.06 1.3-.53 1.49-1.04.18-.51.18-.95.13-1.04-.05-.09-.2-.15-.42-.26z"/></svg>
               Share on WhatsApp
             </a>
@@ -260,7 +243,7 @@
           <div id="friendsList"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">No referrals yet</div></div>
         </div>
 
-        <button onclick="logout()" style="width:100%;margin-top:20px;padding:12px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">Sign out of referrals</button>
+        <button onclick="logout()" style="width:100%;margin-top:20px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">Sign out of referrals</button>
       </div>
     </div>
   </div>
@@ -276,8 +259,8 @@
       <input type="password" id="loginPassword" placeholder="Password" maxlength="20">
       <button class="primary-btn" id="loginBtn">Sign in</button>
       <div id="loginError" class="error"></div>
-      <button onclick="switchToSignup()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--primary);font-weight:600;font-size:13px;cursor:pointer;">New account? Sign up</button>
-      <button onclick="showDashboard()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">← Back to dashboard</button>
+      <button onclick="switchToSignup()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--primary);font-weight:600;font-size:13px;cursor:pointer;">New account? Sign up</button>
+      <button onclick="showDashboard()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">← Back to dashboard</button>
     </div>
   </div>
 
@@ -293,8 +276,8 @@
       <input type="password" id="signupPasswordConfirm" placeholder="Confirm password" maxlength="20">
       <button class="primary-btn" id="signupBtn">Create account</button>
       <div id="signupError" class="error"></div>
-      <button onclick="switchToLogin()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">Already have account? Sign in</button>
-      <button onclick="showDashboard()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">← Back to dashboard</button>
+      <button onclick="switchToLogin()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">Already have account? Sign in</button>
+      <button onclick="showDashboard()" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer;">← Back to dashboard</button>
     </div>
   </div>
 
@@ -386,22 +369,6 @@
     });
   }
 
-  // Mirrors FLAVOR_COLORS in index.html. Hue means flavour across the whole
-  // shop, so a bar is recognisable here and in the rack without reading the name.
-  const FLAVOR_COLORS = {
-    "Orange": "#FF8A3D",
-    "Blue Raspberry": "#3D8CFF",
-    "Grape": "#8E5CD9",
-    "Watermelon": "#FF5C7A",
-    "Cherry": "#E0203C",
-    "White Mystery": "#E8E2ED"
-  };
-
-  function flavorSwatch(flavor){
-    const c = FLAVOR_COLORS[flavor];
-    return c ? `<span class="fswatch" style="background:${c}"></span>` : '';
-  }
-
   function renderFavorites(orders){
     const listEl = document.getElementById('favoritesList');
     const agg = {};
@@ -418,13 +385,13 @@
 
     const top = Object.entries(agg).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
     if(top.length === 0){
-      listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">No orders yet — your favourite flavours will show up after your first pre-order.</div>';
+      listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">No orders yet — your favorite flavors will show up after your first pre-order.</div>';
       return;
     }
 
     listEl.innerHTML = top.map(([flavor, v]) => `
       <div class="flavor-item">
-        <span>${flavorSwatch(flavor)}<span class="name">${flavor}</span><span class="qty">${v.qty} bought</span></span>
+        <span><span class="name">${flavor}</span><span class="qty">${v.qty} bought</span></span>
         <span class="spent">$${v.spent.toFixed(2)}</span>
       </div>
     `).join('');
@@ -616,7 +583,7 @@
     document.getElementById('shareLink').textContent = shareUrl;
     const waShare = document.getElementById('waShareBtn');
     if(waShare){
-      const waMsg = encodeURIComponent(`Hey! Get 5% off Airheads candy pre-orders using my link: ${shareUrl} 🍬 Pick your flavours & pay cash in class!`);
+      const waMsg = encodeURIComponent(`Hey! Get 5% off Airheads candy pre-orders using my link: ${shareUrl} 🍬 Pick your flavors & pay cash in class!`);
       waShare.href = `https://wa.me/?text=${waMsg}`;
     }
 
@@ -641,7 +608,7 @@
         const earnedFromOrder = (o.subtotal || 0) * referralSettings.rate;
         const isPaidOut = o.status === 'paid' || o.status === 'fulfilled';
         const statusLabel = o.status === 'cancelled' ? 'cancelled' : (isPaidOut ? 'earned' : 'pending');
-        const amountColor = o.status === 'cancelled' ? 'var(--muted)' : (isPaidOut ? 'var(--success)' : 'var(--warn)');
+        const amountColor = o.status === 'cancelled' ? 'var(--muted)' : (isPaidOut ? 'var(--success)' : 'var(--accent)');
         return `
           <div class="referral-item">
             <span class="name">${(o.name || 'A friend').replace(/</g,'&lt;')}</span>

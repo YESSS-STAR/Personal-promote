@@ -300,18 +300,15 @@
   /** One-line nudge for the cart sheet, or null when nothing is left to unlock. */
   function volumeNudge(volume) {
     if (!volume) return null;
-    // "Add 3 more bars" - the unit has to be named and counted, otherwise the
-    // shopper has to guess whether "more" means bars, dollars, or packs.
-    var more = function (n) { return n + (n === 1 ? ' more bar' : ' more bars'); };
     if (volume.appliedTier) {
       if (!volume.nextTier) {
-        return 'Best volume price unlocked — ' + volume.percent + '% off';
+        return 'Best volume price unlocked - ' + volume.percent + '% off';
       }
-      return volume.percent + '% off applied. Add ' + more(volume.unitsToNextTier) +
-        ' for ' + volume.nextTier.percent + '% off';
+      return volume.percent + '% off applied. Add ' + volume.unitsToNextTier +
+        ' more for ' + volume.nextTier.percent + '% off';
     }
     if (volume.nextTier) {
-      return 'Add ' + more(volume.unitsToNextTier) + ' to unlock ' + volume.nextTier.percent + '% off';
+      return 'Add ' + volume.unitsToNextTier + ' more to unlock ' + volume.nextTier.percent + '% off';
     }
     return null;
   }
